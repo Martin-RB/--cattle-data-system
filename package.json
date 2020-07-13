@@ -1,0 +1,26 @@
+{
+  "name": "more-react",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "parcel html/index.html --open"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/materialize-css": "^1.0.8",
+    "@types/react-router-dom": "^5.1.5",
+    "materialize-css": "^1.0.0",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "react-router-dom": "^5.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^16.9.41",
+    "@types/react-dom": "^16.9.8",
+    "parcel-bundler": "^1.12.4",
+    "typescript": "^3.9.6"
+  }
+}
