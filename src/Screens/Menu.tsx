@@ -5,9 +5,11 @@ import { MATCH, historyRefresher, HISTORY } from "../App";
 import { Login } from "./Login";
 import { Button, MaterialButton } from "../Components/Button";
 import { TopNav } from "../Components/TopNav";
-import image from "../../img/logo.png";
+import image from "./../../img/logo.png";
 import { TodoWork } from "../Classes/TodoWork";
 import { Sidenav } from "./../Components/Sidenav";
+import { ElementSample } from "./config/ElementSample";
+import { Drugs } from "./config/Drugs";
 
 interface MenuProps{
 
@@ -68,6 +70,7 @@ export class Menu extends React.Component<MenuProps>{
                     <Route path={`${path}/reg-lorry`} render={(a) => historyRefresher(a, <Login/>)}/>
                     <Route path={`${path}/work-heads`} render={(a) => historyRefresher(a, <Login/>)}/>
                     <Route path={`${path}/feed-corrals`} render={(a) => historyRefresher(a, <Login/>)}/>
+                    <Route path={`${path}/drugs`} render={(a) => historyRefresher(a, <Drugs/>)}/>
                 </Switch>
             </div>
         </div>

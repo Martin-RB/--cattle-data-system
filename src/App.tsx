@@ -24,6 +24,10 @@ export var historyRefresher = (r: RouteComponentProps, child: JSX.Element) => {
     return child;
 }
 
+export function toast(message: string){
+    M.toast({html: message});
+}
+
 let view =
 <Router>
     <Switch>

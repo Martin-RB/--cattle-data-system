@@ -46,6 +46,9 @@ body{
 .my-sidenav li>a>i{
     color: var(--color-primary-hard2)!important;
 }
+.sidenav--collapsible{
+	padding: 0 32px !important;
+}
 
 .topnaved{
 	top: 56px;
@@ -66,19 +69,57 @@ body{
 	background-color: var(--color-ternary2);
 }
 
+/*ElementSample*/
+.elcfg{
+	margin: 0 20px;
+}
+.elcfg--top{
+	width: 100%;
+	height: 60px;
+}
+.elcfg--top-select{
+	width: 50%;
+}
+.elcfg--top-buttons{
+	align-items: center;
+}
+.elcfg--top--vertical-pos{
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	height: 100%;
+}
+.elcfg--button--spacing{
+	margin-left: 20px;
+}
+.elcfg--bot{
+	display: flex;
+	flex-direction: row;
+	align-items: flex-end;
+}
+.elcfg--bot-buttons{
+	margin-left: auto;
+	width: auto;
+}
+/*End ElementSample*/
+
+.input-label--positioning{
+	display: block;
+}
+
 @media screen and (min-width: 600px){
 	.topnaved{
 		top: 64px!important;
 		height: calc(100% - 64px)!important;
 	}
 }
-@media screen and (max-width: 993px){
+@media screen and (max-width: 992px){
 	.my-sidenav{
 		top: 0!important;
 		height: 100%!important;
 	}
 	.sidenaved{
-		padding-left: 0;
+		padding-left: 0!important;
 	}
 }
 /* End Sidenav */
@@ -87,7 +128,6 @@ body{
 	padding-left: 300px;
 	width: 100%;
 }
-
 
 .login--background{
     

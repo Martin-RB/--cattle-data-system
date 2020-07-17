@@ -30,8 +30,19 @@ export class Sidenav extends React.Component<ISidenavProps>{
                 <li>
                     <div className="divider"></div>
                 </li>
-                <li><a href="/menu/admin" className="f_selectSection" id="admon"><i className="material-icons">add</i> Administración</a></li>
 
+                <li className="no-padding">
+                    <ul className="collapsible collapsible-accordion">
+                        <li>
+                        <a className="collapsible-header sidenav--collapsible"><i className="material-icons">add</i> Administración</a>
+                        <div className="collapsible-body">
+                            <ul>
+                            <li><a href="/menu/drugs">Medicamentos</a></li>
+                            </ul>
+                        </div>
+                        </li>
+                    </ul>
+                </li>
             
                 {/* <!-- 
                 <li><a href="#!"><i class="material-icons">cloud</i>First Link With Icon</a></li>

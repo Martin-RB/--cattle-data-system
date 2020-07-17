@@ -2,23 +2,27 @@ import React, { ChangeEvent } from "react";
 import M from "materialize-css";
 
 export interface IInputProps{
-    text?: string;
+    value?: string;
     onChange?: (name: string, text: string) => void;
     placeholder?: string;
     name?: string;
     className?: string;
     id?: string;
+    locked?: boolean;
+    wrong?: boolean;
 }
 
 interface IInputState{
-    text: string;
+    
 }
 
 export class Input extends React.Component<IInputProps, IInputState>{
     
+    private static inputCounter : number = 0;
+
     constructor(props: IInputProps){
         super(props);
-        this.state = {text: this.props.text || ""};
+        Input.inputCounter++;
         this.onChange = this.onChange.bind(this);
     }
 
@@ -39,27 +43,42 @@ export class Input extends React.Component<IInputProps, IInputState>{
 
 
     render(): JSX.Element{
-        return <input 
+        return <>
+                <label className="input-label--positioning"
+                    htmlFor={this.props.id? this.props.id : "lbled_" + MaterialInput.inputCounter.toString()}>
+                        {this.props.placeholder}
+                </label>
+                <input 
                     type="text" 
+                    id={this.props.id? this.props.id : "lbled_" + Input.inputCounter.toString()} 
                     onChange={this.onChange} 
-                    value={this.state.text} 
-                    placeholder={this.props.placeholder || ""}
-                    className={`browser-default ${this.props.className || ""}`}/>
+                    value={this.props.value? this.props.value: ""} 
+                    disabled={this.props.locked}
+                    className={`browser-default ${this.props.wrong? "" : ""} ${this.props.className || ""}`}/>
+                
+                </>
     }
 }
 
 export class MaterialInput extends Input{
-    static idCounter : number = 0;
+    private static matInputCounter : number = 0;
+
+    constructor(props: IInputProps){
+        super(props);
+        MaterialInput.matInputCounter++;
+    }
+
     render(): JSX.Element{
-        MaterialInput.idCounter++;
         return <div className="input-field">
             <input 
-                id={this.props.id? this.props.id : "lbled_" + MaterialInput.idCounter.toString()} 
+                id={this.props.id? this.props.id : "lbled_" + MaterialInput.matInputCounter.toString()} 
                 type="text" 
                 onChange={this.onChange} 
+                value={this.props.value? this.props.value: ""} 
+                disabled={this.props.locked}
                 className="validate"/>
             <label 
-                htmlFor={this.props.id? this.props.id : "lbled_" + MaterialInput.idCounter.toString()}
+                htmlFor={this.props.id? this.props.id : "lbled_" + MaterialInput.matInputCounter.toString()}
             >{this.props.placeholder}</label>
         </div>
     }
