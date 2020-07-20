@@ -10,6 +10,8 @@ export interface IInputProps{
     id?: string;
     locked?: boolean;
     wrong?: boolean;
+    width?: string;
+    isInline?: boolean
 }
 
 interface IInputState{
@@ -44,12 +46,13 @@ export class Input extends React.Component<IInputProps, IInputState>{
 
     render(): JSX.Element{
         return <>
-                <label className="input-label--positioning"
+                <label className={this.props.isInline?"": "input-label--positioning"}
                     htmlFor={this.props.id? this.props.id : "lbled_" + MaterialInput.inputCounter.toString()}>
                         {this.props.placeholder}
                 </label>
                 <input 
                     type="text" 
+                    style={{width: this.props.width || ""} as React.CSSProperties}
                     id={this.props.id? this.props.id : "lbled_" + Input.inputCounter.toString()} 
                     onChange={this.onChange} 
                     value={this.props.value? this.props.value: ""} 

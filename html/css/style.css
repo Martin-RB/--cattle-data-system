@@ -101,6 +101,15 @@ body{
 	margin-left: auto;
 	width: auto;
 }
+.elcfg--field--margin{
+	margin-bottom: 15px;
+}
+.left-justify{
+	margin-left: 35px;
+}
+.small-field{
+	width: 75px
+}
 /*End ElementSample*/
 
 .input-label--positioning{
@@ -127,10 +136,6 @@ body{
 .sidenaved{
 	padding-left: 300px;
 	width: 100%;
-}
-
-.login--background{
-    
 }
 
 .login--container{

@@ -4,22 +4,21 @@ import { Input } from "../../Components/Input";
 import { IMedicine } from "../../Classes/DataStructures/Medicine";
 import { toast } from "./../../App";
 import { IOption } from "./../../Classes/IOption";
+import { Radio } from "./../../Components/Radio";
+import { Modal, ModalData, ModalExitOptions } from "./../../Components/Modal";
 
 export interface IFieldedMedicine{
     id?: string,
     name?: string,
     isPerHead?: boolean,
-    costPerUnit?: number,
-    mlPerUnit?: number,
-    mlPerKg?: number
+    cost?: number,
+    presentation?: number,
+    mlApplication?: number,
+    kgApplication?: number
 }
 
 interface IDrugsProps{
 
-}
-
-enum AAA{
-    NAME="", ERROR=""
 }
 
 // State / props
@@ -27,9 +26,10 @@ interface IDrugsState{
     fStt: IState;
     items: Array<IMedicine>;
     item: IFieldedMedicine;
-    wrongFields: Array<AAA>;
-    lockedFields: Array<string>;
+    wrongFields: Array<Fields>;
+    lockedFields: Array<Fields>;
     selectedItem: string;
+    modalData: ModalData | null;
 }
 // Functional interfaces
 interface IEditableState{
@@ -52,7 +52,8 @@ export class Drugs extends React.Component<IDrugsProps, IDrugsState> implements 
             lockedFields: [],
             items: [],
             item: {},
-            selectedItem: "-1"
+            selectedItem: "-1",
+            modalData: null
         }
 
         this.onContentChange = this.onContentChange.bind(this);
@@ -109,6 +110,7 @@ export class Drugs extends React.Component<IDrugsProps, IDrugsState> implements 
                             lockedFields={[]}
                             badFields={[]}/>
             </ElementSample>
+            {this.state.modalData != null? <Modal data={this.state.modalData}/>:null}
         </>
     }
 
@@ -170,7 +172,7 @@ class WaitingState implements IState{
     }
     onItemSelected(idx: string): boolean {
         this.context.setStt({
-            fStt: new EditState(this.context),
+            fStt: new ViewState(this.context),
             selectedItem: idx,
             item: this.context.getStt().items.find((v) => idx == v.id!.toString() )
         })
@@ -280,6 +282,66 @@ class EditState implements IState{
     
 }
 
+class ViewState implements IState{
+
+    constructor(private context: IEditableState & ICheckableFields){};
+
+    onItemAdd = () => {
+        this.context.setStt({
+            fStt: new AddState(this.context),
+            selectedItem: "-1",
+            item: {}
+        })
+    };
+    onItemRemove = () => {
+        this.context.setStt({
+            modalData: {
+                title: "Precaución",
+                content: "El medicamento no se podrá recuperar. ¿desea continuar?",
+                onFinish: (e: ModalExitOptions) => {
+                    let newState:any = {};                    
+                    if(e == ModalExitOptions.ACCEPT){
+                        DrugsSrv.getInstance().remove(this.context.getStt().item.id!);
+                        toast("Medicamento eliminado con exito");
+                        newState = {
+                            item: {},
+                            selectedItem: "-1",
+                            fStt: new WaitingState(this.context)
+                        };
+                    }
+                    newState.modalData = null;
+                    this.context.setStt(newState);
+                }
+            } as ModalData
+        })
+        
+    };
+    onItemSelected = (idx: string) => {
+        this.context.setStt({
+            fStt: new ViewState(this.context),
+            selectedItem: idx,
+            item: this.context.getStt().items.find((v) => idx == v.id!.toString() )
+        });
+        return true;
+    };
+    onAccept = () => {
+        this.context.setStt({
+            fStt: new WaitingState(this.context),
+            selectedItem: "-1",
+            item: {}
+        });
+    };
+    onCancel = () => {
+        this.context.setStt({
+            fStt: new WaitingState(this.context),
+            selectedItem: "-1",
+            item: {}
+        });
+    };
+    showContent = () => true;
+    
+}
+
 
 
 class DrugsSrv{
@@ -325,7 +387,13 @@ class DrugsSrv{
 
 
 enum Fields{
-    NAME="name"
+    NAME="name",
+    PRESENTATION="presentation",
+    COST="cost",
+    ML_APPLY="mlApplication",
+    KG_APLLY="kgApplication",
+    ALL="",
+    IS_PER_HEAD="isPerHead"
 }
 
 interface IDrugsContentProps{
@@ -346,20 +414,102 @@ export class DrugsContent extends React.Component<IDrugsContentProps>{
         this.id = props.value.id;
     }
 
-    onChange = (name: string, value: string) => {
-        let newValue: IFieldedMedicine = {
-            [name]: value
+    onChange = (name: string, value: string | boolean) => {
+        if(value == "false"){
+            value = false
         }
-        newValue.id = this.id;
-        this.props.onChange(newValue);
+        else if(value == "true"){
+            value = true
+        }
+        console.log(name, value);
+        
+        let v = Object.assign({}, this.props.value, {
+            [name]: value
+        })
+        this.props.onChange(v);
+    }
+
+    private getLockedStatus(headCondition: boolean | undefined, field: Fields): boolean{
+        return headCondition != undefined && 
+                (
+                    !headCondition || 
+                    this.props.lockedFields.find((e) => e == Fields.ALL || e == field) != undefined
+                )
+        
     }
 
     render(): JSX.Element{
+        let el = this.props.value;
+        console.log(el);
+        
         return <>
             <div className="row">
                 <div className="col s6">
-                    <Input placeholder="Nombre" name={Fields.NAME} value={this.props.value.name} onChange={this.onChange}/>
+                    <div className="elcfg--field--margin">
+                        <Input placeholder="Nombre" name={Fields.NAME} value={this.props.value.name} onChange={this.onChange}/>
+                    </div>
+                    <div>
+                        <label>Tipo de medicamento</label>
+                    </div>
+                    <div className="elcfg--field--margin">
+                        <Radio name={Fields.IS_PER_HEAD} value={"true"} checked={el.isPerHead!=undefined? el.isPerHead: false} onChange={this.onChange} text="Por mililitros"/>
+                        <div className="left-justify">
+                            <Input 
+                                    placeholder="Presentación" 
+                                    name={Fields.PRESENTATION} 
+                                    value={!this.getLockedStatus(el.isPerHead, name) && this.props.value.presentation?.toString() || ""} 
+                                    onChange={this.onChange} 
+                                    className="small-field" 
+                                    locked={this.getLockedStatus(el.isPerHead, name)}/>
+                            <label> dosis</label>
+                            <Input 
+                                    placeholder="Costo" 
+                                    name={Fields.COST} 
+                                    value={!this.getLockedStatus(el.isPerHead, name) && this.props.value.cost?.toString() || ""} 
+                                    onChange={this.onChange} 
+                                    className="small-field"
+                                    locked={this.getLockedStatus(el.isPerHead, name)}/>
+                            <label> pesos</label>
+                        </div>
+                    </div>
+                    <div className="elcfg--field--margin">
+                        <Radio name={Fields.IS_PER_HEAD} value={"false"} checked={(el.isPerHead!=undefined? !el.isPerHead: false)} onChange={this.onChange} text="Por dosis"/>
+                        <div className="left-justify">
+                            <Input 
+                                    placeholder="Presentación" 
+                                    name={Fields.PRESENTATION} 
+                                    value={this.getLockedStatus(el.isPerHead, name) && this.props.value.presentation?.toString() || ""} 
+                                    onChange={this.onChange} 
+                                    className="small-field"
+                                    locked={this.getLockedStatus(!el.isPerHead, name)}/>
+                            <label> ml</label>
+                            <Input 
+                                    placeholder="Aplicación" 
+                                    name={Fields.ML_APPLY} 
+                                    value={this.getLockedStatus(el.isPerHead, name) && this.props.value.mlApplication?.toString() || ""} 
+                                    onChange={this.onChange} 
+                                    className="small-field"
+                                    locked={this.getLockedStatus(!el.isPerHead, name)}/>
+                            <label> ml por cada </label>
+                            <Input 
+                                    isInline={true} 
+                                    name={Fields.KG_APLLY} 
+                                    value={this.getLockedStatus(el.isPerHead, name) && this.props.value.kgApplication?.toString() || ""} 
+                                    onChange={this.onChange} 
+                                    className="small-field"
+                                    locked={this.getLockedStatus(!el.isPerHead, name)}/>
+                            <label> kg</label>
+                            <Input placeholder="Costo" 
+                                    name={Fields.COST} 
+                                    value={this.getLockedStatus(el.isPerHead, name) && this.props.value.cost?.toString() || ""} 
+                                    onChange={this.onChange} 
+                                    className="small-field"
+                                    locked={this.getLockedStatus(!el.isPerHead, name)}/>
+                            <label> pesos</label>
+                        </div>
+                    </div>
                 </div>
+                
             </div>
         </>
     }
