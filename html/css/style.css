@@ -1,6 +1,8 @@
 html{
     margin: 0 !important;
-    padding: 0 !important;
+	padding: 0 !important;
+	height: 100vh;
+	overflow: hidden;
 }
 body{
 	--color-primary-light2: #DFE8F3;
@@ -13,10 +15,22 @@ body{
 	--color-secondary-light1: #B1E2C9;
 	--color-secondary: #81C8A4;
 	--color-secondary-hard1: #56AA7F;
-    --color-secondary-hard2: #338E60;
+	--color-secondary-hard2: #338E60;
+	
+	--color-gray: #e0e0e0;
     
     margin: 0 !important;
     padding: 0 !important;
+}
+
+::-webkit-scrollbar{
+	width: 5px;
+}
+::-webkit-scrollbar-thumb{
+	background-color: var(--color-primary-hard1);
+}
+::-webkit-scrollbar-track{
+	background-color: #f1f1f1;
 }
 
 .top--nav--color{
@@ -108,13 +122,80 @@ body{
 	margin-left: 35px;
 }
 .small-field{
-	width: 75px
+	width: 75px!important;
+}
+.medium-field{
+	width: 150px!important;
 }
 /*End ElementSample*/
+
+.input{
+	height: 1.5em;
+}
 
 .input-label--positioning{
 	display: block;
 }
+
+.button--color{
+	background-color: var(--color-primary-hard1) !important;
+}
+.icon{
+	background-color: var(--color-primary-hard1);
+	color: white;
+	border-radius: 2px;
+}
+
+/*Table*/
+.myList{
+	width: 100%;
+	border-style: inset;
+	display: grid;
+	grid-template-rows: 45px calc(100% - 45px);
+}
+.myList--head{
+	background-color: var(--color-primary);
+}
+.myList--row{
+	display: flex;
+	flex-direction: row;
+	justify-content: space-evenly;
+	align-items: center;
+	border-bottom: solid 1px var(--color-gray);
+}
+.myList--row--rightMargin{
+	padding-right: 5px;
+}
+.myList--item{
+	display: block;
+	width: 100%;
+	padding: 7px 2px;
+	/* background-color: darkkhaki; */
+}
+.myList--small-item{
+	display: block;
+	width: 30px;
+	padding: 7px 2px;
+	text-align: center;
+	/* background-color: darkcyan; */
+}
+.myList--small-item--verticalItems{
+	height: 100%;
+	display: flexbox;
+	flex-direction: column;
+	align-content: space-between;
+	justify-content: space-between;
+}
+.myList--small-item--verticalItems > *{
+	height: 100%;
+}
+.myList--content{
+	box-shadow: inset 0px 5px 5px rgba(0,0,0,0.2);
+	max-height: 350px;
+	overflow-y: scroll;
+	overflow-x: unset;
+}
+/*END Table*/
 
 @media screen and (min-width: 600px){
 	.topnaved{
@@ -136,6 +217,7 @@ body{
 .sidenaved{
 	padding-left: 300px;
 	width: 100%;
+	overflow-y: scroll	;
 }
 
 .login--container{

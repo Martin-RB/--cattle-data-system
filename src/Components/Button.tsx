@@ -26,7 +26,7 @@ export class Button extends React.Component<IButtonProps, IButtonState>{
 
     render(): JSX.Element{
         return <input 
-            className={`${this.props.className? this.props.className : ""}`}
+            className={`button--color ${this.props.className? this.props.className : ""}`}
             type="button" 
             value={this.props.text} 
             onClick={this.onClick}/>
@@ -36,7 +36,7 @@ export class Button extends React.Component<IButtonProps, IButtonState>{
 export class MaterialButton extends Button{
     render(){
         return <a 
-            className={`waves-effect waves-light btn ${this.props.className? this.props.className : ""}`}
+            className={`button--color waves-effect waves-light btn ${this.props.className? this.props.className : ""}`}
             onClick={this.onClick}>
                 {this.props.text}
             </a>;

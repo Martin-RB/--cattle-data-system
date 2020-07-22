@@ -72,7 +72,7 @@ export class Drugs extends React.Component<IDrugsProps, IDrugsState> implements 
 
     async gather(){
         let srv = DrugsSrv.getInstance();
-        this.onGather(srv.get());
+        this.onGather(await srv.get());
     }
 
     onGather = (data: Array<IMedicine>) =>{
@@ -356,7 +356,7 @@ class DrugsSrv{
         return this.entity
     }
 
-    get(){
+    async get(){
         return this.data;
     }
 
@@ -364,17 +364,17 @@ class DrugsSrv{
         return this.data.find((d) => d.id == id)
     }
 
-    add(d: IMedicine){
+    async add(d: IMedicine){
         d.id = this.data.length.toString();
         this.data.push(d);
     }
 
-    remove(id: string){
+    async remove(id: string){
         let el = this.data.findIndex((d) => d.id == id);
         this.data.splice(el, 1);
     }
 
-    edit(id: string, d: IMedicine){
+    async edit(id: string, d: IMedicine){
         for (let i = 0; i < this.data.length; i++) {
             const el = this.data[i];
             if(el.id == id){
@@ -421,7 +421,6 @@ export class DrugsContent extends React.Component<IDrugsContentProps>{
         else if(value == "true"){
             value = true
         }
-        console.log(name, value);
         
         let v = Object.assign({}, this.props.value, {
             [name]: value
@@ -440,7 +439,6 @@ export class DrugsContent extends React.Component<IDrugsContentProps>{
 
     render(): JSX.Element{
         let el = this.props.value;
-        console.log(el);
         
         return <>
             <div className="row">

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { createRef } from "react";
 
 export interface ModalData{
     title: string,
@@ -21,21 +21,46 @@ export enum ModalExitOptions{
 export class Modal extends React.Component<IModalProps>{
 
     private closingState = ModalExitOptions.EXIT;
+    private instance: M.Modal | undefined;
+
+    private fatherRef: React.RefObject<HTMLDivElement>;
 
     constructor(props: IModalProps){
         super(props);
 
+        this.fatherRef = createRef<HTMLDivElement>();
     }
 
     componentDidMount(){
         var elems = document.querySelectorAll('#modal1')[0];
-        var instances = M.Modal.init(elems, {
+        this.instance = M.Modal.init(elems, {
             onCloseEnd: (el) => {
+                
                 this.props.data.onFinish(this.closingState)
                 this.closingState = ModalExitOptions.EXIT
             }
         });
-        instances.open();
+        this.instance.open();
+        
+        this.fatherRef.current!.addEventListener("keyup", this.doShortcuts, false);
+    }
+
+    componentWillUnmount(){
+        this.fatherRef.current!.removeEventListener("keyup", this.doShortcuts, false);
+    }
+
+    doShortcuts = (ev: KeyboardEvent) => {        
+        ev.preventDefault();
+        ev.stopPropagation()
+        
+        if(ev.keyCode === 13){
+            this.onAccept();
+            this.instance?.close()
+        }
+        else if(ev.keyCode === 27){
+            this.onCancel();
+            this.instance?.close()
+        }
     }
 
     onAccept = () => {        
@@ -47,7 +72,7 @@ export class Modal extends React.Component<IModalProps>{
     }
 
     render():JSX.Element{
-        return  <div id="modal1" className="modal">
+        return  <div id="modal1" className="modal" ref={this.fatherRef}>
                     <div className="modal-content">
                         <h4>{this.props.data.title}</h4>
                         <p>{this.props.data.content}</p>

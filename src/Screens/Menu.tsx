@@ -10,6 +10,7 @@ import { TodoWork } from "../Classes/TodoWork";
 import { Sidenav } from "./../Components/Sidenav";
 import { ElementSample } from "./config/ElementSample";
 import { Drugs } from "./config/Drugs";
+import { Protocols } from "./config/Protocols";
 
 interface MenuProps{
 
@@ -48,7 +49,7 @@ export class Menu extends React.Component<MenuProps>{
 
         let {path, url} = MATCH;
         
-        return <div>
+        return <div style={{height: "100vh"}}>
 
         <TopNav todos={[new TodoWork("Faltan corrales por alimentar", "menu/info")]} 
             logo={
@@ -57,7 +58,7 @@ export class Menu extends React.Component<MenuProps>{
                 </a>} 
             onLogout={this.onLogout}/>
 
-        <div className="menu--container">
+        <div className="menu--container topnaved">
             {/* <div className="menu--side">
                 <MaterialButton text="Ver información" onClick={() => this.routeTo(SIDE_OPT.info)}/>
             </div> */}
@@ -71,6 +72,7 @@ export class Menu extends React.Component<MenuProps>{
                     <Route path={`${path}/work-heads`} render={(a) => historyRefresher(a, <Login/>)}/>
                     <Route path={`${path}/feed-corrals`} render={(a) => historyRefresher(a, <Login/>)}/>
                     <Route path={`${path}/drugs`} render={(a) => historyRefresher(a, <Drugs/>)}/>
+                    <Route path={`${path}/protocols`} render={(a) => historyRefresher(a, <Protocols/>)}/>
                 </Switch>
             </div>
         </div>

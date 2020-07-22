@@ -38,6 +38,7 @@ export class Sidenav extends React.Component<ISidenavProps>{
                         <div className="collapsible-body">
                             <ul>
                             <li><a href="/menu/drugs">Medicamentos</a></li>
+                            <li><a href="/menu/protocols">Protocolos</a></li>
                             </ul>
                         </div>
                         </li>

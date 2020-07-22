@@ -11,7 +11,8 @@ export interface IInputProps{
     locked?: boolean;
     wrong?: boolean;
     width?: string;
-    isInline?: boolean
+    isInline?: boolean;
+    type?: "text" | "number" | "password"
 }
 
 interface IInputState{
@@ -51,13 +52,13 @@ export class Input extends React.Component<IInputProps, IInputState>{
                         {this.props.placeholder}
                 </label>
                 <input 
-                    type="text" 
+                    type={this.props.type != undefined? this.props.type: "text"} 
                     style={{width: this.props.width || ""} as React.CSSProperties}
                     id={this.props.id? this.props.id : "lbled_" + Input.inputCounter.toString()} 
                     onChange={this.onChange} 
                     value={this.props.value? this.props.value: ""} 
                     disabled={this.props.locked}
-                    className={`browser-default ${this.props.wrong? "" : ""} ${this.props.className || ""}`}/>
+                    className={`browser-default input ${this.props.wrong? "" : ""} ${this.props.className || ""}`}/>
                 
                 </>
     }

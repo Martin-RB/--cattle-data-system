@@ -1,4 +1,4 @@
-import React from "react";
+import React, { createRef } from "react";
 import { ElementSelectorTop } from "../../Components/ElementTop";
 import { IOption } from "~/Classes/IOption";
 import { ElementBot } from "../../Components/ElementBot";
@@ -23,18 +23,24 @@ export interface IState{
 
 export class ElementSample extends React.Component<IElementSampleProps>{
 
+    private fatherRef: React.RefObject<HTMLDivElement>;
+    private node: HTMLElement | undefined;
+
     constructor(props:IElementSampleProps){
         super(props);
+        
+        this.fatherRef = createRef<HTMLDivElement>();
     }
 
     componentDidMount(){
-        document.addEventListener("keyup", this.doShortcut);
+        this.node = (this.fatherRef.current)? this.fatherRef.current: undefined;
+        this.node?.addEventListener("keyup", this.doShortcut, false);
     }
     componentWillUnmount(){
-        document.removeEventListener("keyup", this.doShortcut)
+        this.node?.removeEventListener("keyup", this.doShortcut, false)
     }
 
-    doShortcut = (ev: KeyboardEvent) => {
+    doShortcut = (ev: KeyboardEvent) => {        
         ev.preventDefault();
         if(ev.keyCode === 13){
             this.props.state.onAccept();
@@ -45,7 +51,7 @@ export class ElementSample extends React.Component<IElementSampleProps>{
     }
 
     render(): JSX.Element{
-        return <div className="elcfg">
+        return <div className="elcfg" ref={this.fatherRef}>
             <h2>{this.props.title}</h2>
             <ElementSelectorTop 
                         onClickAdd={this.props.state.onItemAdd} 
