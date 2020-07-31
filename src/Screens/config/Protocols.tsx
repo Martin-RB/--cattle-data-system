@@ -7,6 +7,7 @@ import { IOption } from "./../../Classes/IOption";
 import { IProtocol } from "./../../Classes/DataStructures/Protocol";
 import { toast } from "./../../App";
 import { List, ListRow, ListColInput } from "../../Components/List";
+import { Sumer } from "../../Components/Sumer";
 
 interface IFieldedProtocol{
     id?: string, 
@@ -38,8 +39,13 @@ interface ICheckableFields{
 }
 
 export class Protocols extends React.Component<IProtocolsProps, IProtocolsState> implements IEditableState, ICheckableFields{
+
+    medicines: Array<IMedicine>;
+
     constructor(props: IProtocolsProps){
         super(props);
+
+        this.medicines = [];
         
         this.state = {
             fStt: new GatherState(this),
@@ -79,10 +85,11 @@ export class Protocols extends React.Component<IProtocolsProps, IProtocolsState>
 
     async gather(){
         let srv = ProtocolsSrv.getInstance();
-        this.onGather(await srv.get());
+        this.onGather(await srv.get(), await MedicinesSrv.getInstance().get());
     }
 
-    onGather = (data: Array<IProtocol>) =>{
+    onGather = (data: Array<IProtocol>, meds: Array<IMedicine>) =>{
+        this.medicines = meds;
         this.setState({
             fStt: new WaitingState(this),
             items: data
@@ -99,10 +106,11 @@ export class Protocols extends React.Component<IProtocolsProps, IProtocolsState>
                         selectedItem={this.state.selectedItem}
                         selectionPlaceholder="Protocolos">
                 <ProtocolsContent 
-                            value={this.state.item} 
+                            value={(()=>{return this.state.item;})()} 
                             onChange={this.onContentChange}
                             lockedFields={[]}
-                            badFields={[]}/>
+                            badFields={[]}
+                            allMeds={this.medicines}/>
                         {this.state.modalData != null? <Modal data={this.state.modalData}/>:null}
                 </ElementSample>
                 </>
@@ -261,6 +269,42 @@ class ViewState implements IState{
     showContent = () => true
 }
 
+class MedicinesSrv{
+    data:Array<IMedicine> = [
+        {
+            cost: 500,
+            isPerHead: false,
+            kgApplication: 40,
+            mlApplication: 30,
+            name: "Micotil",
+            presentation: 500,
+            id: "4"
+        },
+        {
+            cost: 430,
+            isPerHead: false,
+            kgApplication: 60,
+            mlApplication: 10,
+            name: "KSKI",
+            presentation: 40,
+            id: "3"
+        }
+    ];
+
+    private static entity: MedicinesSrv | undefined;
+
+    static getInstance(){
+        if(this.entity == undefined){
+            this.entity = new MedicinesSrv();
+        }
+        return this.entity
+    }
+
+    async get(){
+        return this.data;
+    }
+}
+
 class ProtocolsSrv{
     data = new Array<IProtocol>();
 
@@ -308,6 +352,7 @@ enum Fields{
 }
 
 interface ProtocolsContentProps{
+    allMeds: Array<IMedicine>;
     onChange: (newValue: IFieldedProtocol) => void;
     value: IFieldedProtocol;
 
@@ -316,23 +361,29 @@ interface ProtocolsContentProps{
 }
 
 interface ProtocolsContentState{
-    rows: Array<ListRow>;
+    headAmmount: number;
+    headWeight: number;
 }
 
 export class ProtocolsContent extends React.Component<ProtocolsContentProps, ProtocolsContentState>{
     
     headers: Array<string>;
+    selMeds: Array<ListRow>;
 
     constructor(props: ProtocolsContentProps){
         super(props);
 
-        this.headers = ["Nombre", "Presentación", "Dosis", "Costo"];
+        this.headers = ["Nombre", "Presentación (ml)", "Dosis (ml/kg)", "Costo"];
         this.state = {
-            rows: [{
-                id: "1",
-                columns: ["Micotil", "500 ml", "0.333 ml/kg", "3000 $"]
-            }]
-        }
+            headAmmount: 1,
+            headWeight: 250
+        };
+        
+        this.selMeds = this.fromMedicineToRows(this.props);
+    }
+
+    componentWillUpdate(nextProps: any, nextState: any, nextContext: any){
+        this.selMeds = this.fromMedicineToRows(nextProps);
     }
 
     onNameChange = (name: string, value: string) => {
@@ -343,8 +394,9 @@ export class ProtocolsContent extends React.Component<ProtocolsContentProps, Pro
     }
 
     onItemChange = (id: string, arrIdx: number, value: string) => {
+        /* let medicines = ;
         let newState = Object.assign({}, this.state, {
-            rows: this.state.rows.map((v) => {
+            rows: this.selMeds.map((v) => {
                 if(v.id == id){
                     let old = v.columns[arrIdx];
                     v.columns[arrIdx] = {inputValue: value, type: (old as ListColInput).type};  
@@ -353,50 +405,112 @@ export class ProtocolsContent extends React.Component<ProtocolsContentProps, Pro
             })
         })
 
-        this.setState(newState);
+        this.setState(newState); */
     }
 
     onAllSelected = (isSelected: boolean) => {
-        let newRows = this.state.rows.map((e) => {
-            e.isSelected = isSelected;
-            return e;
-        });
-
-        this.setState({
-            rows: newRows
-        })
+        let medicines: Array<IMedicine> = isSelected? this.props.allMeds: [];
+        let newValue = Object.assign({}, this.props.value, {medicines} as IFieldedProtocol)
+        this.props.onChange(newValue);
+        this.forceUpdate()
     }
 
-    onItemSelected = (id: string, isSelected: boolean) => {
-        let newRows = this.state.rows.map((e) => {
-            if(e.id == id) e.isSelected = isSelected;
-            return e;
-        });
+    onItemSelected = (id: string, isSelected: boolean) => {        
+        let newValue = Object.assign({}, this.props.value);
+        if(newValue.medicines == undefined) newValue.medicines = []
+        let meds = newValue.medicines!=undefined?newValue.medicines:[];
+        
+        if(isSelected){
+            newValue.medicines?.push(this.props.allMeds.find(v=>v.id==id)!)
+        }
+        else{
+            newValue.medicines?.slice(meds.findIndex(v=>v.id==id), 1);
+        }
+        
 
-        this.setState({
-            rows: newRows
+        this.props.onChange(newValue);
+        this.forceUpdate()
+    }
+
+    fromMedicineToRows: (props: ProtocolsContentProps) => Array<ListRow> = (props) => {
+        let meds = props.allMeds.map((v) => {
+            return {
+                    id: v.id, 
+                    columns: [
+                        v.name, 
+                        v.presentation.toString(), 
+                        v.isPerHead? "Por cabeza" : (v.mlApplication / v.kgApplication).toFixed(3),
+                        v.cost.toString()
+                    ],
+                    isSelected: (props.value.medicines != undefined)?props.value.medicines.find((m) => m.id == v.id) != undefined: false
+                } as ListRow;
         })
+        return meds;
+    }
+
+    getEstimationRows = () => {
+        let estRows = new Array<Array<string>>();
+        for (let i = 0; i < this.selMeds.length; i++) {
+            const el = this.selMeds[i];
+            if(el.isSelected != undefined && el.isSelected){
+                estRows.push(this.processRow(el.columns))
+            }
+        }
+        return estRows;
+    }
+
+    processRow: (cols: Array<(string | ListColInput)>) => Array<string> = (cols) => {
+        let row = new Array<string>();
+
+        let usedAmmount = parseFloat(this.getString(cols[2]));
+        let maxPresentation = parseFloat(this.getString(cols[1]));
+
+        // Head ml of material used        
+        let used = this.state.headAmmount * this.state.headWeight * usedAmmount;        
+        let cost = used / maxPresentation * parseFloat(this.getString(cols[3]));
+
+        row.push(this.getString(cols[0]));
+        row.push(used.toFixed(4));
+        row.push(cost.toFixed(2));
+
+        return row;
+    }
+
+    getString: (el: string | ListColInput) => string = (el) => {
+        return typeof el == "string"? el: el.inputValue;
     }
 
     render(): JSX.Element{
         return <>
                 <div className="row">
-                    <div className="col s6">
+                    <div className="col s12">
                         <div className="elcfg--field--margin">
-
                             <Input name={Fields.NAME} placeholder="Nombre" value={this.props.value.name} onChange={this.onNameChange}/>
                         </div>
+                    </div>
+                    <div className="col s6">
                         <div className="elcfg--field--margin">
                             <label>Medicamentos</label>
                             <List 
                                 deletable={false} 
                                 editable={false} 
                                 headers={this.headers} 
-                                rows={this.state.rows} 
+                                rows={this.selMeds} 
                                 selectable={true} 
                                 onChange={this.onItemChange}
                                 onAllSelected={this.onAllSelected}
                                 onItemSelected={this.onItemSelected}/>
+                        </div>
+                    </div>
+                    <div className="col s6">
+                        <div className="elcfg--field--margin">
+                            <label>Estimación</label>
+                            <Sumer
+                                headers={["Nombre", "Cantidad usada", "Costo"]}
+                                colTarget={2}
+                                resultText="Costo total"
+                                rows={this.getEstimationRows()}
+                                />
                         </div>
                     </div>
                 </div>

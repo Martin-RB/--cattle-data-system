@@ -162,6 +162,7 @@ body{
 	justify-content: space-evenly;
 	align-items: center;
 	border-bottom: solid 1px var(--color-gray);
+	height: 45px;
 }
 .myList--row--rightMargin{
 	padding-right: 5px;
