@@ -63,8 +63,8 @@ export class Login extends React.Component<LoginProps, LoginState>{
                 <h1>Cattle Data System</h1>
                 <div className="row element--background--black element--left-line">
                     <div className="col s4 login--form">
-                        <MaterialInput placeholder="Usuario" name={LoginFields.username} onChange={this.onInputChanged} text={this.state.fields[LoginFields.username]}></MaterialInput>
-                        <MaterialInput placeholder="Contraseña" name={LoginFields.password} onChange={this.onInputChanged} text={this.state.fields[LoginFields.password]}></MaterialInput>
+                        <MaterialInput placeholder="Usuario" name={LoginFields.username} onChange={this.onInputChanged} value={this.state.fields[LoginFields.username]}></MaterialInput>
+                        <MaterialInput placeholder="Contraseña" name={LoginFields.password} onChange={this.onInputChanged} value={this.state.fields[LoginFields.password]}></MaterialInput>
                         <MaterialButton text="Ingresar" onClick={this.onSubmit}/>
                     </div>
                 </div>
