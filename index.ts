@@ -7,6 +7,7 @@ import cors from "cors";
 import { Telemetry } from "./Common/Telemetry";
 import { Protocols } from "./endpoints/Protocols";
 import { Breeds } from "./endpoints/Breeds";
+import { Origins } from "./endpoints/Origins";
 
 let app = express();
 
@@ -32,6 +33,7 @@ app.use("/", Home(express.Router(), conn));
 app.use("/medicines", Medicines(express.Router(), conn, new Telemetry("/medicines")));
 app.use("/protocols", Protocols(express.Router(), conn, new Telemetry("/protocols")));
 app.use("/breeds", Breeds(express.Router(), conn, new Telemetry("/breeds")));
+app.use("/origins", Origins(express.Router(), conn, new Telemetry("/origins")));
 
 app.listen(1235, () => {
     console.log("Done on port: " + 1235);
