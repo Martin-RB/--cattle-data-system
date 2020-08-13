@@ -6,6 +6,7 @@ import * as bodyParser from "body-parser";
 import cors from "cors";
 import { Telemetry } from "./Common/Telemetry";
 import { Protocols } from "./endpoints/Protocols";
+import { Breeds } from "./endpoints/Breeds";
 
 let app = express();
 
@@ -30,6 +31,7 @@ conn.connect((e) => {
 app.use("/", Home(express.Router(), conn));
 app.use("/medicines", Medicines(express.Router(), conn, new Telemetry("/medicines")));
 app.use("/protocols", Protocols(express.Router(), conn, new Telemetry("/protocols")));
+app.use("/breeds", Breeds(express.Router(), conn, new Telemetry("/breeds")));
 
 app.listen(1235, () => {
     console.log("Done on port: " + 1235);

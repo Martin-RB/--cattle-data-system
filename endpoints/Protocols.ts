@@ -8,29 +8,24 @@ import { OUT_Protocol, IN_Protocol, IN_Protocol_Flex } from "../Common/DTO/Proto
 export function Protocols(router: Router, dbConn: Connection, tl: Telemetry){
     router.get("/", async (req, res) => {
         let qrProtocols : IQueryResult | undefined;
-        let success = true;
-        try {
-            qrProtocols = await doQuery(dbConn, `SELECT p.name, p.id_protocols, COUNT(m.id_medicines) as meds_count, 
-                                                            GROUP_CONCAT(m.name) as meds_name, GROUP_CONCAT(m.isPerHead = 1) as meds_isPerHead,
-                                                            GROUP_CONCAT(m.presentation) as meds_presentation, GROUP_CONCAT(m.mlApplication) as meds_mlApplication,
-                                                            GROUP_CONCAT(m.kgApplication) as meds_kgApplication, GROUP_CONCAT(m.actualCost) as meds_actualCost, 
-                                                            GROUP_CONCAT(m.id_medicines) as meds_id 
-                                                    FROM protocols p 
-                                                    LEFT JOIN medicine_protocol mp ON p.id_protocols = mp.id_protocols 
-                                                    LEFT JOIN medicines m ON mp.id_medicines = m.id_medicines 
-                                                    WHERE mp.create_datetime is null OR p.edit_datetime >= mp.create_datetime 
-                                                    GROUP BY p.id_protocols;`, []);
 
-        } catch (e) {
-            tl.reportInternalError(res, e);
-            success = false;
+        qrProtocols = await doQuery(dbConn, `SELECT p.name, p.id_protocols, COUNT(m.id_medicines) as meds_count, 
+                                                        GROUP_CONCAT(m.name) as meds_name, GROUP_CONCAT(m.isPerHead = 1) as meds_isPerHead,
+                                                        GROUP_CONCAT(m.presentation) as meds_presentation, GROUP_CONCAT(m.mlApplication) as meds_mlApplication,
+                                                        GROUP_CONCAT(m.kgApplication) as meds_kgApplication, GROUP_CONCAT(m.actualCost) as meds_actualCost, 
+                                                        GROUP_CONCAT(m.id_medicines) as meds_id 
+                                                FROM protocols p 
+                                                LEFT JOIN medicine_protocol mp ON p.id_protocols = mp.id_protocols 
+                                                LEFT JOIN medicines m ON mp.id_medicines = m.id_medicines 
+                                                WHERE mp.create_datetime is null OR p.edit_datetime >= mp.create_datetime 
+                                                GROUP BY p.id_protocols;`, []);
+
+        if(qrProtocols.error){
+            tl.reportInternalError(res, qrProtocols.error);
+            return;
         }
-
-        if(!success) { return; }
         
         let qrrProtocols = qrProtocols!.result;
-        console.log(qrrProtocols);
-        
         
         // Porting
         let protocols = new Array<OUT_Protocol>();
@@ -78,29 +73,29 @@ export function Protocols(router: Router, dbConn: Connection, tl: Telemetry){
             return;
         }
         let qrProtocols : IQueryResult | undefined;
-        let success = true;
-        try {
-            qrProtocols = await doQuery(dbConn, `SELECT p.name, p.id_protocols, COUNT(m.id_medicines) as meds_count, 
-                                                            GROUP_CONCAT(m.name) as meds_name, GROUP_CONCAT(m.isPerHead = 1) as meds_isPerHead,
-                                                            GROUP_CONCAT(m.presentation) as meds_presentation, GROUP_CONCAT(m.mlApplication) as meds_mlApplication,
-                                                            GROUP_CONCAT(m.kgApplication) as meds_kgApplication, GROUP_CONCAT(m.actualCost) as meds_actualCost, 
-                                                            GROUP_CONCAT(m.id_medicines) as meds_id 
-                                                    FROM protocols p 
-                                                    LEFT JOIN medicine_protocol mp ON mp.id_protocols = p.id_protocols 
-                                                    LEFT JOIN medicines m ON mp.id_medicines = m.id_medicines 
-                                                    WHERE p.id_protocols = ? AND (mp.create_datetime is null OR p.edit_datetime >= mp.create_datetime) 
-                                                    GROUP BY p.id_protocols;`, [req.params.id]);
-
-        } catch (e) {
-            tl.reportInternalError(res, e);
-            success = false;
+        
+        qrProtocols = await doQuery(dbConn, `SELECT p.name, p.id_protocols, COUNT(m.id_medicines) as meds_count, 
+                                                        GROUP_CONCAT(m.name) as meds_name, GROUP_CONCAT(m.isPerHead = 1) as meds_isPerHead,
+                                                        GROUP_CONCAT(m.presentation) as meds_presentation, GROUP_CONCAT(m.mlApplication) as meds_mlApplication,
+                                                        GROUP_CONCAT(m.kgApplication) as meds_kgApplication, GROUP_CONCAT(m.actualCost) as meds_actualCost, 
+                                                        GROUP_CONCAT(m.id_medicines) as meds_id 
+                                                FROM protocols p 
+                                                LEFT JOIN medicine_protocol mp ON mp.id_protocols = p.id_protocols 
+                                                LEFT JOIN medicines m ON mp.id_medicines = m.id_medicines 
+                                                WHERE p.id_protocols = ? AND (mp.create_datetime is null OR p.edit_datetime >= mp.create_datetime) 
+                                                GROUP BY p.id_protocols;`, [req.params.id]);
+        
+        if(qrProtocols.error){
+            tl.reportInternalError(res, qrProtocols.error);
+            return;
         }
-
-        if(!success) { return; }
         
         let qrrProtocols = qrProtocols!.result;
 
-        if(qrrProtocols.length == 0) {tl.reportNotFoundError(res, req.params.id, "Protocolo no encontrado")}
+        if(qrrProtocols.length == 0) {
+            tl.reportNotFoundError(res, req.params.id, "Protocolo no encontrado");
+            return;
+        }
         
         // Porting
         let protocols = new Array<OUT_Protocol>();
@@ -146,35 +141,39 @@ export function Protocols(router: Router, dbConn: Connection, tl: Telemetry){
         let date = new Date().getTime();
         let qr: IQueryResult | undefined = undefined;
         let success = true;
-        try {
-            qr = await doQuery(dbConn, `INSERT INTO protocols 
-                                        (name, create_datetime, edit_datetime)
-                                        VALUES (?, ?, ?);`, 
-                                        [p.name, date.toString(), date.toString()]);
+        qr = await doQuery(dbConn, `INSERT INTO protocols 
+                                    (name, create_datetime, edit_datetime)
+                                    VALUES (?, ?, ?);`, 
+                                    [p.name, date.toString(), date.toString()]);
 
-            let idProtocol = qr.result.insertId;
-
-            let medicines_string = ``;
-            let medicines_args : Array<any>= [];
-
-            p.medicines.forEach((el, i) => {
-                if(!el.id){ throw "Medicines no id. Idx = " + i };
-                if(i != 0){
-                    medicines_string += ", ";
-                }
-                medicines_string += "(?,?,?)";
-                medicines_args.push(el.id, idProtocol, date);
-            });
-
-            qr = await doQuery(dbConn, `INSERT INTO medicine_protocol  
-                                        (id_medicines, id_protocols, create_datetime) 
-                                        VALUES ${medicines_string};`,
-                                        medicines_args)
-        } catch (e) {
-            tl.reportInternalError(res, e);
-            success = false;
+        if(qr.error){
+            tl.reportInternalError(res, qr.error);
+            return;
         }
-        if(!success){
+
+        let idProtocol = qr.result.insertId;
+
+        let medicines_string = ``;
+        let medicines_args : Array<any>= [];
+
+        p.medicines.forEach((el, i) => {
+            if(!el.id){ 
+                tl.reportInternalError(res, "Medicines no id. Idx = " + i);
+                return;
+            }
+            if(i != 0){
+                medicines_string += ", ";
+            }
+            medicines_string += "(?,?,?)";
+            medicines_args.push(el.id, idProtocol, date);
+        });
+
+        qr = await doQuery(dbConn, `INSERT INTO medicine_protocol  
+                                    (id_medicines, id_protocols, create_datetime) 
+                                    VALUES ${medicines_string};`,
+                                    medicines_args)
+        if(qr.error){
+            tl.reportInternalError(res, qr.error);
             return;
         }
         res.send();
@@ -189,40 +188,41 @@ export function Protocols(router: Router, dbConn: Connection, tl: Telemetry){
             return;
         }
 
-        let qr: IQueryResult | undefined;
+        let qr: IQueryResult;
 
-        try {
-            if(p.medicines){
-                let medicines_string = ``;
-                let medicines_args : Array<any>= [];
+        if(p.medicines){
+            let medicines_string = ``;
+            let medicines_args : Array<any>= [];
 
-                p.medicines.forEach((el, i) => {
-                    if(!el.id){ throw "Medicines no id. Idx = " + i };
-                    if(i != 0){
-                        medicines_string += ", ";
-                    }
-                    medicines_string += "(?,?,?)";
-                    medicines_args.push(el.id, req.params.id, date);
-                });
+            p.medicines.forEach((el, i) => {
+                if(!el.id){ throw "Medicines no id. Idx = " + i };
+                if(i != 0){
+                    medicines_string += ", ";
+                }
+                medicines_string += "(?,?,?)";
+                medicines_args.push(el.id, req.params.id, date);
+            });
 
-                qr = await doQuery(dbConn, `INSERT INTO medicine_protocol  
-                                            (id_medicines, id_protocols, create_datetime) 
-                                            VALUES ${medicines_string};`,
-                                            medicines_args)
+            qr = await doQuery(dbConn, `INSERT INTO medicine_protocol  
+                                        (id_medicines, id_protocols, create_datetime) 
+                                        VALUES ${medicines_string};`,
+                                        medicines_args);
+
+            if(qr.error){
+                tl.reportInternalError(res, qr.error);
+                return;
             }
-            qr = undefined;
-            qr = await doEditElement(dbConn, "protocols", req.params.id, 
-                            [
-                                {rowName: "name", doEdit: p.name != undefined, value: p.name! || '\"\"'},
-                            ], date.toString())
-        } catch (e) {
-            tl.reportInternalError(res, e);
         }
 
-        if(!qr){
+        qr = await doEditElement(dbConn, "protocols", req.params.id, 
+                        [
+                            {rowName: "name", doEdit: p.name != undefined, value: p.name! || '\"\"'},
+                        ], date.toString())
+
+        if(qr.error){
+            tl.reportInternalError(res, qr.error);
             return;
         }
-
         res.send();
     });
 
@@ -232,18 +232,13 @@ export function Protocols(router: Router, dbConn: Connection, tl: Telemetry){
             return;
         }
 
-        let qr: IQueryResult | undefined;
-
-        try {
-            qr = await doQuery(dbConn, `UPDATE protocols 
-                                        SET isEnabled = 0 
-                                        WHERE id_protocols = ?;`,
-                                    [req.params.id])
-        } catch (e) {
-            tl.reportInternalError(res, e);
-        }
-
-        if(!qr){
+        let qr = await doQuery(dbConn, `UPDATE protocols 
+                                    SET isEnabled = 0 
+                                    WHERE id_protocols = ?;`,
+                                [req.params.id])
+                                
+        if(qr.error){
+            tl.reportInternalError(res, qr.error);
             return;
         }
 

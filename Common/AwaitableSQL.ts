@@ -1,7 +1,7 @@
 import { Connection, FieldInfo } from "mysql";
 
 export interface IQueryResult{
-    con: Connection, result: any, fields: Array<FieldInfo> | undefined
+    con: Connection, result: any, error: {e: any, info: string} | null 
 }
 
 export interface IRowEdit{
@@ -16,13 +16,16 @@ export function doQuery(con: Connection, sql: string, sql_params: Array<any>) {
             let sql_ = sql.replace(/(\n|\t)/gmi, "");
             con.query(sql_, sql_params, (error, result, fields) =>{
                 if(error){
-                    reject({e: error, info: JSON.stringify({type: "Query", sql_, sql_params})});
+                    resolve({con, result, error:{
+                                                    e: error, 
+                                                    info: JSON.stringify({type: "Query", sql_, sql_params})
+                                                }});
                     return;
                 }
-                resolve({con, result, fields});
+                resolve({con, result, error: null});
             })
         } catch (error) {
-            reject({e:error, info: {type: "Query", sql, sql_params}});
+            reject({con, result:null, error: {e:error, info: {type: "Query", sql, sql_params}}});
         }
     })
 }
