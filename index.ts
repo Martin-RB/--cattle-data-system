@@ -8,6 +8,7 @@ import { Telemetry } from "./Common/Telemetry";
 import { Protocols } from "./endpoints/Protocols";
 import { Breeds } from "./endpoints/Breeds";
 import { Origins } from "./endpoints/Origins";
+import { Providers } from "./endpoints/Providers";
 
 let app = express();
 
@@ -34,6 +35,7 @@ app.use("/medicines", Medicines(express.Router(), conn, new Telemetry("/medicine
 app.use("/protocols", Protocols(express.Router(), conn, new Telemetry("/protocols")));
 app.use("/breeds", Breeds(express.Router(), conn, new Telemetry("/breeds")));
 app.use("/origins", Origins(express.Router(), conn, new Telemetry("/origins")));
+app.use("/providers", Providers(express.Router(), conn, new Telemetry("/providers")));
 
 app.listen(1235, () => {
     console.log("Done on port: " + 1235);
