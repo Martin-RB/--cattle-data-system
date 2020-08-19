@@ -4,10 +4,32 @@ import { Telemetry } from "../Common/Telemetry";
 import { doQuery, doEditElement, IQueryResult } from "../Common/AwaitableSQL";
 import { OUT_Corral, IN_Corral, IN_Corral_Flex } from "../Common/DTO/Corral";
 
+export async function GetCorrals(dbConn: Connection, ids: Array<string>){
+    console.log(ids);
+    
+    let qr = await doQuery(dbConn, "SELECT * FROM corrals WHERE isEnabled = 1 AND id_corrals IN (?)", ids);
+    if(qr.error){
+        return qr.error;
+    }
+    let qrr = qr.result;
+
+    let corrals = new Array<OUT_Corral>();
+    qrr.forEach((el:any) => {
+        let corral: OUT_Corral = {
+            id: el.id_corrals,
+            name: el.name,
+            headNum: el.capacity
+        }
+        corrals.push(corral);
+    });
+
+    return corrals;
+}
+
 export function Corrals(router: Router, dbConn: Connection, tl: Telemetry){
 
     router.get("/", async (req, res) => {
-        let qr = await doQuery(dbConn, "SELECT * FROM corrals WHERE isEnabled = 1", []);
+        let qr = await doQuery(dbConn, "SELECT id_corrals FROM corrals WHERE isEnabled = 1", []);
         if(qr.error){
             tl.reportInternalError(res, qr.error);
             return;
@@ -15,14 +37,21 @@ export function Corrals(router: Router, dbConn: Connection, tl: Telemetry){
         let qrr = qr.result;
 
         let corrals = new Array<OUT_Corral>();
-        qrr.forEach((el:any) => {
-            let corral: OUT_Corral = {
-                id: el.id_corrals,
-                name: el.name,
-                headNum: el.capacity
-            }
-            corrals.push(corral);
-        });
+
+        if(qrr.length == 0){
+            res.send(corrals);
+            return;
+        }
+
+        let corralResponse = await GetCorrals(dbConn, [qrr.map((v:any)=>v.id_corrals)])
+        let responseCorr = (corralResponse as Array<OUT_Corral>);
+        
+        if(responseCorr.length == undefined){
+            let error = corralResponse as {e:any, info: string};
+            tl.reportInternalError(res, error.e);
+            return;
+        }
+        corrals = responseCorr;
         
         res.send(corrals);
     });
@@ -32,27 +61,17 @@ export function Corrals(router: Router, dbConn: Connection, tl: Telemetry){
             tl.reportInternalError(res, "NO ID");
             return;
         }
-        let qr = await doQuery(dbConn, `SELECT * 
-                                        FROM corrals 
-                                        WHERE id_corrals = ? AND isEnabled = 1`, 
-                                        [req.params.id]);
-        if(qr.error){
-            tl.reportInternalError(res, qr.error);
+
+        let corralResponse = await GetCorrals(dbConn, [req.params.id])
+        let responseCorr = (corralResponse as Array<OUT_Corral>);
+        
+        if(responseCorr.length == undefined){
+            let error = corralResponse as {e:any, info: string};
+            tl.reportInternalError(res, error.e);
             return;
         }
-        let qrr = qr.result;
-
-        let corrals = new Array<OUT_Corral>();
-        qrr.forEach((el:any) => {
-            let corral: OUT_Corral = {
-                id: el.id_corrals,
-                name: el.name,
-                headNum: el.capacity
-            }
-            corrals.push(corral);
-        });
         
-        res.send(corrals[0]);
+        res.send(responseCorr[0]);
     });
 
     router.post("/", async (req, res) => {
