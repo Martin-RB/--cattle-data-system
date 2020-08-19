@@ -10,6 +10,7 @@ import { Breeds } from "./endpoints/Breeds";
 import { Origins } from "./endpoints/Origins";
 import { Providers } from "./endpoints/Providers";
 import { Corrals } from "./endpoints/Corrals";
+import { Implants } from "./endpoints/Implants";
 
 let app = express();
 
@@ -38,6 +39,8 @@ app.use("/breeds", Breeds(express.Router(), conn, new Telemetry("/breeds")));
 app.use("/origins", Origins(express.Router(), conn, new Telemetry("/origins")));
 app.use("/providers", Providers(express.Router(), conn, new Telemetry("/providers")));
 app.use("/corrals", Corrals(express.Router(), conn, new Telemetry("/corrals")));
+app.use("/implants", Implants(express.Router(), conn, new Telemetry("/implants")));
+
 
 app.listen(1235, () => {
     console.log("Done on port: " + 1235);
