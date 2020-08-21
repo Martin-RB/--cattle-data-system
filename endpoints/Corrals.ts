@@ -5,9 +5,11 @@ import { doQuery, doEditElement, IQueryResult } from "../Common/AwaitableSQL";
 import { OUT_Corral, IN_Corral, IN_Corral_Flex } from "../Common/DTO/Corral";
 
 export async function GetCorrals(dbConn: Connection, ids: Array<string>){
-    console.log(ids);
+    if(ids.length == 0){
+        return [];
+    }
     
-    let qr = await doQuery(dbConn, "SELECT * FROM corrals WHERE isEnabled = 1 AND id_corrals IN (?)", ids);
+    let qr = await doQuery(dbConn, "SELECT * FROM corrals WHERE id_corrals IN (?)", [ids]);
     if(qr.error){
         return qr.error;
     }

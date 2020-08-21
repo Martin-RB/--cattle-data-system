@@ -6,6 +6,9 @@ import { Telemetry } from "../Common/Telemetry";
 import { OUT_Protocol, IN_Protocol, IN_Protocol_Flex } from "../Common/DTO/Protocol";
 
 export async function GetProtocol(dbConn: Connection, ids: Array<string>){
+    if(ids.length == 0){
+        return [];
+    }
     let qrProtocols : IQueryResult | undefined;
 
     qrProtocols = await doQuery(dbConn, `SELECT p.name, p.id_protocols, COUNT(m.id_medicines) as meds_count, 
@@ -16,7 +19,7 @@ export async function GetProtocol(dbConn: Connection, ids: Array<string>){
                                             FROM protocols p 
                                             LEFT JOIN medicine_protocol mp ON p.id_protocols = mp.id_protocols 
                                             LEFT JOIN medicines m ON mp.id_medicines = m.id_medicines 
-                                            WHERE p.id_protocols IN (?) AND p.isEnabled = 1 AND 
+                                            WHERE p.id_protocols IN (?) AND 
                                                     mp.create_datetime is null OR p.edit_datetime >= mp.create_datetime 
                                             GROUP BY p.id_protocols;`, [ids]);
 
@@ -96,7 +99,6 @@ export function Protocols(router: Router, dbConn: Connection, tl: Telemetry){
             tl.reportInternalError(res, "NO ID");
             return;
         }
-        let qrProtocols : IQueryResult | undefined;
         
         let protResponse = await GetProtocol(dbConn, [req.params.id]);
         let responseProts = (protResponse as Array<OUT_Protocol>);

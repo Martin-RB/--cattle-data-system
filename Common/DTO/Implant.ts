@@ -11,7 +11,6 @@ export interface OUT_Implant{
 
 export interface IN_Implant{
     day: number, 
-    idAlot: number,
     idProtocol: number 
 }
 

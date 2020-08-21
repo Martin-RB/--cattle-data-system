@@ -1,7 +1,7 @@
-import { Connection, FieldInfo } from "mysql";
+import { Connection, FieldInfo, Query } from "mysql";
 
 export interface IQueryResult{
-    con: Connection, result: any, error: {e: any, info: string} | null 
+    obj:Query, con: Connection, result: any, error: {e: any, info: string} | null 
 }
 
 export interface IRowEdit{
@@ -14,15 +14,16 @@ export function doQuery(con: Connection, sql: string, sql_params: Array<any>) {
     return new Promise<IQueryResult>((resolve, reject) =>{
         try {
             let sql_ = sql.replace(/(\n|\t)/gmi, "");
+            let obj =
             con.query(sql_, sql_params, (error, result, fields) =>{
                 if(error){
-                    resolve({con, result, error:{
+                    resolve({obj,con, result, error:{
                                                     e: error, 
                                                     info: JSON.stringify({type: "Query", sql_, sql_params})
                                                 }});
                     return;
                 }
-                resolve({con, result, error: null});
+                resolve({con, result, error: null, obj});
             })
         } catch (error) {
             reject({con, result:null, error: {e:error, info: {type: "Query", sql, sql_params}}});
