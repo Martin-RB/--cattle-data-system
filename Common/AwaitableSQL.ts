@@ -42,3 +42,17 @@ export function doEditElement(con: Connection, table: string, id: string, rowsTo
     let sql = `UPDATE ${table} SET ${caseWhen} edit_datetime = ? WHERE id_${table} = ${id}`;
     return doQuery(con, sql, values);
 }
+
+export function checkResponseErrors(...responses: any[]){
+    let arr = responses;
+
+    for (let i = 0; i < arr.length; i++) {
+        const el = arr[i];
+        let _el = el as Array<any>;
+        if(_el.length == undefined){
+            let error = el as {e:any, info: string};
+            return error;
+        }
+    }
+    return null;
+}

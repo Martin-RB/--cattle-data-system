@@ -5,23 +5,51 @@ import { doQuery, doEditElement } from "../Common/AwaitableSQL";
 import { OUT_Origin, IN_Origin, IN_Origin_Flex } from "../Common/DTO/Origin";
 import { OUT_Provider, IN_Provider, IN_Provider_Flex } from "../Common/DTO/Provider";
 
+export async function GetProviders(dbConn: Connection, ids: Array<string>){
+    let qr = await doQuery(dbConn, `
+        SELECT * FROM providers WHERE id_providers IN (?);
+    `,
+    [ids]);
+    
+    if(qr.error){
+        return qr.error;
+    }
+    let qrr = qr.result;
+    
+    let providers = new Array<OUT_Provider>();
+    qrr.forEach((el:any) => {
+        let provider: OUT_Provider = {
+            id: el.id_providers,
+            name: el.name
+        }
+        providers.push(provider);
+    });
+    return providers;
+}
+
 export function Providers(router: Router, dbConn: Connection, tl: Telemetry){
     router.get("/", async (req, res) => {
-        let qr = await doQuery(dbConn, "SELECT * FROM providers WHERE isEnabled = 1", []);
+        let qr = await doQuery(dbConn, "SELECT id_providers FROM providers WHERE isEnabled = 1", []);
         if(qr.error){
             tl.reportInternalError(res, qr.error);
             return;
         }
-        let qrr = qr.result;
 
+        let ids = qr.result;
         let providers = new Array<OUT_Provider>();
-        qrr.forEach((el:any) => {
-            let provider: OUT_Provider = {
-                id: el.id_providers,
-                name: el.name
+        if(ids.length != 0){
+            let providerResponse = await GetProviders(dbConn, ids.map((v:any) => v.id_providers));
+            let responseProvider = (providerResponse as Array<OUT_Provider>);
+
+
+            if(responseProvider.length == undefined){
+                let error = providerResponse as {e:any, info: string};
+                tl.reportInternalError(res, error.e);
+                return;
             }
-            providers.push(provider);
-        });
+            providers = responseProvider;
+        }
+        
         
         res.send(providers);
     });

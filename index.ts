@@ -12,6 +12,7 @@ import { Providers } from "./endpoints/Providers";
 import { Corrals } from "./endpoints/Corrals";
 import { Implants } from "./endpoints/Implants";
 import { Alots } from "./endpoints/Alots";
+import { Lorries } from "./endpoints/Lorries";
 
 let app = express();
 
@@ -42,6 +43,7 @@ app.use("/providers", Providers(express.Router(), conn, new Telemetry("/provider
 app.use("/corrals", Corrals(express.Router(), conn, new Telemetry("/corrals")));
 app.use("/implants", Implants(express.Router(), conn, new Telemetry("/implants")));
 app.use("/alots", Alots(express.Router(), conn, new Telemetry("/alots")));
+app.use("/lorries", Lorries(express.Router(), conn, new Telemetry("/lorries")));
 
 app.listen(1235, () => {
     console.log("Done on port: " + 1235);

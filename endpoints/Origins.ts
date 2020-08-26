@@ -4,25 +4,54 @@ import { Telemetry } from "../Common/Telemetry";
 import { doQuery, doEditElement } from "../Common/AwaitableSQL";
 import { OUT_Origin, IN_Origin, IN_Origin_Flex } from "../Common/DTO/Origin";
 
+export async function GetOrigins(dbConn: Connection, ids: Array<string>){
+    let qr = await doQuery(dbConn, `
+        SELECT * FROM origins WHERE id_origins IN (?);
+    `,
+    [ids]);
+
+    if(qr.error){
+        return qr.error;
+    }
+    let qrr = qr.result;
+
+    let origins = new Array<OUT_Origin>();
+    qrr.forEach((el:any) => {
+        let origin: OUT_Origin = {
+            id: el.id_origins,
+            locality: el.locality,
+            state: el.state
+        }
+        origins.push(origin);
+    });
+
+    return origins;
+
+}
+
 export function Origins(router: Router, dbConn: Connection, tl: Telemetry){
     router.get("/", async (req, res) => {
-        let qr = await doQuery(dbConn, "SELECT * FROM origins WHERE isEnabled = 1", []);
+        let qr = await doQuery(dbConn, "SELECT id_origins FROM origins WHERE isEnabled = 1", []);
         if(qr.error){
             tl.reportInternalError(res, qr.error);
             return;
         }
-        let qrr = qr.result;
 
+        let ids = qr.result;
         let origins = new Array<OUT_Origin>();
-        qrr.forEach((el:any) => {
-            let origin: OUT_Origin = {
-                id: el.id_origins,
-                locality: el.locality,
-                state: el.state
+        if(ids.length != 0){
+            let originResponse = await GetOrigins(dbConn, ids.map((v:any) => v.id_origins));
+            let responseOrigin = (originResponse as Array<OUT_Origin>);
+
+
+            if(responseOrigin.length == undefined){
+                let error = originResponse as {e:any, info: string};
+                tl.reportInternalError(res, error.e);
+                return;
             }
-            origins.push(origin);
-        });
-        
+            origins = responseOrigin;
+        }
+
         res.send(origins);
     });
 

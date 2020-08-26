@@ -1,7 +1,7 @@
 import { Connection } from "mysql";
 import { Telemetry } from "../Common/Telemetry";
 import { Router, response } from "express";
-import { doQuery, IQueryResult } from "../Common/AwaitableSQL";
+import { doQuery, IQueryResult, checkResponseErrors } from "../Common/AwaitableSQL";
 import { OUT_Alot, IN_Alot } from "../Common/DTO/Alot";
 import { GetImplants } from "./Implants";
 import { GetProtocol } from "./Protocols";
@@ -66,20 +66,6 @@ export async function GetAlots(dbConn: Connection, ids: Array<string>){
     }
 
     return alots;
-}
-
-function checkResponseErrors(implResponse:any, protResponse:any, corrResponse:any){
-    let arr = [protResponse,corrResponse,implResponse];
-
-    for (let i = 0; i < arr.length; i++) {
-        const el = arr[i];
-        let _el = el as Array<any>;
-        if(_el.length == undefined){
-            let error = el as {e:any, info: string};
-            return error;
-        }
-    }
-    return null;
 }
 
 export function Alots(router: Router, dbConn: Connection, tl: Telemetry){    
