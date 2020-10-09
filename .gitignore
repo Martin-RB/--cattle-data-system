@@ -1,2 +1,4 @@
 node_modules
-**/*.js
+endpoints/*.js
+Common/**/*.js
+index.js
