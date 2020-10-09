@@ -34,17 +34,28 @@ conn.connect((e) => {
     console.log("Connected to db " + DATABASE);
 })
 
-app.use("/", Home(express.Router(), conn));
-app.use("/medicines", Medicines(express.Router(), conn, new Telemetry("/medicines")));
-app.use("/protocols", Protocols(express.Router(), conn, new Telemetry("/protocols")));
-app.use("/breeds", Breeds(express.Router(), conn, new Telemetry("/breeds")));
-app.use("/origins", Origins(express.Router(), conn, new Telemetry("/origins")));
-app.use("/providers", Providers(express.Router(), conn, new Telemetry("/providers")));
-app.use("/corrals", Corrals(express.Router(), conn, new Telemetry("/corrals")));
-app.use("/implants", Implants(express.Router(), conn, new Telemetry("/implants")));
-app.use("/alots", Alots(express.Router(), conn, new Telemetry("/alots")));
-app.use("/lorries", Lorries(express.Router(), conn, new Telemetry("/lorries")));
+app.use(express.static(__dirname + "/html"));
 
-app.listen(8079, () => {
-    console.log("Done on port: " + 8079);
+app.use("/api/home", Home(express.Router(), conn));
+app.use("/api/mediciness", Medicines(express.Router(), conn, new Telemetry("/medicines")));
+app.use("/api/protocols", Protocols(express.Router(), conn, new Telemetry("/protocols")));
+app.use("/api/breeds", Breeds(express.Router(), conn, new Telemetry("/breeds")));
+app.use("/api/origins", Origins(express.Router(), conn, new Telemetry("/origins")));
+app.use("/api/providers", Providers(express.Router(), conn, new Telemetry("/providers")));
+app.use("/api/corrals", Corrals(express.Router(), conn, new Telemetry("/corrals")));
+app.use("/api/implants", Implants(express.Router(), conn, new Telemetry("/implants")));
+app.use("/api/alots", Alots(express.Router(), conn, new Telemetry("/alots")));
+app.use("/api/lorries", Lorries(express.Router(), conn, new Telemetry("/lorries")));
+
+app.get('/*', function(req, res) {
+    res.sendFile((__dirname + '/html/index.html'), function(err: any) {
+        if (err) {
+            res.status(500).send(err)
+        }
+    });
+});
+
+
+app.listen(8070, () => {
+    console.log("Done on port: " + 8070);
 })
