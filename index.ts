@@ -37,7 +37,7 @@ conn.connect((e) => {
 app.use(express.static(__dirname + "/html"));
 
 app.use("/api/home", Home(express.Router(), conn));
-app.use("/api/mediciness", Medicines(express.Router(), conn, new Telemetry("/medicines")));
+app.use("/api/medicines", Medicines(express.Router(), conn, new Telemetry("/medicines")));
 app.use("/api/protocols", Protocols(express.Router(), conn, new Telemetry("/protocols")));
 app.use("/api/breeds", Breeds(express.Router(), conn, new Telemetry("/breeds")));
 app.use("/api/origins", Origins(express.Router(), conn, new Telemetry("/origins")));
