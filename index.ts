@@ -45,6 +45,6 @@ app.use("/implants", Implants(express.Router(), conn, new Telemetry("/implants")
 app.use("/alots", Alots(express.Router(), conn, new Telemetry("/alots")));
 app.use("/lorries", Lorries(express.Router(), conn, new Telemetry("/lorries")));
 
-app.listen(1235, () => {
-    console.log("Done on port: " + 1235);
+app.listen(8079, () => {
+    console.log("Done on port: " + 8079);
 })
