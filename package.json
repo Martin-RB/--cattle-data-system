@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "parcel html/index.html --open"
+    "start": "parcel serve html/index.html --open --port 8060"
   },
   "author": "",
   "license": "ISC",
