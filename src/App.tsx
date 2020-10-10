@@ -1,3 +1,4 @@
+// Cambios Daniel
 import { render } from "react-dom";
 import React from "react";
 import {
@@ -7,7 +8,7 @@ import {
     Link,
     RouteComponentProps,
     match,
-    Redirect
+    Redirect,
 } from "react-router-dom";
 import { History } from "history";
 import { Login } from "./Screens/Login";
@@ -22,18 +23,32 @@ export var historyRefresher = (r: RouteComponentProps, child: JSX.Element) => {
     MATCH = r.match;
 
     return child;
+};
+
+export function toast(message: string) {
+    M.toast({ html: message });
 }
 
-export function toast(message: string){
-    M.toast({html: message});
-}
-
-let view =
-<Router>
-    <Switch>
-        <Route exact path="/" render={(a) => historyRefresher(a, <Redirect to="/login"/>)}/>
-        <Route exact path="/login" render={(a) => historyRefresher(a, <Login/>)}/>
-        <Route path="/menu" render={(a) => {return historyRefresher(a, <Menu/>)}}/>
-    </Switch>
-</Router>
+let view = (
+    <Router>
+        <Switch>
+            <Route
+                exact
+                path="/"
+                render={(a) => historyRefresher(a, <Redirect to="/login" />)}
+            />
+            <Route
+                exact
+                path="/login"
+                render={(a) => historyRefresher(a, <Login />)}
+            />
+            <Route
+                path="/menu"
+                render={(a) => {
+                    return historyRefresher(a, <Menu />);
+                }}
+            />
+        </Switch>
+    </Router>
+);
 render(view, document.getElementById("app"));
