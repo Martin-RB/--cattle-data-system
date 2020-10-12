@@ -4,13 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="./css/style.css">
     <!--Import Google Icon Font-->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <!-- Compiled and minified CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-alpha.3/css/materialize.min.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
+    <!--Our CSS -->
+    <link rel="stylesheet" href="./css/style.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
 </head>
 <body>
     <div id="app"></div>
@@ -18,10 +19,10 @@
     <div class="section"></div>
       <main>
         <center>
-          <img class="responsive-img" style="width: 250px;" src="https://i.imgur.com/ax0NCsK.gif" />
+          <img class="responsive-img" width="210px" src="../img/vaquita.svg" />
           <div class="section"></div>
 
-          <h5 class="indigo-text">Please, login into your account</h5>
+          <h5 class="indigo-text">Introduzca sus credenciales</h5>
           <div class="section"></div>
 
           <div class="container">
@@ -35,15 +36,13 @@
 
                 <div class='row'>
                   <div class='input-field col s12'>
-                    <input class='validate' type='email' name='email' id='email' />
-                    <label for='email'>Enter your email</label>
+                    <input class='validate' type='email' name='email' id='email' placeholder="Introduzca su email" />
                   </div>
                 </div>
 
                 <div class='row'>
                   <div class='input-field col s12'>
-                    <input class='validate' type='password' name='password' id='password' />
-                    <label for='password'>Enter your password</label>
+                    <input class='validate' type='password' name='password' id='password' placeholder="Introduzca su contraseña" />
                   </div>
                   <label style='float: right;'>
                                     <a class='pink-text' href='#!'><b>Forgot Password?</b></a>
@@ -69,7 +68,7 @@
 
 
 
-
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
     <script src="../src/App.tsx"></script>
 </body>
 </html>
