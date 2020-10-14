@@ -4,7 +4,7 @@
   "description": "XD",
   "main": "index.js",
   "scripts": {
-    "start": "./node_modules/.bin/nodemon -e ts --exec './node_modules/.bin/tsc && sleep 2 && node index.js'"
+    "start": "./node_modules/.bin/nodemon -e ts --exec './node_modules/.bin/tsc && node index.js'"
   },
   "author": "",
   "license": "ISC",
