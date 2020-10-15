@@ -59,16 +59,50 @@ export class Login extends React.Component<LoginProps, LoginState>{
     render(): JSX.Element{
         
         return <div className="login--background">
-            <div className="login--container">
-                <h1>Cattle Data System</h1>
-                <div className="row element--background--black element--left-line">
-                    <div className="col s4 login--form">
-                        <MaterialInput placeholder="Usuario" name={LoginFields.username} onChange={this.onInputChanged} value={this.state.fields[LoginFields.username]}></MaterialInput>
-                        <MaterialInput placeholder="Contraseña" name={LoginFields.password} onChange={this.onInputChanged} value={this.state.fields[LoginFields.password]}></MaterialInput>
-                        <MaterialButton text="Ingresar" onClick={this.onSubmit}/>
+        <div className="section"></div>
+          <main>
+            <center>
+              <img className="responsive-img" width="210px" src=".../img/vaquita.svg" />
+              <div className="section"></div>
+
+              <h5 className="indigo-text">Introduzca sus credenciales</h5>
+              <div className="section"></div>
+
+              <div className="container">
+                <div className="z-depth-1 grey lighten-4 row contenedor" >
+
+                  <form className="col s12" method="post">
+                    <div className='row'>
+                      <div className='col s12'>
+                      </div>
                     </div>
+
+                    <div className='row'>
+                      <div className='input-field col s12'>
+                        <input className='validate' type='email' name='email' id='email' placeholder="Introduzca su email" />
+                      </div>
+                    </div>
+
+                    <div className='row'>
+                      <div className='input-field col s12'>
+                        <input className='validate' type='password' name='password' id='password' placeholder="Introduzca su contraseña" />
+                      </div>
+                        <label className="forgot-password">
+                            <a className='pink-text' href='#!'><b>Olvido su contraseña?</b></a>
+                        </label>
+                    </div>
+
+                    <br />
+                    <center>
+                      <div className='row'>
+                        <button type='submit' name='btn_login' className='col s12 btn btn-large waves-effect indigo'>Ingresar</button>
+                      </div>
+                    </center>
+                  </form>
                 </div>
-            </div>
+              </div>
+            </center>
+          </main>
         </div>
     }
 }
