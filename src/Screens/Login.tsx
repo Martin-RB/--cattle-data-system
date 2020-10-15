@@ -87,15 +87,12 @@ export class Login extends React.Component<LoginProps, LoginState>{
                       <div className='input-field col s12'>
                         <input className='validate' type='password' name='password' id='password' placeholder="Introduzca su contraseña" />
                       </div>
-                        <label className="forgot-password">
-                            <a className='pink-text' href='#!'><b>Olvido su contraseña?</b></a>
-                        </label>
                     </div>
 
                     <br />
                     <center>
                       <div className='row'>
-                        <button type='submit' name='btn_login' className='col s12 btn btn-large waves-effect indigo'>Ingresar</button>
+                        <button type='submit' name='btn_login' onClick={() => {this.onSubmit()}} className='col s12 btn btn-large waves-effect indigo'>Ingresar</button>
                       </div>
                     </center>
                   </form>
