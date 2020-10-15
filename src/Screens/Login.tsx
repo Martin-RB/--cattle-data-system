@@ -3,6 +3,8 @@ import { Input, MaterialInput } from "../Components/Input";
 import { Button, MaterialButton } from "../Components/Button";
 import { useHistory } from "react-router-dom";
 import { HISTORY } from "../App";
+import vaquita from "./../../img/vaquita.svg";
+
 
 interface LoginProps{
 
@@ -62,11 +64,9 @@ export class Login extends React.Component<LoginProps, LoginState>{
         <div className="section"></div>
           <main>
             <center>
-              <img className="responsive-img" width="210px" src=".../img/vaquita.svg" />
-              <div className="section"></div>
+              <img className="responsive-img" width="210px" src={vaquita} />
 
               <h5 className="indigo-text">Introduzca sus credenciales</h5>
-              <div className="section"></div>
 
               <div className="container">
                 <div className="z-depth-1 grey lighten-4 row contenedor" >
@@ -101,8 +101,15 @@ export class Login extends React.Component<LoginProps, LoginState>{
                   </form>
                 </div>
               </div>
+            <div className="section"></div>
+
             </center>
           </main>
         </div>
     }
 }
+
+
+
+
+
