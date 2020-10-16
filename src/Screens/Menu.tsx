@@ -11,6 +11,7 @@ import { Sidenav } from "./../Components/Sidenav";
 import { ElementSample } from "./config/ElementSample";
 import { Drugs } from "./config/Drugs";
 import { Protocols } from "./config/Protocols";
+import { Providers } from "./config/Providers";
 
 interface MenuProps{
 
@@ -73,6 +74,7 @@ export class Menu extends React.Component<MenuProps>{
                     <Route path={`${path}/feed-corrals`} render={(a) => historyRefresher(a, <Login/>)}/>
                     <Route path={`${path}/drugs`} render={(a) => historyRefresher(a, <Drugs/>)}/>
                     <Route path={`${path}/protocols`} render={(a) => historyRefresher(a, <Protocols/>)}/>
+                    <Route path={`${path}/providers`} render={(a) => historyRefresher(a, <Providers/>)}/>
                 </Switch>
             </div>
         </div>
