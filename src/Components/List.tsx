@@ -91,8 +91,8 @@ export class List extends React.Component<ListProps, ListState>{
                                     }
                                 })}
                                 {this.props.deletable || this.props.editable? <span className="myList--small-item myList--small-item--verticalItems">
-                                    {this.props.deletable? <i className="tiny material-icons icon">remove</i>:null}
-                                    {this.props.editable? <i className="tiny material-icons icon">edit</i>: null}
+                                    {this.props.deletable? <i className="tiny material-icons icon" onClick={()=>this.onDelete(v.id)}>remove</i>:null}
+                                    {this.props.editable? <i className="tiny material-icons icon" onClick={()=>this.onEdit(v.id)}>edit</i>: null}
                                 </span>: null}
                             </div>)}
                     
