@@ -244,10 +244,13 @@ body{
     
 }
 
+.inline-items{
+  display: flex;
+  flex-direction: row;
+}
 .field--margin{
   margin-bottom: 15px;
 }
-
 
 
 /* Login */
