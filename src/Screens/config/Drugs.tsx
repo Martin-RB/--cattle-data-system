@@ -493,7 +493,7 @@ export class DrugsContent extends React.Component<IDrugsContentProps>{
                         <label>Tipo de medicamento</label>
                     </div>
                     <div className="elcfg--field--margin">
-                        <Radio name={Fields.IS_PER_HEAD} value={"true"} checked={el.isPerHead!=undefined? el.isPerHead: false} onChange={this.onChange} text="Por mililitros"/>
+                        <Radio name={Fields.IS_PER_HEAD} value={"true"} checked={el.isPerHead!=undefined? el.isPerHead: false} onChange={this.onChange} text="Por dosis"/>
                         <div className="left-justify">
                             <Input 
                                     placeholder="Presentación" 
@@ -514,7 +514,7 @@ export class DrugsContent extends React.Component<IDrugsContentProps>{
                         </div>
                     </div>
                     <div className="elcfg--field--margin">
-                        <Radio name={Fields.IS_PER_HEAD} value={"false"} checked={(el.isPerHead!=undefined? !el.isPerHead: false)} onChange={this.onChange} text="Por dosis"/>
+                        <Radio name={Fields.IS_PER_HEAD} value={"false"} checked={(el.isPerHead!=undefined? !el.isPerHead: false)} onChange={this.onChange} text="Por mililitros"/>
                         <div className="left-justify">
                             <Input 
                                     placeholder="Presentación" 
