@@ -110,6 +110,7 @@ export function Medicines(router: Router, dbConn: Connection, tl: Telemetry) {
         }
 
         let idMedicine = qr.result.insertId;
+        console.log("datos QR antes ", qr.result);
 
         qr = await doQuery(
             dbConn,
@@ -124,7 +125,7 @@ export function Medicines(router: Router, dbConn: Connection, tl: Telemetry) {
             return;
         }
 
-        res.send();
+        res.send({ id: idMedicine });
     });
 
     router.put("/:id", async (req, res) => {

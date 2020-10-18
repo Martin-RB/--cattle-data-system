@@ -153,6 +153,7 @@ export function Protocols(router: Router, dbConn: Connection, tl: Telemetry) {
 
         let medicines_string = ``;
         let medicines_args: Array<any> = [];
+        console.log("medicines", p.medicines);
 
         p.medicines.forEach((el, i) => {
             if (!el.id) {
@@ -177,7 +178,7 @@ export function Protocols(router: Router, dbConn: Connection, tl: Telemetry) {
             tl.reportInternalError(res, qr.error);
             return;
         }
-        res.send();
+        res.send({ id: idProtocol });
     });
 
     router.put("/:id", async (req, res) => {
