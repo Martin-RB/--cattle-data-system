@@ -13,10 +13,10 @@ export type ListColInput = {inputValue: string, type?: "text" | "number" | "pass
 interface ListProps{
     rows: Array<ListRow>;
     headers: Array<string>;
-    selectable: boolean;
-    editable: boolean;
-    viewable: boolean;
-    deletable: boolean;
+    selectable?: boolean;
+    editable?: boolean;
+    viewable?: boolean;
+    deletable?: boolean;
     onAllSelected?: (isSelected: boolean) => void;
     onChange?: (id: string, arrIdx: number, value: string) => void;
     onItemSelected?: (id:string, isSelected: boolean) => void;
