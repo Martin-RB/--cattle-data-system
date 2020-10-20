@@ -13,6 +13,8 @@ import { toast } from "../App";
 import { Modal, ModalData } from "../Components/Modal";
 import { ProtocolsContent } from "./config/Protocols";
 import { DrugsContent } from "./config/Drugs";
+import { ISexClass } from "../Classes/DataStructures/SexClass";
+import { MedicineDisplay } from "../Components/MedicineDisplay";
 
 interface RegisterHeadsState{
     lorries: Array<Lorry>
@@ -23,7 +25,9 @@ interface RegisterHeadsState{
     weight: string
     idLocal: string
     sex: "male" | "female" | ""
-    heads: Array<Head>
+    heads: Array<Head>,
+    classes: Array<ISexClass>,
+    selectedClass: number
 }
 interface RegisterHeadsProps{
 
@@ -43,7 +47,9 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps,
             weight: "",
             sex: "",
             heads: [],
-            idLocal: ""
+            idLocal: "",
+            classes: [],
+            selectedClass: -1
         }
     }
 
@@ -110,7 +116,12 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps,
             let heads = this.state.heads;
             heads.push(head)
             this.setState({
-                heads
+                heads,
+                weight: "",
+                sex: "",
+                siniga: "",
+                idLocal: "",
+                selectedAlot: -1
             })
         }, 500)
     }
@@ -124,14 +135,37 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps,
         })
     }
 
+    onChangeLorry = (id: string) => {
+        this.setState({
+            selectedLorry: parseInt(id),
+            selectedClass: -1,
+            classes: []
+        });
+
+        setTimeout(() => {
+            this.setState({
+                classes: [
+                    {id: "1", cost: 400, name: "Clase 1"},
+                    {id: "2", cost: 400, name: "Clase 1"},
+                    {id: "3", cost: 400, name: "Clase 1"},
+                    {id: "5", cost: 400, name: "Clase 1"}]
+            });
+        })
+    }
+
     render():JSX.Element{
         let lorries = this.state.lorries.map((v,i)=>({key: i.toString(), 
                                                 name: v.name} as IOption));
 
         let heads = this.state.heads.map((v, i) => (
                         {id: i.toString(), columns:
-                            [v.siniga, v.idLocal, v.weight.toString()]
-                        } as ListRow))
+                            [v.siniga, v.idLocal, v.sex[0].toUpperCase(), v.weight.toString()]
+                        } as ListRow));
+
+        let classes = this.state.classes.map((e,i) => ({
+            key: i.toString(),
+            name: e.name
+        } as IOption))
         return (
             <>
             <div className="row">
@@ -141,11 +175,10 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps,
             </div>
             <div className="row">
                 <div className="col s12">
+                    <label>Jaula</label>
                     <Select placeholder="Seleccione jaula" 
                             elements={lorries} 
-                            onChange={(v) => {this.setState({
-                                selectedLorry: parseInt(v)
-                            }); return true}}
+                            onChange={(v) => {this.onChangeLorry(v); return true}}
                             value={this.state.selectedLorry.toString()}/>
                 </div>
             </div>
@@ -163,6 +196,16 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps,
                                     onChange={(_,v) => this.setState({
                                         idLocal: v
                                     })}/>
+                    <div className="field--margin">
+                        <Select placeholder="Seleccione clasificación" 
+                                    elements={classes} 
+                                    value={"-1"}
+                                    onChange={(v) => { 
+                                        this.setState({
+                                            selectedClass: parseInt(v)
+                                        });
+                                        return true;}}/>
+                    </div>
                     <div className="field--margin">
                         <Radio name="sex" 
                                 checked={this.state.sex == "male"} 
@@ -219,10 +262,11 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps,
                     <p>Cabezas registradas</p>
                     <List deletable={true}
                             editable={false}
-                            headers={["Siniga", "Id local", "Peso"]}
+                            headers={["Siniga", "Id local", "Sexo", "Peso"]}
                             rows={heads}
                             selectable={false}
-                            onDeleteClicked={this.onDeleteHead}/>
+                            onDeleteClicked={this.onDeleteHead}
+                            viewable={false}/>
                 </div>
             </div>
             <div className="row">
@@ -318,6 +362,18 @@ class AlotController extends React.Component
                 <p>Capacidad: {heads}/{maxHeads}</p>
                 <p>Protocolo a utilizar: {protocol}</p>
             </div>
+            <MedicineDisplay medicines={[
+                            {med: {
+                                id:"1",
+                                name:"Micotil",
+                                cost:3025,
+                                presentation:500,
+                                kgApplication:0.0333333,
+                                "isPerHead":true, 
+                                mlApplication: 400}, kg:500}
+                            ]}
+                            protocolName="XD"
+                            />
             {this.state.showModal?
                 <Modal data={this.modalData}/>
             :null}

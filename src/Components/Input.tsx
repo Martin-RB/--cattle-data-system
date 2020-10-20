@@ -75,10 +75,10 @@ export class MaterialInput extends Input{
 
     constructor(props: IInputProps){
         super(props);
-        MaterialInput.matInputCounter++;
     }
 
     render(): JSX.Element{
+        MaterialInput.matInputCounter++;
         return <div className="input-field">
             <input 
                 id={this.props.id? this.props.id : "lbled_" + MaterialInput.matInputCounter.toString()} 
