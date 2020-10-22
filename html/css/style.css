@@ -260,5 +260,70 @@ body{
 
 
 /* Home */
+.columnas-menu-info{
+  display: grid;
+  grid-template-columns: 42% 53%;
+}
+
+@media (max-width: 790px){
+  .columnas-menu-info{
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+}
+
+ul{
+  list-style: none;
+}
+
+#email::after {
+  content: "";
+  display: block;
+  width: 6rem;
+  height: .5rem;
+  background-color: #e5e5e5;
+  margin-top: .3rem;
+}
+
+#administración::before {
+  content: "";
+  display: block;
+  width: 6rem;
+  height: .5rem;
+  background-color: #e5e5e5;
+  margin-top: .3rem;
+}
+
+nav{
+  background-color: #3f51b5;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
