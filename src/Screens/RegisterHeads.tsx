@@ -4,7 +4,7 @@ import { Radio } from "../Components/Radio";
 import { MaterialButton } from "../Components/Button";
 import { Select } from "../Components/Select";
 import { List, ListRow } from "../Components/List";
-import { Alot } from "../Classes/DataStructures/Alot";
+import { IAlot } from "../Classes/DataStructures/Alot";
 import { IOption } from "../Classes/IOption";
 import { useHistory } from "react-router-dom";
 import { Lorry } from "../Classes/DataStructures/Lorry";
@@ -13,17 +13,22 @@ import { toast } from "../App";
 import { Modal, ModalData } from "../Components/Modal";
 import { ProtocolsContent } from "./config/Protocols";
 import { DrugsContent } from "./config/Drugs";
+import { ISexClass } from "../Classes/DataStructures/SexClass";
+import { MedicineDisplay } from "../Components/MedicineDisplay";
+import { IImplant } from "~/Classes/DataStructures/Implant";
 
 interface RegisterHeadsState{
     lorries: Array<Lorry>
-    alots: Array<Alot>
+    alots: Array<IAlot>
     selectedLorry: number
     selectedAlot: number
     siniga: string
     weight: string
     idLocal: string
     sex: "male" | "female" | ""
-    heads: Array<Head>
+    heads: Array<Head>,
+    classes: Array<ISexClass>,
+    selectedClass: number
 }
 interface RegisterHeadsProps{
 
@@ -43,7 +48,9 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps,
             weight: "",
             sex: "",
             heads: [],
-            idLocal: ""
+            idLocal: "",
+            classes: [],
+            selectedClass: -1
         }
     }
 
@@ -57,19 +64,25 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps,
             this.setState({
                 alots: [
                     {id: "1", 
-                    name: "Alot1", 
-                    heads: 4,
-                    maxHeads: 39,
+                    name: "Alot12", 
+                    heads: 1,
+                    arrivalProtocol: 1,
+                    hostCorral: 1,
+                    reimplants: [],
+                    maxHeadNum: 10,
                     protocolName: "XD",
                     sex: "male",
-                    maxWeight: 500,
-                    minWeight: 200}, 
+                    minWeight: 0,
+                    maxWeight: 600},
                     
                     {id: "2", 
                     name: "Alot 2", 
-                    heads: 9,
-                    maxHeads: 10,
-                    protocolName: "XD",
+                    heads: 1,
+                    arrivalProtocol: 1,
+                    hostCorral: 1,
+                    reimplants: [],
+                    maxHeadNum: 22,
+                    protocolName: "DX",
                     sex: "male",
                     minWeight: 0,
                     maxWeight: 200}, 
@@ -78,7 +91,7 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps,
         }, 400)
     }
 
-    onAlotAdded = (alot: Alot) => {
+    onAlotAdded = (alot: IAlot) => {
         let alots = this.state.alots;
         alots.push(alot)
         setTimeout(() => {
@@ -110,7 +123,12 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps,
             let heads = this.state.heads;
             heads.push(head)
             this.setState({
-                heads
+                heads,
+                weight: "",
+                sex: "",
+                siniga: "",
+                idLocal: "",
+                selectedAlot: -1
             })
         }, 500)
     }
@@ -124,14 +142,37 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps,
         })
     }
 
+    onChangeLorry = (id: string) => {
+        this.setState({
+            selectedLorry: parseInt(id),
+            selectedClass: -1,
+            classes: []
+        });
+
+        setTimeout(() => {
+            this.setState({
+                classes: [
+                    {id: "1", cost: 400, name: "Clase 1"},
+                    {id: "2", cost: 400, name: "Clase 1"},
+                    {id: "3", cost: 400, name: "Clase 1"},
+                    {id: "5", cost: 400, name: "Clase 1"}]
+            });
+        })
+    }
+
     render():JSX.Element{
         let lorries = this.state.lorries.map((v,i)=>({key: i.toString(), 
                                                 name: v.name} as IOption));
 
         let heads = this.state.heads.map((v, i) => (
                         {id: i.toString(), columns:
-                            [v.siniga, v.idLocal, v.weight.toString()]
-                        } as ListRow))
+                            [v.siniga, v.idLocal, v.sex[0].toUpperCase(), v.weight.toString()]
+                        } as ListRow));
+
+        let classes = this.state.classes.map((e,i) => ({
+            key: i.toString(),
+            name: e.name
+        } as IOption))
         return (
             <>
             <div className="row">
@@ -141,11 +182,10 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps,
             </div>
             <div className="row">
                 <div className="col s12">
+                    <label>Jaula</label>
                     <Select placeholder="Seleccione jaula" 
                             elements={lorries} 
-                            onChange={(v) => {this.setState({
-                                selectedLorry: parseInt(v)
-                            }); return true}}
+                            onChange={(v) => {this.onChangeLorry(v); return true}}
                             value={this.state.selectedLorry.toString()}/>
                 </div>
             </div>
@@ -163,6 +203,16 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps,
                                     onChange={(_,v) => this.setState({
                                         idLocal: v
                                     })}/>
+                    <div className="field--margin">
+                        <Select placeholder="Seleccione clasificación" 
+                                    elements={classes} 
+                                    value={"-1"}
+                                    onChange={(v) => { 
+                                        this.setState({
+                                            selectedClass: parseInt(v)
+                                        });
+                                        return true;}}/>
+                    </div>
                     <div className="field--margin">
                         <Radio name="sex" 
                                 checked={this.state.sex == "male"} 
@@ -219,10 +269,11 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps,
                     <p>Cabezas registradas</p>
                     <List deletable={true}
                             editable={false}
-                            headers={["Siniga", "Id local", "Peso"]}
+                            headers={["Siniga", "Id local", "Sexo", "Peso"]}
                             rows={heads}
                             selectable={false}
-                            onDeleteClicked={this.onDeleteHead}/>
+                            onDeleteClicked={this.onDeleteHead}
+                            viewable={false}/>
                 </div>
             </div>
             <div className="row">
@@ -242,10 +293,10 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps,
 interface AlotControllerProps{
     sex: "male" | "female" | ""
     weight: number
-    alots: Array<Alot>
+    alots: Array<IAlot>
     alotSelected: number
     onAlotSelected: (id: number) => boolean
-    onNewAlotAdded: (alot: Alot) => void
+    onNewAlotAdded: (alot: IAlot) => void
 }
 
 interface AlotControllerState{
@@ -269,8 +320,8 @@ class AlotController extends React.Component
 
     getSortedAlots = () => {
         let alots = Object.assign(this.props.alots, {});
-        alots = alots.filter(v=>v.heads<v.maxHeads);
-        alots = alots.sort((a:Alot,b:Alot) => {
+        alots = alots.filter(v=>v.heads<v.maxHeadNum);
+        alots = alots.sort((a:IAlot,b:IAlot) => {
             return (a.sex == this.props.sex
                         && a.minWeight <= this.props.weight
                         && a.maxWeight >= this.props.weight)?1:-1;
@@ -294,8 +345,8 @@ class AlotController extends React.Component
         
         let lotes = this.getSortedAlots().map((v,i) => ({key: i.toString(), 
                                                     name: v.name} as IOption));
-        let alot:Alot|undefined = this.props.alots[this.props.alotSelected];
-        let maxHeads = alot?.maxHeads?.toString() || "-";
+        let alot:IAlot|undefined = this.props.alots[this.props.alotSelected];
+        let maxHeads = alot?.maxHeadNum?.toString() || "-";
         let heads = alot?.heads || "-";
         let maxWeight = alot?.maxWeight.toString() || "-";
         let minWeight = alot?.minWeight.toString() || "-";
@@ -318,6 +369,18 @@ class AlotController extends React.Component
                 <p>Capacidad: {heads}/{maxHeads}</p>
                 <p>Protocolo a utilizar: {protocol}</p>
             </div>
+            <MedicineDisplay medicines={[
+                            {med: {
+                                id:"1",
+                                name:"Micotil",
+                                cost:3025,
+                                presentation:500,
+                                kgApplication:0.0333333,
+                                "isPerHead":true, 
+                                mlApplication: 400}, kg:500}
+                            ]}
+                            protocolName="XD"
+                            />
             {this.state.showModal?
                 <Modal data={this.modalData}/>
             :null}

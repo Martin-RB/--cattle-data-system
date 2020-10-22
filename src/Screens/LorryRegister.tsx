@@ -74,10 +74,12 @@ export class LorryRegister extends React.Component<LorryRegisterProps, LorryRegi
     render(): JSX.Element{
         
         return (
+            <>
+            <h2>Registrar jaula</h2>
             <div className="row">
                 <div className="col s12 m10 l10 offset-m1">
                     <div className="row">
-                        <div className="col s6">
+                        <div className="col s12 m6">
                             <DateInput placeholder="fecha" 
                                         id="fecha" 
                                         onChange={(a) => this.setState({
@@ -86,7 +88,7 @@ export class LorryRegister extends React.Component<LorryRegisterProps, LorryRegi
                                         value={this.state.date}
                                         />
                         </div>
-                        <div className="col s6">
+                        <div className="col s12 m6">
                             <TimeInput placeholder="hora" 
                                         id="hora" 
                                         onChange={(a) => this.setState({
@@ -136,7 +138,7 @@ export class LorryRegister extends React.Component<LorryRegisterProps, LorryRegi
                         </div>
                     </div>
                     <div className="row">
-                        <div className="col s6">
+                        <div className="col s12 l6">
                             <SexClassifier 
                                     sex="machos"
                                     onChange={(a) => this.setState({
@@ -144,7 +146,7 @@ export class LorryRegister extends React.Component<LorryRegisterProps, LorryRegi
                                     })}
                                     values={this.state.classMale}/>
                         </div>
-                        <div className="col s6">
+                        <div className="col s12 l6">
                             <SexClassifier 
                                     sex="hembras"
                                     onChange={(a) => this.setState({
@@ -162,6 +164,7 @@ export class LorryRegister extends React.Component<LorryRegisterProps, LorryRegi
                     </div>
                 </div>
             </div>
+            </>
         )
     }
 }
