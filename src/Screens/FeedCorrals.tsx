@@ -17,7 +17,7 @@ export class FeedCorrals extends React.Component<{}, FeedCorralsState>{
         super(props)
 
         this.state = {
-            corrals: [{corral: {id:"1", name: "XD"}, kg: 2101}],
+            corrals: [{corral: {id:"1", name: "XD", headNum:"1"}, kg: 2101}],
             kg:"",
             screenState: new WaitingState(this),
             selectedCorral: -1

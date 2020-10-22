@@ -14,6 +14,7 @@ import { Protocols } from "./config/Protocols";
 import { LorryRegister } from "./LorryRegister";
 import { RegisterHeads } from "./RegisterHeads";
 import { FeedCorrals } from "./FeedCorrals";
+import { Providers } from "./config/Providers";
 
 interface MenuProps{
 
@@ -76,6 +77,7 @@ export class Menu extends React.Component<MenuProps>{
                     <Route path={`${path}/feed-corrals`} render={(a) => historyRefresher(a, <FeedCorrals/>)}/>
                     <Route path={`${path}/drugs`} render={(a) => historyRefresher(a, <Drugs/>)}/>
                     <Route path={`${path}/protocols`} render={(a) => historyRefresher(a, <Protocols/>)}/>
+                    <Route path={`${path}/providers`} render={(a) => historyRefresher(a, <Providers/>)}/>
                 </Switch>
             </div>
         </div>

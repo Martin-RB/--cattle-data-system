@@ -4,7 +4,7 @@ import { Radio } from "../Components/Radio";
 import { MaterialButton } from "../Components/Button";
 import { Select } from "../Components/Select";
 import { List, ListRow } from "../Components/List";
-import { Alot } from "../Classes/DataStructures/Alot";
+import { IAlot } from "../Classes/DataStructures/Alot";
 import { IOption } from "../Classes/IOption";
 import { useHistory } from "react-router-dom";
 import { Lorry } from "../Classes/DataStructures/Lorry";
@@ -15,10 +15,11 @@ import { ProtocolsContent } from "./config/Protocols";
 import { DrugsContent } from "./config/Drugs";
 import { ISexClass } from "../Classes/DataStructures/SexClass";
 import { MedicineDisplay } from "../Components/MedicineDisplay";
+import { IImplant } from "~/Classes/DataStructures/Implant";
 
 interface RegisterHeadsState{
     lorries: Array<Lorry>
-    alots: Array<Alot>
+    alots: Array<IAlot>
     selectedLorry: number
     selectedAlot: number
     siniga: string
@@ -63,19 +64,25 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps,
             this.setState({
                 alots: [
                     {id: "1", 
-                    name: "Alot1", 
-                    heads: 4,
-                    maxHeads: 39,
+                    name: "Alot12", 
+                    heads: 1,
+                    arrivalProtocol: 1,
+                    hostCorral: 1,
+                    reimplants: [],
+                    maxHeadNum: 10,
                     protocolName: "XD",
                     sex: "male",
-                    maxWeight: 500,
-                    minWeight: 200}, 
+                    minWeight: 0,
+                    maxWeight: 600},
                     
                     {id: "2", 
                     name: "Alot 2", 
-                    heads: 9,
-                    maxHeads: 10,
-                    protocolName: "XD",
+                    heads: 1,
+                    arrivalProtocol: 1,
+                    hostCorral: 1,
+                    reimplants: [],
+                    maxHeadNum: 22,
+                    protocolName: "DX",
                     sex: "male",
                     minWeight: 0,
                     maxWeight: 200}, 
@@ -84,7 +91,7 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps,
         }, 400)
     }
 
-    onAlotAdded = (alot: Alot) => {
+    onAlotAdded = (alot: IAlot) => {
         let alots = this.state.alots;
         alots.push(alot)
         setTimeout(() => {
@@ -286,10 +293,10 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps,
 interface AlotControllerProps{
     sex: "male" | "female" | ""
     weight: number
-    alots: Array<Alot>
+    alots: Array<IAlot>
     alotSelected: number
     onAlotSelected: (id: number) => boolean
-    onNewAlotAdded: (alot: Alot) => void
+    onNewAlotAdded: (alot: IAlot) => void
 }
 
 interface AlotControllerState{
@@ -313,8 +320,8 @@ class AlotController extends React.Component
 
     getSortedAlots = () => {
         let alots = Object.assign(this.props.alots, {});
-        alots = alots.filter(v=>v.heads<v.maxHeads);
-        alots = alots.sort((a:Alot,b:Alot) => {
+        alots = alots.filter(v=>v.heads<v.maxHeadNum);
+        alots = alots.sort((a:IAlot,b:IAlot) => {
             return (a.sex == this.props.sex
                         && a.minWeight <= this.props.weight
                         && a.maxWeight >= this.props.weight)?1:-1;
@@ -338,8 +345,8 @@ class AlotController extends React.Component
         
         let lotes = this.getSortedAlots().map((v,i) => ({key: i.toString(), 
                                                     name: v.name} as IOption));
-        let alot:Alot|undefined = this.props.alots[this.props.alotSelected];
-        let maxHeads = alot?.maxHeads?.toString() || "-";
+        let alot:IAlot|undefined = this.props.alots[this.props.alotSelected];
+        let maxHeads = alot?.maxHeadNum?.toString() || "-";
         let heads = alot?.heads || "-";
         let maxWeight = alot?.maxWeight.toString() || "-";
         let minWeight = alot?.minWeight.toString() || "-";
