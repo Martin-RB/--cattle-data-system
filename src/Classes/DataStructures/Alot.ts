@@ -1,10 +1,12 @@
-export interface Alot{
-    id: string,
+import {  IImplant } from "./Implant";
+
+export interface IAlot {
     name: string, 
-    heads: number,
-    maxHeads: number,
-    sex: "male" | "female",
-    protocolName: string
-    maxWeight: number
-    minWeight: number
+    maxHeadNum: number, 
+    sex: ("male" | "female"),
+    maxWeight: number, 
+    minWeight: number, 
+    arrivalProtocol: number, 
+    hostCorral: number, 
+    reimplants: Array<IImplant> 
 }
