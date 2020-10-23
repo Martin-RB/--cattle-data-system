@@ -12,7 +12,8 @@ export interface IInputProps{
     wrong?: boolean;
     width?: string;
     isInline?: boolean;
-    type?: "text" | "number" | "password"
+    type?: "text" | "number" | "password";
+    onClick?: (e:React.MouseEvent<HTMLInputElement>) => void;
 }
 
 interface IInputState{
@@ -44,6 +45,10 @@ export class Input extends React.Component<IInputProps, IInputState>{
         })
     }
 
+    onClick = (e:React.MouseEvent<HTMLInputElement>) => {
+        this.props.onClick?this.props.onClick(e):undefined;
+    }
+
 
     render(): JSX.Element{
         return <>
@@ -58,6 +63,7 @@ export class Input extends React.Component<IInputProps, IInputState>{
                     onChange={this.onChange} 
                     value={this.props.value? this.props.value: ""} 
                     disabled={this.props.locked}
+                    onClick={this.onClick}
                     className={`browser-default input ${this.props.wrong? "" : ""} ${this.props.className || ""}`}/>
                 
                 </>
@@ -69,10 +75,10 @@ export class MaterialInput extends Input{
 
     constructor(props: IInputProps){
         super(props);
-        MaterialInput.matInputCounter++;
     }
 
     render(): JSX.Element{
+        MaterialInput.matInputCounter++;
         return <div className="input-field">
             <input 
                 id={this.props.id? this.props.id : "lbled_" + MaterialInput.matInputCounter.toString()} 
@@ -80,7 +86,7 @@ export class MaterialInput extends Input{
                 onChange={this.onChange} 
                 value={this.props.value? this.props.value: ""} 
                 disabled={this.props.locked}
-                className="validate"/>
+                className={"validate " + this.props.className}/>
             <label 
                 htmlFor={this.props.id? this.props.id : "lbled_" + MaterialInput.matInputCounter.toString()}
             >{this.props.placeholder}</label>

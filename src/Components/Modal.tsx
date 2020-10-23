@@ -75,7 +75,8 @@ export class Modal extends React.Component<IModalProps>{
         return  <div id="modal1" className="modal" ref={this.fatherRef}>
                     <div className="modal-content">
                         <h4>{this.props.data.title}</h4>
-                        <p>{this.props.data.content}</p>
+                        {(typeof this.props.data.content == "string")?
+                            <p>{this.props.data.content}</p>:this.props.data.content}
                     </div>
                     <div className="modal-footer">
                         <a href="#!" className="modal-close waves-effect waves-green btn-flat" onClick={this.onCancel}>Cancelar</a>
