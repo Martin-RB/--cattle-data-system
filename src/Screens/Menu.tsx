@@ -15,6 +15,7 @@ import { LorryRegister } from "./LorryRegister";
 import { RegisterHeads } from "./RegisterHeads";
 import { FeedCorrals } from "./FeedCorrals";
 import { Providers } from "./config/Providers";
+import { Home } from "./Home";
 
 interface MenuProps{
 
@@ -51,7 +52,7 @@ export class Menu extends React.Component<MenuProps>{
 
     render() {
 
-        let {path, url} = MATCH;
+        let {path, url} = MATCH;        
         
         return <div style={{height: "100vh"}}>
 
@@ -62,22 +63,23 @@ export class Menu extends React.Component<MenuProps>{
                 </a>} 
             onLogout={this.onLogout}/>
 
+
         <div className="menu--container topnaved">
             {/* <div className="menu--side">
                 <MaterialButton text="Ver información" onClick={() => this.routeTo(SIDE_OPT.info)}/>
             </div> */}
-
             <Sidenav user={{email: "martin.riv.ben@hotmail.com", name: "Martín Rivas"}}/>
+            
             
             <div className="sidenaved">
                 <Switch>
-                    <Route path={`${path}/${SIDE_OPT.info}`} render={(a) => historyRefresher(a, <Info/>)}/>
-                    <Route path={`${path}/reg-lorry`} render={(a) => historyRefresher(a, <LorryRegister/>)}/>
+                    <Route path={`${path}/reg-lorry`} component={LorryRegister}/>
                     <Route path={`${path}/work-heads`} render={(a) => historyRefresher(a, <RegisterHeads/>)}/>
                     <Route path={`${path}/feed-corrals`} render={(a) => historyRefresher(a, <FeedCorrals/>)}/>
                     <Route path={`${path}/drugs`} render={(a) => historyRefresher(a, <Drugs/>)}/>
                     <Route path={`${path}/protocols`} render={(a) => historyRefresher(a, <Protocols/>)}/>
                     <Route path={`${path}/providers`} render={(a) => historyRefresher(a, <Providers/>)}/>
+                    <Route component={Home}/>
                 </Switch>
             </div>
         </div>

@@ -22,15 +22,6 @@ export class TopNav extends React.Component<TopNavProps>{
         this.MTodos = this.convertToMappable(this.todoWorks);
     }
 
-    componentDidMount(){
-        let elems = document.querySelectorAll('.dropdown-trigger');
-        console.log(elems);
-        
-        if(elems){
-            let dd = M.Dropdown.init(elems);
-        }
-    }
-
     render(){
         return <>
         <nav className="nav-main">
@@ -40,7 +31,9 @@ export class TopNav extends React.Component<TopNavProps>{
                 </ul>
                 {this.props.logo}
                 <ul className="right">
-                    <li><DropDown content={this.MTodos} text={"Mis tareas"} numIndicator={true} /></li>
+                    <li><DropDown content={this.MTodos} text={"Mis tareas"} numIndicator={true} onClick={(e) => {
+                        
+                    }}/></li>
                     <li><a className="black-text" href="#" id="close-session" onClick={() => this.props.onLogout()}><i className="right material-icons">settings_power</i></a></li>
                 </ul>
             </div>

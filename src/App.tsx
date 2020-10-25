@@ -9,6 +9,7 @@ import {
     RouteComponentProps,
     match,
     Redirect,
+    BrowserRouter,
 } from "react-router-dom";
 import { History } from "history";
 import { Login } from "./Screens/Login";
@@ -30,7 +31,7 @@ export function toast(message: string) {
 }
 
 let view = (
-    <Router>
+    <BrowserRouter>
         <Switch>
             <Route
                 exact
@@ -49,6 +50,6 @@ let view = (
                 }}
             />
         </Switch>
-    </Router>
+    </BrowserRouter>
 );
 render(view, document.getElementById("app"));

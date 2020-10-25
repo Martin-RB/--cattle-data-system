@@ -2,13 +2,23 @@ import React from "react";
 import { IUserInfo } from "~/Classes/UserInfo";
 
 interface ISidenavProps{
-    user: IUserInfo,
+    user: IUserInfo
 }
 
 export class Sidenav extends React.Component<ISidenavProps>{
 
     constructor(props: ISidenavProps){
         super(props);
+    }
+
+    componentDidMount(){
+        let elems = document.querySelectorAll(".sidenav");
+        let collaps = document.querySelector('#side_collapse');
+        
+        if(elems){
+            let dd = M.Sidenav.init(elems);    
+            let ss = M.Collapsible.init(collaps);
+        }
     }
 
     render(): JSX.Element{
@@ -32,7 +42,7 @@ export class Sidenav extends React.Component<ISidenavProps>{
                 </li>
 
                 <li className="no-padding">
-                    <ul className="collapsible collapsible-accordion">
+                    <ul className="collapsible collapsible-accordion" id="side_collapse">
                         <li>
                         <a className="collapsible-header sidenav--collapsible"><i className="material-icons">add</i> Administración</a>
                         <div className="collapsible-body">

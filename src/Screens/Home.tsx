@@ -1,145 +1,169 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<title>Index</title>
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+import React from "react";
+import { DropDown } from "../Components/DropDown";
+import head from "./../../img/head.png";
+import alot from "./../../img/alot.png";
+import { toast } from "../App";
+import { IOption } from "../Classes/IOption";
 
-	<link rel="stylesheet" type="text/css" href="estilos.css">
-	    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+export interface HomeProps{
 
-</head>
-<body>
+}
 
-	<!-- Nav -->
-	<div class="navbar-fixed">
-        <nav>
-            <div class="nav-wrapper deep-purple darken-2">
-                <!-- Logo -->
-                <a href="#"><img src="logo.png" class="brand-logo" width="25%" height="100%"></a>
+interface HomeState{
+	search: string
+	searchItems: Array<SearchItem>
+}
 
-                <!-- Ícone para abrir no Mobile -->
-                <a href="#" data-target="mobile-navbar" class="sidenav-trigger">
-                    <i class="material-icons">menu</i>
-                </a>
+export class Home extends React.Component<HomeProps, HomeState>{
 
-                <ul id="navbar-items" class="right hide-on-med-and-down">
-                    <li>
-                        <a class="dropdown-trigger" data-target="dropdown-menu" href="#">
-                            5 Tareas<i class="material-icons right">arrow_drop_down</i>
-                        </a>
-                    </li>
-                    <li><a href="#">
-                    	<i class="material-icons right">power_settings_new</i></a>
-                    </li>
-                </ul>
+	constructor(props: HomeProps){
+		super(props);
 
-                <!-- Dropdown -->
-                <ul id="dropdown-menu" class="dropdown-content">
-                    <li><a href="#">Tarea 1</a></li>
-                    <li><a href="#">Tarea 2</a></li>
-                    <li><a href="#">Tarea 3</a></li> 
-                </ul>
-            </div>
-        </nav>
-    </div>
-    <!-- Fin Nav -->
+		this.state = {
+			search: "",
+			searchItems: []
+		}
+	}
 
-    <!-- Menu Mobile -->
-    <ul id="mobile-navbar" class="sidenav">
-        <li><a href="#">Tarea 1</a></li>
-        <li><a href="#">Tarea 2</a></li>
-        <li><a href="#">Tarea 3</a></li> 
-        <li><a href="#">
-         	<i class="material-icons right">power_settings_new</i></a>
-        </li>
-    </ul>
-    <!--Fin Menu Mobile -->
+	onSubmitSearch = () => {
+		toast("Submited " + this.state.search);
+	}
 
-    <div class="columnas-menu-info">
-    	<!--Columna menu -->
-    	<div>
-    		<ul>
-    			<li>Albán Aguilar Campos</li>
-    			<li id="email">albanaguilar1@gmail.com</li>
-    			<li>Inicio</li>
-    			<li>Registro de Jaulas</li>
-    			<li>Trabajar Cabezas</li>
-    			<li>Alimentar Corrales</li>
-    			<li id="administración">Administracion</li>
-    			<ul>
-    				<li>BLALALALALALALLALA</li>
-    				<li>BLALALALALALALLALA</li>
-    				<li>BLALALALALALALLALA</li>
-    				<li>BLALALALALALALLALA</li>
-    			</ul>
-    		</ul>
-    	</div>
-    	<!--FIN Columna menu -->
-    	<!-- Lote-cabeza-busqueda-->
-    	<div>
-    		<!-- Search bar-->
-    		<nav>
-			    <div class="nav-wrapper">
-			      	<form>
-			        	<div class="input-field">
-			          		<input id="search" type="search" required>
-			          		<label class="label-icon" for="search"><i class="material-icons">search </i></label>
-			          		<i class="material-icons">close</i>
-			        	</div>
-			      	</form>
-			    </div>
-			</nav>
-			<!-- Fin Search bar-->
+	onCancelSearch = () => {
+		this.setState({
+			search: ""
+		})
+	}
 
-			<!-- Lote-->
-			<div>
-				<div>
-					<h3>Lote AS32</h3>
-					<i class="material-icons">open_in_full</i>
-					<i class="material-icons">open_in_full</i>
-				</div>
+	onOptionClicked = (type: "head"|"alot", id: string, option: string) => {
+		switch(type){
+			case "alot":
+				if(option == "detail"){
+					alert(`${type} ${option}`)
+				}
+				else if(option == "sell"){
+					alert(`${type} ${option}`)
+				}
+				break;
+			case "head":
+				if(option == "detail"){
+					alert(`${type} ${option}`)
+				}
+				break;
+		}
+	}
+
+	render() : JSX.Element{
+
+
+
+		return (
+		<>
+		<nav className="search-bar">
+		<div className="nav-wrapper">
+		<form onSubmit={(e) => {
+			e.preventDefault();
+			this.onSubmitSearch()
+		}}>
+			<div className="input-field">
+				<input id="search" type="search"
+					required value={this.state.search} onChange={(v)=>
+					this.setState({search: v.target.value})
+				} onKeyUp={(v)=>{
+					console.log(v.keyCode);
+					
+				}}/>
+				<label className="label-icon" htmlFor="search"><i className="material-icons">search</i></label>
+				<i className="material-icons" onClick={this.onCancelSearch}>close</i>
 			</div>
-			<!-- Lote-->
+		</form>
+		</div>
+		</nav>
+			{/* (new Array(10)).fill("").map((_,i) => <div key={i.toString()} className="search-item">
+				<div className="search-item--icon">
+					<img src={head} className="top-nav--logo-img--sizing"/>
+				</div>
+				<div>
+					<span className="search-item--title">54312252</span>
+					<span>(44545)</span>
+				</div>
+				<div className="search-item--options">
+					<div className="search-item--option hide-on-small-only"></div>
+					<div className="search-item--option hide-on-small-only"></div>
+					<div className="search-item--option hide-on-small-only"></div>
+					<div className="search-item--option hide-on-small-only"></div>
 
+					<DropDown className="hide-on-med-and-up" 
+							content={[{key:"123", name: "xd"}]} onClick={
+						(e) => {alert(e)}
+					}/>
+				</div>
+				
+				<div className="search-item--description">
+					<span>OK</span><span>Femenino</span><span>Lote 44</span><span>Corral 20</span>
+				</div>
+			</div>) */}
 
-    	</div>
-    	<!-- Fin Lote-cabeza-busqueda-->
-    </div>
+			{new Array(10).fill("").map((_,i) => this.itemToJSX({
+				id: i.toString(),
+				subtitle: (Math.random() * 1000).toString(),
+				title: (Math.random() * 1000).toString(),
+				type: Math.random() > 0.5?"alot":"head"
+			}))}
 
+			{this.itemToJSX({id:"1", subtitle: "asd",title:"2", type: "head"})}
+		</>
+		)
+	}
 
+	itemToJSX = (item: SearchItem) => {
+		let isH = item.type == "head";
+		let dropdownOptions : Array<IOption> = isH?
+				[{key:"detail", name: ":web_asset:"}]:
+				[{key:"sell", name: ":attach_money:"},{key:"detail", name: ":web_asset:"}];
+		return 	<div key={item.id} className="search-item search-item-grid">
+					<div className="search-item--icon">
+						<img src={isH?head:alot} className="top-nav--logo-img--sizing"/>
+					</div>
+					<div>
+						<span className="search-item--title search-item--title--fontSize">{item.title}</span>
+						<span className="search-item--subtit search-item--subtit--fontSize">({item.subtitle})</span>
+					</div>
+					<div className="search-item--options">
 
+						{isH?
+							// Reemplazar por opciones para cabeza
+							null:
+							// Reemplazar por opciones para lotes
+							<div className="search-item--option hide-on-small-only"
+								onClick={() => this.onOptionClicked(item.type, item.id, "sell")}>
+									<i className="material-icons">attach_money</i>
+							</div>
+						}
+						{/* Opcion generalizada de "Detalles" */}
+						<div className="search-item--option hide-on-small-only"
+							onClick={() => this.onOptionClicked(item.type, item.id, "detail")}>
+								<i className="material-icons">web_asset</i>
+						</div>
 
+						<DropDown className="hide-on-med-and-up" 
+									content={dropdownOptions} 
+									onClick={
+										(e) => {this.onOptionClicked(item.type, item.id, e)}
+									}
+						/>
+					</div>
+					
+					<div className="search-item--description">
+						<span>OK</span><span>Femenino</span><span>Lote 44</span><span>Corral 20</span>
+					</div>
+				</div>
+	}
+}
 
-    <!-- MARTIN ESTOS SON LOS SCRIPTS PARA CONVERTIR
-        LA NAV A SIDENAV EN MOVIL
-
-
-
-    // Navbar
-const elemsDropdown = document.querySelectorAll(".dropdown-trigger");
-const instancesDropdown = M.Dropdown.init(elemsDropdown, {
-    coverTrigger: false
-});
-const elemsSidenav = document.querySelectorAll(".sidenav");
-const instancesSidenav = M.Sidenav.init(elemsSidenav, {
-    edge: "left"
-});
--->
-
-
-
-
-
-
-
-
-
-
-
-
-
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-	<script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
-	<script type="text/javascript" src="script.js"></script>
-</body>
-</html>
+interface SearchItem{
+	type: "head" | "alot"
+	title: string
+	subtitle: string
+	id: string
+}
