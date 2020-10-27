@@ -122,6 +122,46 @@ export function Alots(router: Router, dbConn: Connection, tl: Telemetry) {
         res.send(ans);
         //res.send(alots);
     });
+    // just changed the SELECT STATEMENT
+    router.get("/available", async (req, res) => {
+        let qr = await doQuery(
+            dbConn,
+            `
+            SELECT id_alots FROM alots WHERE isEnabled = 1 AND isClosed = 0;
+        `,
+            []
+        );
+
+        if (qr.error) {
+            tl.reportInternalError(res, qr.error);
+            return;
+        }
+
+        let ids = qr.result;
+        console.log("ids", ids);
+        let alots = new Array<OUT_Alot>();
+        let ans = [];
+        if (ids.length != 0) {
+            for(let i = 0; i < ids.length; i++){
+                let alotResponse = await GetAlots(
+                    dbConn,
+                    ids[0].id_alots
+                    //ids.map((v: any) => v.id_alots)
+                );
+                let responseAlot = alotResponse as Array<OUT_Alot>;
+
+                if (responseAlot.length == undefined) {
+                    let error = alotResponse as { e: any; info: string };
+                    tl.reportInternalError(res, error.e);
+                    return;
+                }
+                //alots = responseAlot;
+                ans.push(responseAlot);
+            }
+        }
+        res.send(ans);
+        //res.send(alots);
+    });
 
     router.get("/:id", async (req, res) => {
         if (!req.params.id) {
