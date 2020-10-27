@@ -6,6 +6,7 @@ import { toast } from "../../App";
 import { IOption } from "../../Classes/IOption";
 import { Radio } from "../../Components/Radio";
 import { Modal, ModalData, ModalExitOptions } from "../../Components/Modal";
+import url from "../ConfigI";
 
 export interface IFieldedProvider{
     id?: string
@@ -352,21 +353,62 @@ class ProvidersSrv{
     }
 
     async get(){
-        return this.data;
+        try {
+            const response = await fetch(url + "/providers", {
+            method: 'GET', 
+            mode: 'cors', 
+            cache: 'no-cache', 
+            }); 
+
+        let data = await response.json()
+        this.data=data
+        return data
+        } catch (error) {
+            return this.data
+        }
     }
 
-    getId(id: string){
-        return this.data.find((d) => d.id == id)
+    async getId(id: string){
+        try {
+            const response = await fetch(url + "/providers/" + id, {
+            method: 'GET', 
+            mode: 'cors', 
+            cache: 'no-cache', 
+            }); 
+
+        let data = await response.json()
+
+        return data
+        } catch (error) {
+            return this.data
+        }
     }
 
     async add(d: IProvider){
-        d.id = this.data.length.toString();
-        this.data.push(d);
+        d.id_user = -1
+        try {
+            fetch(url + "/providers", {
+            method: 'POST', 
+            body: JSON.stringify(d),
+            headers:{
+                'Content-Type': 'application/json'
+              }
+            }); 
+        } catch (error) {
+            console.log(error)
+        }
     }
 
     async remove(id: string){
-        let el = this.data.findIndex((d) => d.id == id);
-        this.data.splice(el, 1);
+        try {
+            const response = await fetch(url + "/providers/" + id, {
+            method: 'DELETE', 
+            mode: 'cors', 
+            }); 
+
+        } catch (error) {
+            console.log(error)
+        }
     }
 
     async edit(id: string, d: IProvider){
@@ -378,8 +420,6 @@ class ProvidersSrv{
         }
     }
 }
-
-
 
 enum Fields{
     NAME="name",
@@ -416,16 +456,7 @@ export class ProvidersContent extends React.Component<IProvidersContentProps>{
         })
         this.props.onChange(v);
     }
-/*
-    private getLockedStatus(headCondition: boolean | undefined, field: Fields): boolean{
-        return headCondition != undefined && 
-                (
-                    !headCondition || 
-                    this.props.lockedFields.find((e) => e == Fields.ALL || e == field) != undefined
-                )
-        
-    }
-    */
+
 
     render(): JSX.Element{
         let el = this.props.value;

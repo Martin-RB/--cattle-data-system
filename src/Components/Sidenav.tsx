@@ -40,10 +40,8 @@ export class Sidenav extends React.Component<ISidenavProps>{
                             <li><a href="/menu/drugs">Medicamentos</a></li>
                             <li><a href="/menu/protocols">Protocolos</a></li>
                             <li><a href="/menu/providers">Proveedores</a></li>
-                            <li><a href="/menu/protocols">Corrales</a></li>
-                            <li><a href="/menu/protocols">Lotes</a></li>
-                            <li><a href="/menu/protocols">Raciones</a></li>
-                            <li><a href="/menu/protocols">Insumos</a></li>
+                            <li><a href="/menu/corrals">Corrales</a></li>
+                            <li><a href="/menu/lots">Lotes</a></li>
                             </ul>
                         </div>
                         </li>

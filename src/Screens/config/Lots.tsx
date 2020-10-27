@@ -1,32 +1,37 @@
 import React from "react";
 import { ElementSample, IState } from "./ElementSample";
 import { Input } from "../../Components/Input";
-import { IMedicine } from "../../Classes/DataStructures/Medicine";
-import { toast } from "./../../App";
-import { IOption } from "./../../Classes/IOption";
-import { Radio } from "./../../Components/Radio";
-import { Modal, ModalData, ModalExitOptions } from "./../../Components/Modal";
+import { IAlot } from "../../Classes/DataStructures/Alot";
+import { IImplant} from "../../Classes/DataStructures/Implant"
+import { toast } from "../../App";
+import { Select } from "../../Components/Select";
+import { IOption } from "../../Classes/IOption";
+import { Radio } from "../../Components/Radio";
+import { Button} from "../../Components/Button";
+import { Modal, ModalData, ModalExitOptions } from "../../Components/Modal";
 import url from "../ConfigI";
 
-export interface IFieldedMedicine{
-    id?: string,
-    name?: string,
-    isPerHead?: boolean,
-    cost?: number,
-    presentation?: number,
-    mlApplication?: number,
-    kgApplication?: number
+export interface IFieldedLot{
+    id?: string;
+    name?: string, 
+    maxHeadNum?: number, 
+    sex?: ("male" | "female"),
+    maxWeight?: number, 
+    minWeight?: number, 
+    arrivalProtocol?: number, 
+    hostCorral?: number, 
+    reimplants?: Array<IImplant> 
 }
 
-interface IDrugsProps{
+interface ILotsProps{
 
 }
 
 // State / props
-interface IDrugsState{
+interface ILotsState{
     fStt: IState;
-    items: Array<IMedicine>;
-    item: IFieldedMedicine;
+    items: Array<IAlot>;
+    item: IFieldedLot;
     wrongFields: Array<Fields>;
     lockedFields: Array<Fields>;
     selectedItem: string;
@@ -35,16 +40,16 @@ interface IDrugsState{
 // Functional interfaces
 interface IEditableState{
     setStt(stt: any): void;
-    getStt(): IDrugsState;
+    getStt(): ILotsState;
 }
 interface ICheckableFields{
     isAllFilled(): boolean;
     setWrongFields(fields: Array<Fields>): void;
 }
 
-export class Drugs extends React.Component<IDrugsProps, IDrugsState> implements IEditableState, ICheckableFields{
+export class Lots extends React.Component<ILotsProps, ILotsState> implements IEditableState, ICheckableFields{
 
-    constructor(props: IDrugsProps){
+    constructor(props: ILotsProps){
         super(props);
 
         this.state = {
@@ -72,18 +77,18 @@ export class Drugs extends React.Component<IDrugsProps, IDrugsState> implements 
     }
 
     async gather(){
-        let srv = DrugsSrv.getInstance();
+        let srv = LotsSrv.getInstance();
         this.onGather(await srv.get());
     }
 
-    onGather = (data: Array<IMedicine>) =>{
+    onGather = (data: Array<IAlot>) =>{
         this.setState({
             fStt: new WaitingState(this),
             items: data
         })
     }
 
-    onContentChange(newValue: IFieldedMedicine){        
+    onContentChange(newValue: IFieldedLot){        
         this.setState({
             item: newValue
         });
@@ -99,13 +104,13 @@ export class Drugs extends React.Component<IDrugsProps, IDrugsState> implements 
     render(): JSX.Element{        
         return <>
             <ElementSample  
-                        title="Medicamentos"
+                        title="Lotes"
                         state={this.state.fStt}
                         showContent={this.state.fStt.showContent()}
                         items={this.fromItemToOption(this.state.items)}
                         selectedItem={this.state.selectedItem}
-                        selectionPlaceholder="Medicamentos">
-                <DrugsContent 
+                        selectionPlaceholder="Lotes">
+                <LotsContent 
                             value={this.state.item} 
                             onChange={this.onContentChange}
                             lockedFields={[]}
@@ -115,7 +120,7 @@ export class Drugs extends React.Component<IDrugsProps, IDrugsState> implements 
         </>
     }
 
-    private fromItemToOption(items: Array<IMedicine>){
+    private fromItemToOption(items: Array<IAlot>){
         let options = new Array<IOption>();
         for (let i = 0; i < items.length; i++) {
             const el = items[i];
@@ -132,6 +137,8 @@ class GatherState implements IState{
         this.onItemSelected = this.onItemSelected.bind(this);
         this.onAccept = this.onAccept.bind(this);
         this.onCancel = this.onCancel.bind(this);
+
+        this.onClick = this.onClick.bind(this);
     }
     onItemAdd(): void {
         toast("Obteniendo datos");
@@ -144,6 +151,9 @@ class GatherState implements IState{
         return false;
     }
     onAccept(): void {
+        toast("Obteniendo datos");
+    }
+    onClick(): void {
         toast("Obteniendo datos");
     }
     onCancel(): void {
@@ -161,6 +171,8 @@ class WaitingState implements IState{
         this.onItemSelected = this.onItemSelected.bind(this);
         this.onAccept = this.onAccept.bind(this);
         this.onCancel = this.onCancel.bind(this);
+
+        this.onClick = this.onClick.bind(this);
     }
 
     onItemAdd(): void {
@@ -169,7 +181,7 @@ class WaitingState implements IState{
         });
     }
     onItemRemove(): void {
-        toast("Seleccione un medicamento a eliminar");
+        toast("Seleccione un lote a eliminar");
     }
     onItemSelected(idx: string): boolean {
         this.context.setStt({
@@ -180,6 +192,9 @@ class WaitingState implements IState{
         return true;
     }
     onAccept(): void {
+        toast("No hay elemento seleccionado")
+    }
+    onClick(): void {
         toast("No hay elemento seleccionado")
     }
     onCancel(): void {
@@ -198,16 +213,18 @@ class AddState implements IState{
         this.onItemSelected = this.onItemSelected.bind(this);
         this.onAccept = this.onAccept.bind(this);
         this.onCancel = this.onCancel.bind(this);
+
+        this.onClick = this.onClick.bind(this);
     }
 
     onItemAdd(): void {        
-        toast("Guarde el medicamento antes de continuar");
+        toast("Guarde el lote antes de continuar");
     }
     onItemRemove(): void {
-        toast("Guarde el medicamento antes de continuar");
+        toast("Guarde el lote antes de continuar");
     }
     onItemSelected(idx: string): boolean {
-        toast("Guarde el medicamento antes de continuar");
+        toast("Guarde el lote antes de continuar");
         return false;
     }
     onAccept(): void {
@@ -219,14 +236,21 @@ class AddState implements IState{
             return;
         }
 
-        DrugsSrv.getInstance().add(stt.item as IMedicine);
+        LotsSrv.getInstance().add(stt.item as IAlot);
 
         this.context.setStt({
             fStt: new WaitingState(this.context),
             item: {}
         });
-        toast("Medicamento guardado con exito");
+        toast("Lote guardado con exito");
     }
+
+    onClick(): void {
+
+
+        toast("Implante guardado con exito");
+    }
+
     onCancel(): void {
         this.context.setStt({
             fStt: new WaitingState(this.context)
@@ -242,11 +266,11 @@ class EditState implements IState{
     constructor(private context: IEditableState & ICheckableFields){};
 
     onItemAdd = () => {
-        toast("Guarde el medicamento antes de continuar");
+        toast("Guarde el lote antes de continuar");
     }
     onItemRemove = () => {
-        DrugsSrv.getInstance().remove(this.context.getStt().item.id!);
-        toast("Medicamento eliminado con exito");
+        LotsSrv.getInstance().remove(this.context.getStt().item.id!);
+        toast("Lote eliminado con exito");
         this.context.setStt({
             item: {},
             selectedItem: "-1",
@@ -254,24 +278,41 @@ class EditState implements IState{
         })
     };
     onItemSelected = (idx: string) => {
-        toast("Guarde el medicamento antes de continuar");
+        toast("Guarde el lote antes de continuar");
         return false;
     };
     onAccept = () => {
         if(!this.context.isAllFilled()){
             toast("Llene todos los campos");
         }
-        DrugsSrv.getInstance().edit(
+        LotsSrv.getInstance().edit(
                                 this.context.getStt().selectedItem, 
-                                this.context.getStt().item as IMedicine);
+                                this.context.getStt().item as IAlot);
 
         this.context.setStt({
             fStt: new WaitingState(this.context),
             selectedItem: "-1",
             item: {}
         })
-        toast("Medicamento editado con exito");
+        toast("Lote editado con exito");
     };
+
+    onClick = () => {
+        if(!this.context.isAllFilled()){
+            toast("Llene todos los campos");
+        }
+        LotsSrv.getInstance().edit(
+                                this.context.getStt().selectedItem, 
+                                this.context.getStt().item as IAlot);
+
+        this.context.setStt({
+            fStt: new WaitingState(this.context),
+            selectedItem: "-1",
+            item: {}
+        })
+        toast("Lote editado con exito");
+    };
+
     onCancel = () => {
         this.context.setStt({
             fStt: new WaitingState(this.context),
@@ -298,12 +339,12 @@ class ViewState implements IState{
         this.context.setStt({
             modalData: {
                 title: "Precaución",
-                content: "El medicamento no se podrá recuperar. ¿desea continuar?",
+                content: "El Lote no se podrá recuperar. ¿desea continuar?",
                 onFinish: (e: ModalExitOptions) => {
                     let newState:any = {};                    
                     if(e == ModalExitOptions.ACCEPT){
-                        DrugsSrv.getInstance().remove(this.context.getStt().item.id!);
-                        toast("Medicamento eliminado con exito");
+                        LotsSrv.getInstance().remove(this.context.getStt().item.id!);
+                        toast("Lote eliminado con exito");
                         newState = {
                             item: {},
                             selectedItem: "-1",
@@ -345,80 +386,78 @@ class ViewState implements IState{
 
 
 
-class DrugsSrv{
-    data = new Array<IMedicine>();
+class LotsSrv{
+    data = new Array<IAlot>();
 
-    private static entity: DrugsSrv | undefined;
+    private static entity: LotsSrv | undefined;
 
     static getInstance(){
         if(this.entity == undefined){
-            this.entity = new DrugsSrv();
+            this.entity = new LotsSrv();
         }
         return this.entity
     }
 
     async get(){
-            try {
+        try {
 
-                const response = await fetch(url + "/medicines", {
-                method: 'GET', 
-                mode: 'cors', 
-                cache: 'no-cache', 
-                }); 
+            const response = await fetch(url + "/alots", {
+            method: 'GET', 
+            mode: 'cors', 
+            cache: 'no-cache', 
+            }); 
 
-            let data = await response.json()
-            this.data=data
-            return data
-            } catch (error) {
-                return this.data
-            }
-            
-    
+        let data = await response.json()
+        this.data=data
+        return data
+        } catch (error) {
+            return this.data
+        }
+        
+
     }
 
     getId(id: string){
         return this.data.find((d) => d.id == id)
     }
 
-    async add(d: IMedicine){
+    async add(d: IAlot){
+       d.id_user = -1
+        let newReimplants :IImplant[] = [
 
+            {id: "2",
+            day: 123, 
+            idProtocol: 1 }
 
-        if(!d.kgApplication )
-            d.kgApplication = 0
-        if(!d.mlApplication )
-            d.mlApplication = 0
-        if(!d.cost )
-            d.cost = 0
-        d.id_user = -1
-            
-        
+        ]
+        d.reimplants = newReimplants
         try {
-            fetch(url + "/medicines", {
+            fetch(url + "/alots", {
             method: 'POST', 
             body: JSON.stringify(d),
             headers:{
                 'Content-Type': 'application/json'
-              }
+            }
             }); 
         } catch (error) {
             console.log(error)
         }
     }
 
-    
-    async remove(id: string){
-        try {
-            const response = await fetch(url + "/medicines/" + id, {
-            method: 'DELETE', 
-            mode: 'cors', 
-            }); 
 
-        } catch (error) {
-            console.log(error)
+        async remove(id: string){
+            try {
+                const response = await fetch(url + "/alots/" + id, {
+                method: 'DELETE', 
+                mode: 'cors', 
+                }); 
+
+            } catch (error) {
+                console.log(error)
+            }
         }
-    }
 
-    async edit(id: string, d: IMedicine){
+    async edit(id: string, d: IAlot){
         for (let i = 0; i < this.data.length; i++) {
             const el = this.data[i];
             if(el.id == id){
@@ -433,27 +472,31 @@ class DrugsSrv{
 
 enum Fields{
     NAME="name",
-    PRESENTATION="presentation",
-    COST="cost",
-    ML_APPLY="mlApplication",
-    KG_APLLY="kgApplication",
-    ALL="",
-    IS_PER_HEAD="isPerHead"
+    MAX_HEAD="maxHeadNum",
+    SEX="sex",
+    MAX_WEIGHT="maxWeight",
+    MIN_WEIGHT="minWeight",
+    ARRIVAL_PROTOCOL="arrivalProtocol",
+    HOST_CORRAL="hostCorral",
+    REIMPLANTS="reimplants",
+    sexType="sexType"
 }
 
-interface IDrugsContentProps{
-    onChange: (newValue: IFieldedMedicine) => void;
-    value: IFieldedMedicine;
+interface ILotsContentProps{
+    onChange: (newValue: IFieldedLot) => void;
+    value: IFieldedLot;
 
     lockedFields: Array<string>;
     badFields: Array<string>;
 }
 
-export class DrugsContent extends React.Component<IDrugsContentProps>{
+export class LotsContent extends React.Component<ILotsContentProps>{
 
     id: string | undefined;
+    sexType : boolean = false
+  
 
-    constructor(props: IDrugsContentProps){
+    constructor(props: ILotsContentProps){
         super(props);
 
         this.id = props.value.id;
@@ -462,9 +505,15 @@ export class DrugsContent extends React.Component<IDrugsContentProps>{
     onChange = (name: string, value: string | boolean) => {
         if(value == "false"){
             value = false
+           
+            this.props.value.sex = "female"
+             this.sexType = false
         }
         else if(value == "true"){
             value = true
+           
+            this.props.value.sex = "male"
+             this.sexType =  true
         }
         
         let v = Object.assign({}, this.props.value, {
@@ -473,87 +522,36 @@ export class DrugsContent extends React.Component<IDrugsContentProps>{
         this.props.onChange(v);
     }
 
-    private getLockedStatus(headCondition: boolean | undefined, field: Fields): boolean{
-        return headCondition != undefined && 
-                (
-                    !headCondition || 
-                    this.props.lockedFields.find((e) => e == Fields.ALL || e == field) != undefined
-                )
-        
-    }
-
     render(): JSX.Element{
         let el = this.props.value;
-        
         return <>
             <div className="row">
                 <div className="col s6">
                     <div className="elcfg--field--margin">
-                        <Input placeholder="Nombre" name={Fields.NAME} value={this.props.value.name} onChange={this.onChange}/>
-                    </div>
-                    <div>
-                        <label>Tipo de medicamento</label>
-                    </div>
-                    <div className="elcfg--field--margin">
-                        <Radio name={Fields.IS_PER_HEAD} value={"true"} checked={el.isPerHead!=undefined? el.isPerHead: false} onChange={this.onChange} text="Por dosis"/>
-                        <div className="left-justify">
-                            <Input 
-                                    placeholder="Presentación" 
-                                    name={Fields.PRESENTATION} 
-                                    value={!this.getLockedStatus(el.isPerHead, name) && el.presentation?.toString() || ""} 
-                                    onChange={this.onChange} 
-                                    className="small-field" 
-                                    locked={this.getLockedStatus(el.isPerHead, name)}/>
-                            <label> dosis</label>
-                            <Input 
-                                    placeholder="Costo" 
-                                    name={Fields.COST} 
-                                    value={!this.getLockedStatus(el.isPerHead, name) && el.cost?.toString() || ""} 
-                                    onChange={this.onChange} 
-                                    className="small-field"
-                                    locked={this.getLockedStatus(el.isPerHead, name)}/>
-                            <label> pesos</label>
+                        <Input placeholder="Nombre del lote" name={Fields.NAME} value={el.name} onChange={this.onChange}/>
+                        <Input placeholder="Numero maximo de cabezas" type="number" name={Fields.MAX_HEAD} value={el.maxHeadNum?.toString() } onChange={this.onChange}/>
+                        <div>
+                        <label>Sexo</label>
                         </div>
-                    </div>
-                    <div className="elcfg--field--margin">
-                        <Radio name={Fields.IS_PER_HEAD} value={"false"} checked={(el.isPerHead!=undefined? !el.isPerHead: false)} onChange={this.onChange} text="Por mililitros"/>
-                        <div className="left-justify">
-                            <Input 
-                                    placeholder="Presentación" 
-                                    name={Fields.PRESENTATION} 
-                                    value={this.getLockedStatus(el.isPerHead, name) && this.props.value.presentation?.toString() || ""} 
-                                    onChange={this.onChange} 
-                                    className="small-field"
-                                    locked={this.getLockedStatus(!el.isPerHead, name)}/>
-                            <label> ml</label>
-                            <Input 
-                                    placeholder="Aplicación" 
-                                    name={Fields.ML_APPLY} 
-                                    value={this.getLockedStatus(el.isPerHead, name) && this.props.value.mlApplication?.toString() || ""} 
-                                    onChange={this.onChange} 
-                                    className="small-field"
-                                    locked={this.getLockedStatus(!el.isPerHead, name)}/>
-                            <label> ml por cada </label>
-                            <Input 
-                                    isInline={true} 
-                                    name={Fields.KG_APLLY} 
-                                    value={this.getLockedStatus(el.isPerHead, name) && this.props.value.kgApplication?.toString() || ""} 
-                                    onChange={this.onChange} 
-                                    className="small-field"
-                                    locked={this.getLockedStatus(!el.isPerHead, name)}/>
-                            <label> kg</label>
-                            <Input placeholder="Costo" 
-                                    name={Fields.COST} 
-                                    value={this.getLockedStatus(el.isPerHead, name) && this.props.value.cost?.toString() || ""} 
-                                    onChange={this.onChange} 
-                                    className="small-field"
-                                    locked={this.getLockedStatus(!el.isPerHead, name)}/>
-                            <label> pesos</label>
+                        <div>
+                            <Radio name={Fields.sexType} value={"true"} checked={this.sexType} onChange={this.onChange} text="Macho"/>
                         </div>
+                        <div>
+                            <Radio name={Fields.sexType} value={"false"} checked={ !this.sexType} onChange={this.onChange} text="Hembra"/>
+                        </div>
+                        
+                        <Input placeholder="Peso minimo admitido" type="number" name={Fields.MIN_WEIGHT} value={el.minWeight?.toString()} onChange={this.onChange}/>
+                        <Input placeholder="Peso maximo admitido" type="number" name={Fields.MAX_WEIGHT} value={el.maxWeight?.toString()} onChange={this.onChange}/>
+                        <Input placeholder="Protocolo de llegada" type="number" name={Fields.ARRIVAL_PROTOCOL} value={el.arrivalProtocol?.toString()} onChange={this.onChange}/>
+                        <Input placeholder="Corral anfitrión" type="number" name={Fields.HOST_CORRAL} value={el.hostCorral?.toString()} onChange={this.onChange}/>
                     </div>
                 </div>
-                
+                <div className="col s6">
+
+                </div>
+
             </div>
         </>
     }
 }
+

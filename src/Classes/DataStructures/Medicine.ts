@@ -2,8 +2,9 @@ export interface IMedicine{
     id?: string,
     name: string,
     isPerHead: boolean,
-    cost: number,
-    presentation: number,
-    mlApplication: number,
+    cost: number
+    presentation: number
+    mlApplication: number 
     kgApplication: number
+    id_user: number
 }

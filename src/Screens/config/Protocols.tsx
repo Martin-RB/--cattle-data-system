@@ -8,6 +8,7 @@ import { IProtocol } from "./../../Classes/DataStructures/Protocol";
 import { toast } from "./../../App";
 import { List, ListRow, ListColInput } from "../../Components/List";
 import { Sumer } from "../../Components/Sumer";
+import url from "../ConfigI";
 
 interface IFieldedProtocol{
     id?: string, 
@@ -270,26 +271,8 @@ class ViewState implements IState{
 }
 
 class MedicinesSrv{
-    data:Array<IMedicine> = [
-        {
-            cost: 500,
-            isPerHead: false,
-            kgApplication: 40,
-            mlApplication: 30,
-            name: "Micotil",
-            presentation: 500,
-            id: "4"
-        },
-        {
-            cost: 430,
-            isPerHead: false,
-            kgApplication: 60,
-            mlApplication: 10,
-            name: "KSKI",
-            presentation: 40,
-            id: "3"
-        }
-    ];
+    data = new Array<IMedicine>();
+
 
     private static entity: MedicinesSrv | undefined;
 
@@ -301,7 +284,22 @@ class MedicinesSrv{
     }
 
     async get(){
-        return this.data;
+        try {
+
+            const response = await fetch(url + "/medicines", {
+            method: 'GET', 
+            mode: 'cors', 
+            cache: 'no-cache', 
+            }); 
+
+        let data = await response.json()
+
+        this.data=data
+        return data
+        } catch (error) {
+            return this.data
+        }
+  
     }
 }
 
@@ -318,7 +316,20 @@ class ProtocolsSrv{
     }
 
     async get(){
-        return this.data;
+        try {
+
+            const response = await fetch(url + "/protocols", {
+            method: 'GET', 
+            mode: 'cors', 
+            cache: 'no-cache', 
+            }); 
+
+        let data = await response.json()
+        this.data=data
+        return data
+        } catch (error) {
+            return this.data
+        }
     }
 
     getId(id: string){
@@ -326,13 +337,44 @@ class ProtocolsSrv{
     }
 
     async add(d: IProtocol){
-        d.id = this.data.length.toString();
-        this.data.push(d);
+        d.id_user = -1
+
+    let newMedecines  = [
+
+        {   id: "23",
+            name: "medicine",
+            isPerHead: true,
+            cost: 12,
+            presentation: 1,
+            mlApplication: 0 ,
+            kgApplication: 0,
+            id_user: -1}
+
+    ]
+    d.medicines = newMedecines
+    try {
+        fetch(url + "/protocols", {
+        method: 'POST', 
+        body: JSON.stringify(d),
+        headers:{
+            'Content-Type': 'application/json'
+        }
+        }); 
+    } catch (error) {
+        console.log(error)
+    }
     }
 
     async remove(id: string){
-        let el = this.data.findIndex((d) => d.id == id);
-        this.data.splice(el, 1);
+        try {
+            const response = await fetch(url + "/protocols/" + id, {
+            method: 'DELETE', 
+            mode: 'cors', 
+            }); 
+
+        } catch (error) {
+            console.log(error)
+        }
     }
 
     async edit(id: string, d: IProtocol){
@@ -440,7 +482,7 @@ export class ProtocolsContent extends React.Component<ProtocolsContentProps, Pro
                         v.name, 
                         v.presentation.toString(), 
                         v.isPerHead? "Por cabeza" : (v.mlApplication / v.kgApplication).toFixed(3),
-                        v.cost.toString()
+                        v.cost == null? "0" : v.cost.toString() 
                     ],
                     isSelected: (props.value.medicines != undefined)?props.value.medicines.find((m) => m.id == v.id) != undefined: false
                 } as ListRow;
