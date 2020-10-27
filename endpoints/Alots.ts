@@ -98,23 +98,29 @@ export function Alots(router: Router, dbConn: Connection, tl: Telemetry) {
         }
 
         let ids = qr.result;
+        console.log("ids", ids);
         let alots = new Array<OUT_Alot>();
+        let ans = [];
         if (ids.length != 0) {
-            let alotResponse = await GetAlots(
-                dbConn,
-                ids.map((v: any) => v.id_alots)
-            );
-            let responseAlot = alotResponse as Array<OUT_Alot>;
+            for(let i = 0; i < ids.length; i++){
+                let alotResponse = await GetAlots(
+                    dbConn,
+                    ids[0].id_alots
+                    //ids.map((v: any) => v.id_alots)
+                );
+                let responseAlot = alotResponse as Array<OUT_Alot>;
 
-            if (responseAlot.length == undefined) {
-                let error = alotResponse as { e: any; info: string };
-                tl.reportInternalError(res, error.e);
-                return;
+                if (responseAlot.length == undefined) {
+                    let error = alotResponse as { e: any; info: string };
+                    tl.reportInternalError(res, error.e);
+                    return;
+                }
+                //alots = responseAlot;
+                ans.push(responseAlot);
             }
-            alots = responseAlot;
         }
-
-        res.send(alots);
+        res.send(ans);
+        //res.send(alots);
     });
 
     router.get("/:id", async (req, res) => {
