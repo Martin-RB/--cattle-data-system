@@ -169,12 +169,13 @@ export function Lorries(router: Router, dbConn: Connection, tl: Telemetry) {
             dbConn,
             `
             INSERT INTO lorries 
-                (plate, id_origins, id_providers, heads, 
+                (id_user,plate, id_origins, id_providers, heads, 
                     arrivalWeight, idStayCorral, arrivalDate,
                     create_datetime, edit_datetime) 
-                VALUES (?,?,?,?,?,?,?,?,?);
+                VALUES (?,?,?,?,?,?,?,?,?,?);
         `,
             [
+                p.id_user,
                 p.plateNum,
                 p.origin,
                 p.provider,
@@ -202,15 +203,15 @@ export function Lorries(router: Router, dbConn: Connection, tl: Telemetry) {
                 values_str += ",";
             }
             const el = allClassfies[i];
-            values_arr.push(idLorry, el.name, el.heads, el.cost, el.sex, date);
-            values_str += "(?,?,?,?,?,?)";
+            values_arr.push(p.id_user,idLorry, el.name, -1, el.cost, el.sex, date);
+            values_str += "(?,?,?,?,?,?,?)";
         }
 
         let classfyQr = await doQuery(
             dbConn,
             `
             INSERT INTO weight_class 
-                (id_lorries, name, heads, cost, sex, create_datetime) VALUES 
+                (id_user,id_lorries, name, heads, cost, sex, create_datetime) VALUES 
                 :values:;
         `.replace(":values:", values_str),
             values_arr
@@ -223,7 +224,7 @@ export function Lorries(router: Router, dbConn: Connection, tl: Telemetry) {
             return;
         }
 
-        res.send();
+        res.send({id: idLorry});
     });
     return router;
 }
