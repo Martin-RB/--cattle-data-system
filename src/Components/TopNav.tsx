@@ -31,9 +31,9 @@ export class TopNav extends React.Component<TopNavProps>{
                 </ul>
                 {this.props.logo}
                 <ul className="right">
-                    <li><DropDown content={this.MTodos} text={"Mis tareas"} numIndicator={true} onClick={(e) => {
+                    {/* <li><DropDown content={this.MTodos} text={"Mis tareas"} numIndicator={true} onClick={(e) => {
                         
-                    }}/></li>
+                    }}/></li> */}
                     <li><a className="black-text" href="#" id="close-session" onClick={() => this.props.onLogout()}><i className="right material-icons">settings_power</i></a></li>
                 </ul>
             </div>

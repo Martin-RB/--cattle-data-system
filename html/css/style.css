@@ -302,6 +302,10 @@ body{
   .search-item--subtit--fontSize{
     font-size: 0.75em!important;
   }
+  .top-nav--logo-a--sizing{
+    height: 100%;
+    width: 200px;
+  }
 }
 
 .search-item--icon{
