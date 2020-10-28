@@ -106,7 +106,7 @@ export function Corrals(router: Router, dbConn: Connection, tl: Telemetry) {
             `INSERT INTO feeds 
                                 (id_user,id_alots , id_rations, id_corrals, kg , date, create_datetime, edit_datetime) VALUES 
                                         (?,?,?,?, ?,?, ?, ?);`,
-            [c.id_user, c.id_alots, c.id_rations, c.id_corrals, c.kg, date, date, date]
+            [-1, -1, -1, c.id_corrals, c.kg, date, date, date]
         );
 
         if (qr.error) {
