@@ -3,6 +3,10 @@ import { Connection } from "mysql";
 import { Telemetry } from "../Common/Telemetry";
 import { doQuery, doEditElement, IQueryResult } from "../Common/AwaitableSQL";
 import { OUT_Corral, IN_Corral, IN_Corral_Flex } from "../Common/DTO/Corral";
+// Feed corrals means:
+// send id_corral, kgs
+// We store that in  
+
 
 export async function GetCorrals(dbConn: Connection, ids: Array<string>) {
     if (ids.length == 0) {
@@ -88,8 +92,39 @@ export function Corrals(router: Router, dbConn: Connection, tl: Telemetry) {
 
         res.send(responseCorr[0]);
     });
+    // place post
+    router.post("/alimentacion", async (req, res) => {
+        console.log("here");
+        // Create a table
+        //let c = req.body as IN_Corral;
+        // handle same day alimentacion with get
+        let c = req.body;
+        let date = new Date().getTime().toString();
+
+        let qr = await doQuery(
+            dbConn,
+            `INSERT INTO feeds 
+                                (id_user,id_alots , id_rations, id_corrals, kg , date, create_datetime, edit_datetime) VALUES 
+                                        (?,?,?,?, ?,?, ?, ?);`,
+            [c.id_user, c.id_alots, c.id_rations, c.id_corrals, c.kg, date, date, date]
+        );
+
+        if (qr.error) {
+            tl.reportInternalError(res, qr.error);
+            return;
+        }
+
+        let insertId = qr.result.insertId;
+
+        res.send({ id: insertId });
+
+    });
+
+
+
 
     router.post("/", async (req, res) => {
+
         let c = req.body as IN_Corral;
         let date = new Date().getTime().toString();
 
