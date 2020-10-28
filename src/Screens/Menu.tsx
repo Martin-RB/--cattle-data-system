@@ -16,6 +16,7 @@ import { RegisterHeads } from "./RegisterHeads";
 import { FeedCorrals } from "./FeedCorrals";
 import { Providers } from "./config/Providers";
 import { Home } from "./Home";
+import { SellAlotRoute } from "./SellAlot/SellAlotRoute";
 
 interface MenuProps{
 
@@ -76,6 +77,7 @@ export class Menu extends React.Component<MenuProps>{
                     <Route path={`${path}/reg-lorry`} component={LorryRegister}/>
                     <Route path={`${path}/work-heads`} render={(a) => historyRefresher(a, <RegisterHeads/>)}/>
                     <Route path={`${path}/feed-corrals`} render={(a) => historyRefresher(a, <FeedCorrals/>)}/>
+                    <Route path={`${path}/sell-alot`} render={(props) => <SellAlotRoute {...props}/>}/>
                     <Route path={`${path}/drugs`} render={(a) => historyRefresher(a, <Drugs/>)}/>
                     <Route path={`${path}/protocols`} render={(a) => historyRefresher(a, <Protocols/>)}/>
                     <Route path={`${path}/providers`} render={(a) => historyRefresher(a, <Providers/>)}/>

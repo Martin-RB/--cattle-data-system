@@ -2,7 +2,7 @@ import React from "react";
 import { DropDown } from "../Components/DropDown";
 import head from "./../../img/head.png";
 import alot from "./../../img/alot.png";
-import { toast } from "../App";
+import { HISTORY, toast } from "../App";
 import { IOption } from "../Classes/IOption";
 
 export interface HomeProps{
@@ -22,7 +22,7 @@ export class Home extends React.Component<HomeProps, HomeState>{
 		this.state = {
 			search: "",
 			searchItems: []
-		}
+		}		
 	}
 
 	onSubmitSearch = () => {
@@ -42,7 +42,8 @@ export class Home extends React.Component<HomeProps, HomeState>{
 					alert(`${type} ${option}`)
 				}
 				else if(option == "sell"){
-					alert(`${type} ${option}`)
+					//alert(`${type} ${option}`)
+					HISTORY.push("/menu/sell-alot", {idAlot: 1})
 				}
 				break;
 			case "head":

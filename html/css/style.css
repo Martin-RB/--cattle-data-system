@@ -141,6 +141,9 @@ body{
 .button--color{
   background-color: var(--color-primary-hard1) !important;
 }
+.button--small{
+  padding: 0px 5px;
+}
 .icon{
   background-color: var(--color-primary-hard1);
   color: white;
@@ -196,6 +199,12 @@ body{
   height: 400px;
   overflow-y: scroll;
   overflow-x: unset;
+}
+.myList--row--color-good{
+  background-color: #79bd7b;
+}
+.myList--row--color-bad{
+  background-color: #e28484;
 }
 /*END Table*/
 
