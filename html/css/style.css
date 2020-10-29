@@ -280,7 +280,26 @@ body{
   border: 1px solid #EEE;
 }
 
+/*Custom table*/
+.c-table--header-row{
+  font-weight: bold;
+}
+.c-table--footer-row{
+  border-top: 1px rgba(120,120,120,0.5) solid;
+  background-color: rgba(219, 219, 219, 0.5);
+}
+.c-table--row{}
 
+.c-table--header-row, .c-table--footer-row, .c-table--row, .row--padding{
+  padding-top: 15px!important;
+  padding-bottom: 15px!important;
+}
+
+.c-table--row:nth-child(odd){
+  background-color: rgba(242,242,242,0.5);
+}
+
+.row--padding{}
 
 /* Home */
 .search-container{
