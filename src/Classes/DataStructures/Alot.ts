@@ -1,7 +1,7 @@
 import {  IImplant } from "./Implant";
 
 export interface IAlot {
-    id: string;
+    id?: string;
     name: string, 
     maxHeadNum: number, 
     sex: ("male" | "female"),

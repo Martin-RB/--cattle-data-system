@@ -10,6 +10,8 @@ import { Radio } from "../../Components/Radio";
 import { Button} from "../../Components/Button";
 import { Modal, ModalData, ModalExitOptions } from "../../Components/Modal";
 import url from "../ConfigI";
+import { ICorral } from "../../Classes/DataStructures/Corral";
+import { IProtocol } from "../../Classes/DataStructures/Protocol";
 
 export interface IFieldedLot{
     id?: string;
@@ -30,6 +32,8 @@ interface ILotsProps{
 // State / props
 interface ILotsState{
     fStt: IState;
+    corrals: Array<ICorral>
+    protocols: Array<IProtocol>
     items: Array<IAlot>;
     item: IFieldedLot;
     wrongFields: Array<Fields>;
@@ -59,7 +63,9 @@ export class Lots extends React.Component<ILotsProps, ILotsState> implements IEd
             items: [],
             item: {},
             selectedItem: "-1",
-            modalData: null
+            modalData: null,
+            corrals: [],
+            protocols: []
         }
 
         this.onContentChange = this.onContentChange.bind(this);
@@ -77,14 +83,25 @@ export class Lots extends React.Component<ILotsProps, ILotsState> implements IEd
     }
 
     async gather(){
-        let srv = LotsSrv.getInstance();
-        this.onGather(await srv.get());
+        let alotSrv = LotsSrv.getInstance();
+        let corralsSrv = CorralsSrv.getInstance();
+        let protocolsSrv = ProtocolsSrv.getInstance()
+        let [alotRes, corralRes, protRes] = await Promise.all([
+            alotSrv.get(),
+            corralsSrv.get(),
+            protocolsSrv.get()
+        ])
+        this.onGather(alotRes, corralRes?corralRes:new Array<ICorral>(), protRes);
     }
 
-    onGather = (data: Array<IAlot>) =>{
+    onGather = (alots: Array<IAlot>, 
+                corrals: Array<ICorral>, 
+                protocols: Array<IProtocol>) =>{
         this.setState({
             fStt: new WaitingState(this),
-            items: data
+            items: alots,
+            corrals,
+            protocols
         })
     }
 
@@ -114,7 +131,11 @@ export class Lots extends React.Component<ILotsProps, ILotsState> implements IEd
                             value={this.state.item} 
                             onChange={this.onContentChange}
                             lockedFields={[]}
-                            badFields={[]}/>
+                            badFields={[]}
+                            corrals={this.state.corrals}
+                            idxCorral={this.state.corrals.findIndex(v=>v.id==this.state.item.hostCorral)}
+                            idxProtocol={this.state.protocols.findIndex(v=>v.id==this.state.item.arrivalProtocol)}
+                            protocols={this.state.protocols}/>
             </ElementSample>
             {this.state.modalData != null? <Modal data={this.state.modalData}/>:null}
         </>
@@ -235,14 +256,17 @@ class AddState implements IState{
             toast("Llene todos los campos");
             return;
         }
+        
 
-        LotsSrv.getInstance().add(stt.item as IAlot);
-
-        this.context.setStt({
-            fStt: new WaitingState(this.context),
-            item: {}
+        LotsSrv.getInstance().add(stt.item as IAlot).then(()=>{
+            
+            this.context.setStt({
+                fStt: new GatherState(this.context),
+                item: {}
+            });
+            toast("Lote guardado con exito");
         });
-        toast("Lote guardado con exito");
+
     }
 
     onClick(): void {
@@ -261,7 +285,7 @@ class AddState implements IState{
     }
 }
 
-class EditState implements IState{
+/* class EditState implements IState{
 
     constructor(private context: IEditableState & ICheckableFields){};
 
@@ -322,7 +346,7 @@ class EditState implements IState{
     };
     showContent = () => true;
     
-}
+} */
 
 class ViewState implements IState{
 
@@ -384,7 +408,61 @@ class ViewState implements IState{
     
 }
 
+class ProtocolsSrv{
+    private static entity: ProtocolsSrv | undefined;
 
+    static getInstance(){
+        if(this.entity == undefined){
+            this.entity = new ProtocolsSrv();
+        }
+        return this.entity
+    }
+
+    async get() : Promise<Array<IProtocol>>{
+        return new Promise<Array<IProtocol>>(async (res, rej) => {
+            try {
+                const response = await fetch(url + "/protocols", {
+                    method: 'GET', 
+                    mode: 'cors', 
+                    cache: 'no-cache', 
+                }); 
+    
+                let data = (await response.json()) as Array<IProtocol>
+                res(data)
+            } catch (error) {
+                console.log(error);
+            }
+        })
+    }
+}
+
+class CorralsSrv{
+    private static entity: CorralsSrv | undefined;
+
+    static getInstance(){
+        if(this.entity == undefined){
+            this.entity = new CorralsSrv();
+        }
+        return this.entity
+    }
+
+    async get(){
+        try {
+
+        const response = await fetch(url + "/corrals", {
+            method: 'GET', 
+            mode: 'cors', 
+            cache: 'no-cache', 
+        }); 
+
+        let data = await response.json()
+        return data as Array<ICorral>
+        } catch (error) {
+            console.log(error);
+            
+        }
+    }
+}
 
 class LotsSrv{
     data = new Array<IAlot>();
@@ -401,14 +479,16 @@ class LotsSrv{
     async get(){
         try {
 
-            const response = await fetch(url + "/alots", {
+        const response = await fetch(url + "/alots", {
             method: 'GET', 
             mode: 'cors', 
             cache: 'no-cache', 
-            }); 
+        }); 
 
         let data = await response.json()
         this.data=data
+        console.log(data);
+        
         return data
         } catch (error) {
             return this.data
@@ -422,6 +502,8 @@ class LotsSrv{
     }
 
     async add(d: IAlot){
+        console.log("asdasd");
+        
        d.id_user = -1
         let newReimplants :IImplant[] = [
 
@@ -432,12 +514,14 @@ class LotsSrv{
         ]
         d.reimplants = newReimplants
         try {
+            console.log("doing");
+            
             fetch(url + "/alots", {
-            method: 'POST', 
-            body: JSON.stringify(d),
-            headers:{
-                'Content-Type': 'application/json'
-            }
+                method: 'POST', 
+                body: JSON.stringify(d),
+                headers:{
+                    'Content-Type': 'application/json'
+                }
             }); 
         } catch (error) {
             console.log(error)
@@ -445,17 +529,17 @@ class LotsSrv{
     }
 
 
-        async remove(id: string){
-            try {
-                const response = await fetch(url + "/alots/" + id, {
-                method: 'DELETE', 
-                mode: 'cors', 
-                }); 
+    async remove(id: string){
+        try {
+            const response = await fetch(url + "/alots/" + id, {
+            method: 'DELETE', 
+            mode: 'cors', 
+            }); 
 
-            } catch (error) {
-                console.log(error)
-            }
+        } catch (error) {
+            console.log(error)
         }
+    }
 
     async edit(id: string, d: IAlot){
         for (let i = 0; i < this.data.length; i++) {
@@ -488,13 +572,18 @@ interface ILotsContentProps{
 
     lockedFields: Array<string>;
     badFields: Array<string>;
+    corrals: Array<ICorral>
+    idxCorral: number
+    protocols: Array<IProtocol>
+    idxProtocol: number
+
 }
 
 export class LotsContent extends React.Component<ILotsContentProps>{
 
     id: string | undefined;
     sexType : boolean = false
-  
+
 
     constructor(props: ILotsContentProps){
         super(props);
@@ -522,7 +611,27 @@ export class LotsContent extends React.Component<ILotsContentProps>{
         this.props.onChange(v);
     }
 
+    onSelectChanged = (name: string, value: string) => {
+        if(name == Fields.HOST_CORRAL){
+            let idCorral = this.props.corrals[parseInt(value)].id;
+            let v = Object.assign({}, this.props.value, {
+                [name]: idCorral
+            })
+            this.props.onChange(v);
+        }
+        else if(name == Fields.ARRIVAL_PROTOCOL){
+            let idCorral = this.props.protocols[parseInt(value)].id;
+            let v = Object.assign({}, this.props.value, {
+                [name]: idCorral
+            })
+            this.props.onChange(v);
+        }
+        return true;
+    }
+
     render(): JSX.Element{
+        console.log(this.props.idxCorral);
+        
         let el = this.props.value;
         return <>
             <div className="row">
@@ -542,8 +651,14 @@ export class LotsContent extends React.Component<ILotsContentProps>{
                         
                         <Input placeholder="Peso minimo admitido" type="number" name={Fields.MIN_WEIGHT} value={el.minWeight?.toString()} onChange={this.onChange}/>
                         <Input placeholder="Peso maximo admitido" type="number" name={Fields.MAX_WEIGHT} value={el.maxWeight?.toString()} onChange={this.onChange}/>
-                        <Input placeholder="Protocolo de llegada" type="number" name={Fields.ARRIVAL_PROTOCOL} value={el.arrivalProtocol?.toString()} onChange={this.onChange}/>
-                        <Input placeholder="Corral anfitrión" type="number" name={Fields.HOST_CORRAL} value={el.hostCorral?.toString()} onChange={this.onChange}/>
+                        <div>
+                        <label>Protocolo de llegada</label>
+                        <Select placeholder="Protocolo de llegada" value={this.props.idxProtocol.toString()} onChange={(v)=>this.onSelectChanged(Fields.ARRIVAL_PROTOCOL, v)}
+                                    elements={this.props.protocols.map((v, i)=>({key: i.toString(), name: v.name})as IOption)}/>
+                        <label>Corral anfitrión</label>
+                        <Select placeholder="Corral anfitrión" value={this.props.idxCorral.toString()} onChange={(v)=>this.onSelectChanged(Fields.HOST_CORRAL, v)}
+                                    elements={this.props.corrals.map((v, i)=>({key: i.toString(), name: v.name})as IOption)}/>
+                        </div>
                     </div>
                 </div>
                 <div className="col s6">
