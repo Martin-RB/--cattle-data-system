@@ -2,7 +2,8 @@ export interface IN_WeightClassfy{
     name: string,
     heads: number
     cost: string,
-    sex: string 
+    sex: string,
+    id_user: number
 }
 
 export interface OUT_WeightClassfy{

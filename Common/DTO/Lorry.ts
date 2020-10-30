@@ -12,7 +12,8 @@ export interface IN_Lorry{
     weight: number 
     arrivalDate: number, 
     femaleClassfies: Array<IN_WeightClassfy>, 
-    maleClassfies: Array<IN_WeightClassfy> 
+    maleClassfies: Array<IN_WeightClassfy>,
+    id_user: number
 }
 
 export interface OUT_Lorry{

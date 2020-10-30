@@ -46,7 +46,7 @@ export async function GetProtocol(dbConn: Connection, ids: Array<string>) {
 
     qrrProtocols.forEach((el: any) => {
         let medicines = new Array<OUT_Medicine>();
-        console.log("info agregar", el);
+        //console.log("info agregar", el);
         if (el.meds_count > 0) {
             let meds_id_arr = el.meds_id.split(",");
             let meds_name_arr = el.meds_name.split(",");
