@@ -45814,7 +45814,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-var url = 'http://localhost:8070/api';
+var url = 'http://52.7.201.184:8070/api';
 var _default = url;
 exports.default = _default;
 },{}],"../src/Screens/config/Drugs.tsx":[function(require,module,exports) {
@@ -156267,7 +156267,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "35739" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "37605" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
