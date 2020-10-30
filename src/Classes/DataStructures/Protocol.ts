@@ -1,7 +1,10 @@
 import { IMedicine } from "./Medicine";
 
 export interface IProtocol{
-    id: string, 
+     
+
+    id? : string,
     name: string, 
     medicines: Array<IMedicine>;
+    id_user: number,
 }

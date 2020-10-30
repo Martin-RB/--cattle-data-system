@@ -1,15 +1,14 @@
 import {  IImplant } from "./Implant";
 
 export interface IAlot {
-    id: string,
+    id?: string;
     name: string, 
     maxHeadNum: number, 
-    heads: number,
     sex: ("male" | "female"),
     maxWeight: number, 
     minWeight: number, 
     arrivalProtocol: number, 
     hostCorral: number, 
-    protocolName: string,
-    reimplants: Array<IImplant> 
+    reimplants: Array<IImplant>
+    id_user: number 
 }
