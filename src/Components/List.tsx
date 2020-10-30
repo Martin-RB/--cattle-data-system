@@ -1,14 +1,16 @@
 import React from "react";
 import { Input } from "./Input";
 import { Checkbox } from "./Checkbox";
+import { Button, MaterialButton } from "./Button";
 
 export interface ListRow{
     id: string
     isSelected?: boolean,
     columns: Array<string | ListColInput>
+    styleClass?:string
 }
 
-export type ListColInput = {inputValue: string, type?: "text" | "number" | "password"};
+export type ListColInput = {inputValue: string, type?: "text" | "number" | "password" | "button"};
 
 interface ListProps{
     rows: Array<ListRow>;
@@ -18,11 +20,12 @@ interface ListProps{
     viewable?: boolean;
     deletable?: boolean;
     onAllSelected?: (isSelected: boolean) => void;
-    onChange?: (id: string, arrIdx: number, value: string) => void;
+    onChange?: (id: string, columnIndex: number, value: string) => void;
     onItemSelected?: (id:string, isSelected: boolean) => void;
     onDeleteClicked?: (id: string) => void;
     onEditClicked?: (id: string) => void;
     onViewClicked?: (id: string) => void;
+    onButtonClicked?: (id: string, columnIndex: number) => void;
 }
 
 interface ListState{}
@@ -60,6 +63,9 @@ export class List extends React.Component<ListProps, ListState>{
     private onView = (id: string) => {
         this.props.onViewClicked?this.props.onViewClicked(id):"";
     }
+    private onButtonClicked = (id: string, columnIndex: number) => {
+        this.props.onButtonClicked?this.props.onButtonClicked(id, columnIndex):"";
+    }
 
     render(){
         return <>
@@ -78,7 +84,7 @@ export class List extends React.Component<ListProps, ListState>{
                 <div className="myList--content">
 
                     {this.props.rows.map((v,i) => 
-                            <div className="myList--row" key={i.toString()}>
+                            <div className={`myList--row ${v.styleClass}`} key={i.toString()}>
                                 {this.props.selectable? <span className="myList--small-item">
                                     <Checkbox 
                                         checked={v.isSelected != undefined && v.isSelected} 
@@ -90,6 +96,11 @@ export class List extends React.Component<ListProps, ListState>{
                                 {v.columns.map((vv, ii) => {
                                     if(typeof vv == "string"){
                                         return <span className="myList--item" key={`${this.props.headers[ii]}_${i}`}>{vv}</span>;
+                                    }
+                                    else if(vv.type == "button"){
+                                        return <div className="myList--item" key={`${this.props.headers[ii]}_${i}`}>
+                                            <MaterialButton className="button--small" text={vv.inputValue} onClick={()=>this.onButtonClicked(v.id, ii)}/>
+                                        </div>
                                     }
                                     else{
                                         return <Input type={vv.type} className="myList--item" key={`${this.props.headers[ii]}_${i}`} value={vv.inputValue} onChange={(_,val) => {this.onItemChanged(v.id, ii, val)}}/>;

@@ -6,4 +6,5 @@ export interface Head{
     idAlot: string
     alotName: string
     weight: number
+    providerName: string
 }

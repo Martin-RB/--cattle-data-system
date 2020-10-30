@@ -141,6 +141,9 @@ body{
 .button--color{
   background-color: var(--color-primary-hard1) !important;
 }
+.button--small{
+  padding: 0px 5px;
+}
 .icon{
   background-color: var(--color-primary-hard1);
   color: white;
@@ -196,6 +199,12 @@ body{
   height: 400px;
   overflow-y: scroll;
   overflow-x: unset;
+}
+.myList--row--color-good{
+  background-color: #79bd7b;
+}
+.myList--row--color-bad{
+  background-color: #e28484;
 }
 /*END Table*/
 
@@ -271,7 +280,26 @@ body{
   border: 1px solid #EEE;
 }
 
+/*Custom table*/
+.c-table--header-row{
+  font-weight: bold;
+}
+.c-table--footer-row{
+  border-top: 1px rgba(120,120,120,0.5) solid;
+  background-color: rgba(219, 219, 219, 0.5);
+}
+.c-table--row{}
 
+.c-table--header-row, .c-table--footer-row, .c-table--row, .row--padding{
+  padding-top: 15px!important;
+  padding-bottom: 15px!important;
+}
+
+.c-table--row:nth-child(odd){
+  background-color: rgba(242,242,242,0.5);
+}
+
+.row--padding{}
 
 /* Home */
 .search-container{
