@@ -53,6 +53,8 @@ interface ICheckableFields{
 
 export class Lots extends React.Component<ILotsProps, ILotsState> implements IEditableState, ICheckableFields{
 
+
+    // TODO: Arreglar los selects para que den datos correctos
     constructor(props: ILotsProps){
         super(props);
 
