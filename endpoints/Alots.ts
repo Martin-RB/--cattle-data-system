@@ -45,9 +45,15 @@ export async function GetAlots(dbConn: Connection, ids: Array<string>) {
                 ? el.im_ids.split(",")
                 : [];
 
-        let implResponse = await GetImplants(dbConn, im_ids);
+        let [implResponse,
+            protResponse,
+            corrResponse] = await Promise.all([GetImplants(dbConn, im_ids),
+                GetProtocol(dbConn, [el.idArrivalProtocol]),
+                GetCorrals(dbConn, [el.id_corrals])]);
+
+        /* let implResponse = await GetImplants(dbConn, im_ids);
         let protResponse = await GetProtocol(dbConn, [el.idArrivalProtocol]);
-        let corrResponse = await GetCorrals(dbConn, [el.id_corrals]);
+        let corrResponse = await GetCorrals(dbConn, [el.id_corrals]); */
         let errors = checkResponseErrors(
             implResponse,
             protResponse,
@@ -99,27 +105,24 @@ export function Alots(router: Router, dbConn: Connection, tl: Telemetry) {
 
         let ids = qr.result;
         console.log("ids", ids);
+        ids = (ids as Array<{id_alots: number}>).map(v=>v.id_alots);
+        
         let alots = new Array<OUT_Alot>();
-        let ans = [];
-        if (ids.length != 0) {
-            for(let i = 0; i < ids.length; i++){
-                let alotResponse = await GetAlots(
-                    dbConn,
-                    ids[0].id_alots
-                    //ids.map((v: any) => v.id_alots)
-                );
-                let responseAlot = alotResponse as Array<OUT_Alot>;
 
-                if (responseAlot.length == undefined) {
-                    let error = alotResponse as { e: any; info: string };
-                    tl.reportInternalError(res, error.e);
-                    return;
-                }
-                //alots = responseAlot;
-                ans.push(responseAlot);
-            }
+        let alotResponse = await GetAlots(
+            dbConn,
+            ids
+            //ids.map((v: any) => v.id_alots)
+        );
+        let responseAlot = alotResponse as Array<OUT_Alot>;
+
+        if (responseAlot.length == undefined) {
+            let error = alotResponse as { e: any; info: string };
+            tl.reportInternalError(res, error.e);
+            return;
         }
-        res.send(ans);
+        
+        res.send(responseAlot);
         //res.send(alots);
     });
     // just changed the SELECT STATEMENT
