@@ -195,15 +195,22 @@ export function Lorries(router: Router, dbConn: Connection, tl: Telemetry) {
 
         let idLorry = qr.result.insertId;
 
-        let allClassfies = p.maleClassfies.concat(p.femaleClassfies);
         let values_str = "";
         let values_arr = [];
-        for (let i = 0; i < allClassfies.length; i++) {
+        for (let i = 0; i < p.maleClassfies.length; i++) {
             if (i != 0) {
                 values_str += ",";
             }
-            const el = allClassfies[i];
-            values_arr.push(-1,idLorry, el.name, -1, el.cost, el.sex, date);
+            const el = p.maleClassfies[i];
+            values_arr.push(-1,idLorry, el.name, -1, el.cost, "male", date);
+            values_str += "(?,?,?,?,?,?,?)";
+        }
+        for (let i = 0; i < p.femaleClassfies.length; i++) {
+            if (i != 0) {
+                values_str += ",";
+            }
+            const el = p.femaleClassfies[i];
+            values_arr.push(-1,idLorry, el.name, -1, el.cost, "female", date);
             values_str += "(?,?,?,?,?,?,?)";
         }
 
