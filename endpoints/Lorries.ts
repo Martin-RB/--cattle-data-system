@@ -175,9 +175,9 @@ export function Lorries(router: Router, dbConn: Connection, tl: Telemetry) {
                 VALUES (?,?,?,?,?,?,?,?,?,?);
         `,
             [
-                p.id_user,
+                -1,
                 p.plateNum,
-                p.origin,
+                -1,
                 p.provider,
                 p.maxHeads,
                 p.weight,
@@ -203,7 +203,7 @@ export function Lorries(router: Router, dbConn: Connection, tl: Telemetry) {
                 values_str += ",";
             }
             const el = allClassfies[i];
-            values_arr.push(p.id_user,idLorry, el.name, -1, el.cost, el.sex, date);
+            values_arr.push(-1,idLorry, el.name, -1, el.cost, el.sex, date);
             values_str += "(?,?,?,?,?,?,?)";
         }
 

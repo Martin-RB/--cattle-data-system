@@ -9,7 +9,6 @@ export interface OUT_Protocol {
 export interface IN_Protocol {
 	name: string;
 	medicines: Array<IN_Medicine>;
-	id_user: number;
 }
 
 export interface IN_Protocol_Flex {

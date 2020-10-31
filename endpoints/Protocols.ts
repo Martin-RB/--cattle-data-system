@@ -141,7 +141,7 @@ export function Protocols(router: Router, dbConn: Connection, tl: Telemetry) {
             `INSERT INTO protocols 
                                     (id_user,name, create_datetime, edit_datetime)
                                     VALUES (?,?, ?, ?);`,
-            [p.id_user, p.name, date.toString(), date.toString()]
+            [-1, p.name, date.toString(), date.toString()]
         );
 
         if (qr.error) {
@@ -164,7 +164,7 @@ export function Protocols(router: Router, dbConn: Connection, tl: Telemetry) {
                 medicines_string += ", ";
             }
             medicines_string += "(?,?,?,?)";
-            medicines_args.push(p.id_user, el.id, idProtocol, date);
+            medicines_args.push(-1, el.id, idProtocol, date);
         });
 
         qr = await doQuery(

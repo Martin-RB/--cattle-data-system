@@ -4,7 +4,6 @@ import { OUT_Provider } from "./Provider";
 import { OUT_Corral } from "./Corral";
 
 export interface IN_Lorry{
-    origin: number, 
     provider: number, 
     entryCorral: number, 
     plateNum: string, 
@@ -13,7 +12,6 @@ export interface IN_Lorry{
     arrivalDate: number, 
     femaleClassfies: Array<IN_WeightClassfy>, 
     maleClassfies: Array<IN_WeightClassfy>,
-    id_user: number
 }
 
 export interface OUT_Lorry{
