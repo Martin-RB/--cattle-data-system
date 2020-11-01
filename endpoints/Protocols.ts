@@ -153,18 +153,13 @@ export function Protocols(router: Router, dbConn: Connection, tl: Telemetry) {
 
         let medicines_string = ``;
         let medicines_args: Array<any> = [];
-        console.log("medicines", p.medicines);
 
         p.medicines.forEach((el, i) => {
-            if (!el.id) {
-                tl.reportInternalError(res, "Medicines no id. Idx = " + i);
-                return;
-            }
             if (i != 0) {
                 medicines_string += ", ";
             }
             medicines_string += "(?,?,?,?)";
-            medicines_args.push(-1, el.id, idProtocol, date);
+            medicines_args.push(-1, el, idProtocol, date);
         });
 
         qr = await doQuery(

@@ -200,7 +200,7 @@ export function Alots(router: Router, dbConn: Connection, tl: Telemetry) {
             VALUES (?,?,?,?,?,?,?,?,?,?);
         `,
             [
-                a.id_user,
+                -1,
                 a.maxHeadNum,
                 a.maxWeight,
                 a.minWeight,
@@ -229,7 +229,7 @@ export function Alots(router: Router, dbConn: Connection, tl: Telemetry) {
                 (id_user,id_alots, id_protocols, day, create_datetime) 
                 VALUES (?,?, ?, ?, ?);
             `,
-                [a.id_user, idAlot, p.idProtocol, p.day, date.toString()]
+                [-1, idAlot, p.idProtocol, p.day, date.toString()]
             );
 
             if (qr.error) {

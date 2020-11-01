@@ -93,7 +93,7 @@ export function Medicines(router: Router, dbConn: Connection, tl: Telemetry) {
                                     (id_user, name, isPerHead, presentation, mlApplication, kgApplication, create_datetime, edit_datetime, actualCost)
                                     VALUES (?,?, ?, ?, ?, ?, ?, ?, ?);`,
             [
-                m.id_user,
+                -1,
                 m.name,
                 m.isPerHead ? 1 : 0,
                 m.presentation?.toString() || 0,
@@ -110,14 +110,13 @@ export function Medicines(router: Router, dbConn: Connection, tl: Telemetry) {
         }
 
         let idMedicine = qr.result.insertId;
-        console.log("datos QR antes ", qr.result);
 
         qr = await doQuery(
             dbConn,
             `INSERT INTO medicine_costs 
                                     (id_user,id_medicines, cost, create_datetime) 
                                     VALUES (?,?, ?, ?);`,
-            [1, idMedicine, m.cost, date]
+            [-1, idMedicine, m.cost, date]
         );
 
         if (qr.error) {
