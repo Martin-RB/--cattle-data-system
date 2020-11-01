@@ -1,5 +1,8 @@
-export interface IProvider {
-    id?: string
+export interface IN_Provider {
+    id: string
     name: string
-    id_user: number
+}
+
+export interface OUT_Provider {
+    name: string
 }

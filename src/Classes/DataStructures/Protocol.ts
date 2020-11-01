@@ -1,10 +1,12 @@
-import { IMedicine } from "./Medicine";
+import { IN_Medicine, OUT_Medicine } from "./Medicine";
 
-export interface IProtocol{
-     
-
-    id? : string,
+export interface IN_Protocol{
+    id : string,
     name: string, 
-    medicines: Array<IMedicine>;
-    id_user: number,
+    medicines: Array<IN_Medicine>;
+}
+
+export interface OUT_Protocol{
+    name: string, 
+    medicines: Array<string>;
 }

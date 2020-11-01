@@ -1,12 +1,12 @@
 import React from "react";
 import { ElementSample, IState } from "./ElementSample";
 import { Input } from "../../Components/Input";
-import { IMedicine } from "../../Classes/DataStructures/Medicine";
 import { toast } from "./../../App";
 import { IOption } from "./../../Classes/IOption";
 import { Radio } from "./../../Components/Radio";
 import { Modal, ModalData, ModalExitOptions } from "./../../Components/Modal";
 import url from "../ConfigI";
+import { IN_Medicine, OUT_Medicine } from "../../Classes/DataStructures/Medicine";
 
 export interface IFieldedMedicine{
     id?: string,
@@ -25,7 +25,7 @@ interface IDrugsProps{
 // State / props
 interface IDrugsState{
     fStt: IState;
-    items: Array<IMedicine>;
+    items: Array<IN_Medicine>;
     item: IFieldedMedicine;
     wrongFields: Array<Fields>;
     lockedFields: Array<Fields>;
@@ -76,7 +76,7 @@ export class Drugs extends React.Component<IDrugsProps, IDrugsState> implements 
         this.onGather(await srv.get());
     }
 
-    onGather = (data: Array<IMedicine>) =>{
+    onGather = (data: Array<IN_Medicine>) =>{
         this.setState({
             fStt: new WaitingState(this),
             items: data
@@ -115,7 +115,7 @@ export class Drugs extends React.Component<IDrugsProps, IDrugsState> implements 
         </>
     }
 
-    private fromItemToOption(items: Array<IMedicine>){
+    private fromItemToOption(items: Array<IN_Medicine>){
         let options = new Array<IOption>();
         for (let i = 0; i < items.length; i++) {
             const el = items[i];
@@ -219,7 +219,7 @@ class AddState implements IState{
             return;
         }
 
-        DrugsSrv.getInstance().add(stt.item as IMedicine);
+        DrugsSrv.getInstance().add(stt.item as OUT_Medicine);
 
         this.context.setStt({
             fStt: new WaitingState(this.context),
@@ -237,7 +237,7 @@ class AddState implements IState{
     }
 }
 
-class EditState implements IState{
+/* class EditState implements IState{
 
     constructor(private context: IEditableState & ICheckableFields){};
 
@@ -281,7 +281,7 @@ class EditState implements IState{
     };
     showContent = () => true;
     
-}
+} */
 
 class ViewState implements IState{
 
@@ -346,7 +346,7 @@ class ViewState implements IState{
 
 
 class DrugsSrv{
-    data = new Array<IMedicine>();
+    data = new Array<IN_Medicine>();
 
     private static entity: DrugsSrv | undefined;
 
@@ -380,7 +380,7 @@ class DrugsSrv{
         return this.data.find((d) => d.id == id)
     }
 
-    async add(d: IMedicine){
+    async add(d: OUT_Medicine){
 
 
         if(!d.kgApplication )
@@ -389,7 +389,6 @@ class DrugsSrv{
             d.mlApplication = 0
         if(!d.cost )
             d.cost = 0
-        d.id_user = -1
             
         
         try {
@@ -418,7 +417,7 @@ class DrugsSrv{
         }
     }
 
-    async edit(id: string, d: IMedicine){
+    async edit(id: string, d: any){
         for (let i = 0; i < this.data.length; i++) {
             const el = this.data[i];
             if(el.id == id){

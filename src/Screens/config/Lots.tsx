@@ -1,7 +1,6 @@
 import React from "react";
 import { ElementSample, IState } from "./ElementSample";
 import { Input } from "../../Components/Input";
-import { IAlot } from "../../Classes/DataStructures/Alot";
 import { IImplant} from "../../Classes/DataStructures/Implant"
 import { toast } from "../../App";
 import { Select } from "../../Components/Select";
@@ -10,8 +9,9 @@ import { Radio } from "../../Components/Radio";
 import { Button} from "../../Components/Button";
 import { Modal, ModalData, ModalExitOptions } from "../../Components/Modal";
 import url from "../ConfigI";
-import { ICorral } from "../../Classes/DataStructures/Corral";
-import { IProtocol } from "../../Classes/DataStructures/Protocol";
+import { IN_Corral } from "../../Classes/DataStructures/Corral";
+import { IN_Protocol } from "../../Classes/DataStructures/Protocol";
+import { IN_Alot, OUT_Alot } from "../../Classes/DataStructures/Alot";
 
 export interface IFieldedLot{
     id?: string;
@@ -32,9 +32,9 @@ interface ILotsProps{
 // State / props
 interface ILotsState{
     fStt: IState;
-    corrals: Array<ICorral>
-    protocols: Array<IProtocol>
-    items: Array<IAlot>;
+    corrals: Array<IN_Corral>
+    protocols: Array<IN_Protocol>
+    items: Array<IN_Alot>;
     item: IFieldedLot;
     wrongFields: Array<Fields>;
     lockedFields: Array<Fields>;
@@ -93,12 +93,12 @@ export class Lots extends React.Component<ILotsProps, ILotsState> implements IEd
             corralsSrv.get(),
             protocolsSrv.get()
         ])
-        this.onGather(alotRes, corralRes?corralRes:new Array<ICorral>(), protRes);
+        this.onGather(alotRes, corralRes?corralRes:new Array<IN_Corral>(), protRes);
     }
 
-    onGather = (alots: Array<IAlot>, 
-                corrals: Array<ICorral>, 
-                protocols: Array<IProtocol>) =>{
+    onGather = (alots: Array<IN_Alot>, 
+                corrals: Array<IN_Corral>, 
+                protocols: Array<IN_Protocol>) =>{
         this.setState({
             fStt: new WaitingState(this),
             items: alots,
@@ -135,15 +135,15 @@ export class Lots extends React.Component<ILotsProps, ILotsState> implements IEd
                             lockedFields={[]}
                             badFields={[]}
                             corrals={this.state.corrals}
-                            idxCorral={this.state.corrals.findIndex(v=>v.id==this.state.item.hostCorral)}
-                            idxProtocol={this.state.protocols.findIndex(v=>v.id==this.state.item.arrivalProtocol)}
+                            idxCorral={this.state.corrals.findIndex(v=>v.id==this.state.item.hostCorral?.toString())}
+                            idxProtocol={this.state.protocols.findIndex(v=>v.id==this.state.item.arrivalProtocol?.toString())}
                             protocols={this.state.protocols}/>
             </ElementSample>
             {this.state.modalData != null? <Modal data={this.state.modalData}/>:null}
         </>
     }
 
-    private fromItemToOption(items: Array<IAlot>){
+    private fromItemToOption(items: Array<IN_Alot>){
         let options = new Array<IOption>();
         for (let i = 0; i < items.length; i++) {
             const el = items[i];
@@ -207,10 +207,16 @@ class WaitingState implements IState{
         toast("Seleccione un lote a eliminar");
     }
     onItemSelected(idx: string): boolean {
+        let item = this.context.getStt().items.find((v) => idx == v.id!.toString() );
+        
         this.context.setStt({
             fStt: new ViewState(this.context),
             selectedItem: idx,
-            item: this.context.getStt().items.find((v) => idx == v.id!.toString() )
+            item: ({
+                ...item,
+                hostCorral: item?.hostCorral.id,
+                arrivalProtocol: item?.arrivalProtocol.id
+            }) as IFieldedLot
         })
         return true;
     }
@@ -260,7 +266,7 @@ class AddState implements IState{
         }
         
 
-        LotsSrv.getInstance().add(stt.item as IAlot).then(()=>{
+        LotsSrv.getInstance().add(stt.item as OUT_Alot).then(()=>{
             
             this.context.setStt({
                 fStt: new GatherState(this.context),
@@ -385,11 +391,17 @@ class ViewState implements IState{
         
     };
     onItemSelected = (idx: string) => {
+        let item = this.context.getStt().items.find((v) => idx == v.id!.toString() );
+        
         this.context.setStt({
             fStt: new ViewState(this.context),
             selectedItem: idx,
-            item: this.context.getStt().items.find((v) => idx == v.id!.toString() )
-        });
+            item: ({
+                ...item,
+                hostCorral: item?.hostCorral.id,
+                arrivalProtocol: item?.arrivalProtocol.id
+            }) as IFieldedLot
+        })
         return true;
     };
     onAccept = () => {
@@ -420,8 +432,8 @@ class ProtocolsSrv{
         return this.entity
     }
 
-    async get() : Promise<Array<IProtocol>>{
-        return new Promise<Array<IProtocol>>(async (res, rej) => {
+    async get() : Promise<Array<IN_Protocol>>{
+        return new Promise<Array<IN_Protocol>>(async (res, rej) => {
             try {
                 const response = await fetch(url + "/protocols", {
                     method: 'GET', 
@@ -429,7 +441,7 @@ class ProtocolsSrv{
                     cache: 'no-cache', 
                 }); 
     
-                let data = (await response.json()) as Array<IProtocol>
+                let data = (await response.json()) as Array<IN_Protocol>
                 res(data)
             } catch (error) {
                 console.log(error);
@@ -458,7 +470,7 @@ class CorralsSrv{
         }); 
 
         let data = await response.json()
-        return data as Array<ICorral>
+        return data as Array<IN_Corral>
         } catch (error) {
             console.log(error);
             
@@ -467,7 +479,7 @@ class CorralsSrv{
 }
 
 class LotsSrv{
-    data = new Array<IAlot>();
+    data = new Array<IN_Alot>();
 
     private static entity: LotsSrv | undefined;
 
@@ -503,20 +515,12 @@ class LotsSrv{
         return this.data.find((d) => d.id == id)
     }
 
-    async add(d: IAlot){
+    async add(d: OUT_Alot){
         console.log("asdasd");
-        
-       d.id_user = -1
-        let newReimplants :IImplant[] = [
-
-            {id: "2",
-            day: 123, 
-            idProtocol: 1 }
-
-        ]
+    
+        let newReimplants :IImplant[] = []
         d.reimplants = newReimplants
         try {
-            console.log("doing");
             
             fetch(url + "/alots", {
                 method: 'POST', 
@@ -543,7 +547,7 @@ class LotsSrv{
         }
     }
 
-    async edit(id: string, d: IAlot){
+/*     async edit(id: string, d: IAlot){
         for (let i = 0; i < this.data.length; i++) {
             const el = this.data[i];
             if(el.id == id){
@@ -551,7 +555,7 @@ class LotsSrv{
                 fetch(url);
             }
         }
-    }
+    } */
 }
 
 
@@ -574,9 +578,9 @@ interface ILotsContentProps{
 
     lockedFields: Array<string>;
     badFields: Array<string>;
-    corrals: Array<ICorral>
+    corrals: Array<IN_Corral>
     idxCorral: number
-    protocols: Array<IProtocol>
+    protocols: Array<IN_Protocol>
     idxProtocol: number
 
 }

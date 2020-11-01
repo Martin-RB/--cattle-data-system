@@ -1,5 +1,12 @@
-export interface ISexClass{
-    id?: string,
+export interface IN_SexClass{
+    id: string,
     name: string,
-    cost: number
+    heads: number
+    cost: string,
+    sex: string,
+}
+
+export interface OUT_SexClass{
+    name: string,
+    cost: string,
 }

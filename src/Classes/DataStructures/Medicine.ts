@@ -1,10 +1,18 @@
-export interface IMedicine{
-    id?: string,
+export interface IN_Medicine{
+    id: string,
     name: string,
     isPerHead: boolean,
     cost: number
     presentation: number
     mlApplication: number 
     kgApplication: number
-    id_user: number
+}
+
+export interface OUT_Medicine{
+    name: string,
+    isPerHead: boolean,
+    cost: number
+    presentation: number
+    mlApplication: number 
+    kgApplication: number
 }

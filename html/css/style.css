@@ -1,4 +1,8 @@
-/* Codigo que no se de que es pero se necesita para no se que */
+/*Materialize fix for list bug with checkboxes*/
+.filled-in{
+  position: relative!important;
+  top: 30px;
+}
 html{
   margin: 0 !important;
   padding: 0 !important;
