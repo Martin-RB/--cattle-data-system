@@ -1,6 +1,10 @@
-export interface ICorral{
-    id?: string
+export interface IN_Corral{
+    id: string
     name: string
     headNum: string
-    id_user: number
+}
+
+export interface OUT_Corral{
+    name: string
+    headNum: string
 }

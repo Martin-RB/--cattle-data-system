@@ -1,12 +1,12 @@
 import React from "react";
 import { ElementSample, IState } from "./ElementSample";
 import { Input } from "../../Components/Input";
-import { ICorral } from "../../Classes/DataStructures/Corral";
 import { toast } from "../../App";
 import { IOption } from "../../Classes/IOption";
 import { Radio } from "../../Components/Radio";
 import { Modal, ModalData, ModalExitOptions } from "../../Components/Modal";
 import url from "../ConfigI";
+import { IN_Corral, OUT_Corral } from "../../Classes/DataStructures/Corral";
 
 export interface IFieldedCorral{
     id?: string
@@ -21,7 +21,7 @@ interface ICorralsProps{
 // State / props
 interface ICorralsState{
     fStt: IState;
-    items: Array<ICorral>;
+    items: Array<IN_Corral>;
     item: IFieldedCorral;
     wrongFields: Array<Fields>;
     lockedFields: Array<Fields>;
@@ -72,7 +72,7 @@ export class Corrals extends React.Component<ICorralsProps, ICorralsState> imple
         this.onGather(await srv.get());
     }
 
-    onGather = (data: Array<ICorral>) =>{
+    onGather = (data: Array<IN_Corral>) =>{
         this.setState({
             fStt: new WaitingState(this),
             items: data
@@ -111,7 +111,7 @@ export class Corrals extends React.Component<ICorralsProps, ICorralsState> imple
         </>
     }
 
-    private fromItemToOption(items: Array<ICorral>){
+    private fromItemToOption(items: Array<IN_Corral>){
         let options = new Array<IOption>();
         for (let i = 0; i < items.length; i++) {
             const el = items[i];
@@ -215,7 +215,7 @@ class AddState implements IState{
             return;
         }
 
-        CorralsSrv.getInstance().add(stt.item as ICorral);
+        CorralsSrv.getInstance().add(stt.item as OUT_Corral);
 
         this.context.setStt({
             fStt: new WaitingState(this.context),
@@ -233,7 +233,7 @@ class AddState implements IState{
     }
 }
 
-class EditState implements IState{
+/* class EditState implements IState{
 
     constructor(private context: IEditableState & ICheckableFields){};
 
@@ -259,7 +259,7 @@ class EditState implements IState{
         }
         CorralsSrv.getInstance().edit(
                                 this.context.getStt().selectedItem, 
-                                this.context.getStt().item as ICorral);
+                                this.context.getStt().item as OUT_Corral);
 
         this.context.setStt({
             fStt: new WaitingState(this.context),
@@ -277,7 +277,7 @@ class EditState implements IState{
     };
     showContent = () => true;
     
-}
+} */
 
 class ViewState implements IState{
 
@@ -342,7 +342,7 @@ class ViewState implements IState{
 
 
 class CorralsSrv{
-    data = new Array<ICorral>();
+    data = new Array<IN_Corral>();
 
     private static entity: CorralsSrv | undefined;
 
@@ -376,9 +376,7 @@ class CorralsSrv{
         return this.data.find((d) => d.id == id)
     }
 
-async add(d: ICorral){
-
-    d.id_user = -1
+async add(d: OUT_Corral){
         
     try {
         fetch(url + "/corrals", {
@@ -403,16 +401,6 @@ async remove(id: string){
 
     } catch (error) {
         console.log(error)
-    }
-}
-
-async edit(id: string, d: ICorral){
-    for (let i = 0; i < this.data.length; i++) {
-        const el = this.data[i];
-        if(el.id == id){
-            this.data[i] = d;
-            fetch(url);
-        }
     }
 }
 }

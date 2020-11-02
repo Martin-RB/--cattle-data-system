@@ -1,19 +1,19 @@
 import React from "react";
 import { IState, ElementSample } from "./ElementSample";
-import { IMedicine } from "./../../Classes/DataStructures/Medicine";
 import { Input } from "./../../Components/Input";
 import { ModalData, Modal, ModalExitOptions } from "./../../Components/Modal";
 import { IOption } from "./../../Classes/IOption";
-import { IProtocol } from "./../../Classes/DataStructures/Protocol";
 import { toast } from "./../../App";
 import { List, ListRow, ListColInput } from "../../Components/List";
 import { Sumer } from "../../Components/Sumer";
 import url from "../ConfigI";
+import { IN_Protocol, OUT_Protocol } from "../../Classes/DataStructures/Protocol";
+import { IN_Medicine } from "../../Classes/DataStructures/Medicine";
 
 interface IFieldedProtocol{
     id?: string, 
     name?: string, 
-    medicines?: Array<IMedicine>;
+    medicines?: Array<string>;
 }
 
 interface IProtocolsProps{
@@ -21,7 +21,7 @@ interface IProtocolsProps{
 
 interface IProtocolsState{
     fStt: IState;
-    items: Array<IProtocol>;
+    items: Array<IN_Protocol>;
     item: IFieldedProtocol;
     wrongFields: Array<Fields>;
     lockedFields: Array<Fields>;
@@ -41,7 +41,7 @@ interface ICheckableFields{
 
 export class Protocols extends React.Component<IProtocolsProps, IProtocolsState> implements IEditableState, ICheckableFields{
 
-    medicines: Array<IMedicine>;
+    medicines: Array<IN_Medicine>;
 
     constructor(props: IProtocolsProps){
         super(props);
@@ -89,7 +89,7 @@ export class Protocols extends React.Component<IProtocolsProps, IProtocolsState>
         this.onGather(await srv.get(), await MedicinesSrv.getInstance().get());
     }
 
-    onGather = (data: Array<IProtocol>, meds: Array<IMedicine>) =>{
+    onGather = (data: Array<IN_Protocol>, meds: Array<IN_Medicine>) =>{
         this.medicines = meds;
         this.setState({
             fStt: new WaitingState(this),
@@ -116,7 +116,7 @@ export class Protocols extends React.Component<IProtocolsProps, IProtocolsState>
                 </ElementSample>
                 </>
     }
-    private fromItemToOption(items: Array<IProtocol>){
+    private fromItemToOption(items: Array<IN_Protocol>){
         let options = new Array<IOption>();
         for (let i = 0; i < items.length; i++) {
             const el = items[i];
@@ -159,10 +159,14 @@ class WaitingState implements IState{
         toast("Seleccione un medicamento a eliminar");
     }
     onItemSelected = (idx: string) => {
+        let item = this.context.getStt().items.find((v) => idx == v.id!.toString());
         this.context.setStt({
             fStt: new ViewState(this.context),
             selectedItem: idx,
-            item: this.context.getStt().items.find((v) => idx == v.id!.toString() )
+            item: ({
+                ...item,
+                medicines: item?.medicines.map(v=>v.id)
+            }) as IFieldedProtocol
         })
         return true;
     }
@@ -197,7 +201,7 @@ class AddState implements IState{
             return;
         }
 
-        ProtocolsSrv.getInstance().add(stt.item as IProtocol);
+        ProtocolsSrv.getInstance().add(stt.item as OUT_Protocol);
 
         this.context.setStt({
             fStt: new WaitingState(this.context),
@@ -227,7 +231,7 @@ class ViewState implements IState{
         this.context.setStt({
             modalData: {
                 title: "Precaución",
-                content: "El medicamento no se podrá recuperar. ¿desea continuar?",
+                content: "El protocolo no se podrá recuperar. ¿desea continuar?",
                 onFinish: (e: ModalExitOptions) => {
                     let newState:any = {};                    
                     if(e == ModalExitOptions.ACCEPT){
@@ -246,10 +250,14 @@ class ViewState implements IState{
         })
     }
     onItemSelected = (idx: string) => {
+        let item = this.context.getStt().items.find((v) => idx == v.id!.toString());
         this.context.setStt({
             fStt: new ViewState(this.context),
             selectedItem: idx,
-            item: this.context.getStt().items.find((v) => idx == v.id!.toString() )
+            item: ({
+                ...item,
+                medicines: item?.medicines.map(v=>v.id)
+            }) as IFieldedProtocol
         })
         return true;
     }
@@ -271,7 +279,7 @@ class ViewState implements IState{
 }
 
 class MedicinesSrv{
-    data = new Array<IMedicine>();
+    data = new Array<IN_Medicine>();
 
 
     private static entity: MedicinesSrv | undefined;
@@ -304,7 +312,7 @@ class MedicinesSrv{
 }
 
 class ProtocolsSrv{
-    data = new Array<IProtocol>();
+    data = new Array<IN_Protocol>();
 
     private static entity: ProtocolsSrv | undefined;
 
@@ -336,22 +344,8 @@ class ProtocolsSrv{
         return this.data.find((d) => d.id == id)
     }
 
-    async add(d: IProtocol){
-        d.id_user = -1
+    async add(d: OUT_Protocol){
 
-    let newMedecines  = [
-
-        {   id: "23",
-            name: "medicine",
-            isPerHead: true,
-            cost: 12,
-            presentation: 1,
-            mlApplication: 0 ,
-            kgApplication: 0,
-            id_user: -1}
-
-    ]
-    d.medicines = newMedecines
     try {
         fetch(url + "/protocols", {
         method: 'POST', 
@@ -376,15 +370,6 @@ class ProtocolsSrv{
             console.log(error)
         }
     }
-
-    async edit(id: string, d: IProtocol){
-        for (let i = 0; i < this.data.length; i++) {
-            const el = this.data[i];
-            if(el.id == id){
-                this.data[i] = d;
-            }
-        }
-    }
 }
 
 
@@ -394,7 +379,7 @@ enum Fields{
 }
 
 interface ProtocolsContentProps{
-    allMeds: Array<IMedicine>;
+    allMeds: Array<IN_Medicine>;
     onChange: (newValue: IFieldedProtocol) => void;
     value: IFieldedProtocol;
 
@@ -451,7 +436,7 @@ export class ProtocolsContent extends React.Component<ProtocolsContentProps, Pro
     }
 
     onAllSelected = (isSelected: boolean) => {
-        let medicines: Array<IMedicine> = isSelected? this.props.allMeds: [];
+        let medicines: Array<string> = isSelected? this.props.allMeds.map(v=>v.id): [];
         let newValue = Object.assign({}, this.props.value, {medicines} as IFieldedProtocol)
         this.props.onChange(newValue);
         this.forceUpdate()
@@ -463,10 +448,10 @@ export class ProtocolsContent extends React.Component<ProtocolsContentProps, Pro
         let meds = newValue.medicines!=undefined?newValue.medicines:[];
         
         if(isSelected){
-            newValue.medicines?.push(this.props.allMeds.find(v=>v.id==id)!)
+            newValue.medicines?.push(id)
         }
         else{
-            newValue.medicines?.slice(meds.findIndex(v=>v.id==id), 1);
+            newValue.medicines?.splice(meds.findIndex(v=>v==id), 1);
         }
         
 
@@ -475,7 +460,11 @@ export class ProtocolsContent extends React.Component<ProtocolsContentProps, Pro
     }
 
     fromMedicineToRows: (props: ProtocolsContentProps) => Array<ListRow> = (props) => {
+        console.log(props.value.medicines);
+        
         let meds = props.allMeds.map((v) => {
+            console.log(v.id);
+            
             return {
                     id: v.id, 
                     columns: [
@@ -484,7 +473,7 @@ export class ProtocolsContent extends React.Component<ProtocolsContentProps, Pro
                         v.isPerHead? "Por cabeza" : (v.mlApplication / v.kgApplication).toFixed(3),
                         v.cost == null? "0" : v.cost.toString() 
                     ],
-                    isSelected: (props.value.medicines != undefined)?props.value.medicines.find((m) => m.id == v.id) != undefined: false
+                    isSelected: (props.value.medicines != undefined)?props.value.medicines.find((m) => m == v.id) != undefined: false
                 } as ListRow;
         })
         return meds;
@@ -544,7 +533,7 @@ export class ProtocolsContent extends React.Component<ProtocolsContentProps, Pro
                                 onItemSelected={this.onItemSelected}/>
                         </div>
                     </div>
-                    <div className="col s6">
+                    <div className="col s6 hide">
                         <div className="elcfg--field--margin">
                             <label>Estimación</label>
                             <Sumer
