@@ -100,7 +100,10 @@ export class LorryRegister extends React.Component<LorryRegisterProps, LorryRegi
         }
         
         this.uploadLorry(fieldCheck).then((res) => {
-            toast("Jaula registrada con exito")
+            if(res && res.status == 200)
+                toast("Jaula registrada con exito")
+            else
+                toast("Hubo un error al registrar jaula. Verifique sus datos.")
         })
 
     }
@@ -281,6 +284,7 @@ export class LorryRegister extends React.Component<LorryRegisterProps, LorryRegi
                 cache: 'no-cache', 
                 body: JSON.stringify(data)
             }); 
+            return response;
         } catch (error) {
             console.log(error);
             
