@@ -30,7 +30,7 @@ export async function GetProtocol(dbConn: Connection, ids: Array<string>) {
                                             LEFT JOIN medicine_protocol mp ON p.id_protocols = mp.id_protocols 
                                             LEFT JOIN medicines m ON mp.id_medicines = m.id_medicines 
                                             WHERE p.id_protocols IN (?) AND 
-                                                    mp.create_datetime is null OR p.edit_datetime >= mp.create_datetime 
+                                                    (mp.create_datetime is null OR p.edit_datetime >= mp.create_datetime) 
                                             GROUP BY p.id_protocols;`,
         [ids]
     );

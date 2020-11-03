@@ -144,6 +144,41 @@ export function Lorries(router: Router, dbConn: Connection, tl: Telemetry) {
         res.send(lorries);
     });
 
+    router.get("/notWorked", async (req, res) => {
+        let qr = await doQuery(
+            dbConn,
+            `
+            SELECT id_lorries FROM lorries
+            WHERE isWorked = 0;
+        `,
+            []
+        );
+        if (qr.error) {
+            tl.reportInternalError(res, qr.error);
+            return;
+        }
+
+        let ids = qr.result;
+
+        let lorries = new Array<OUT_Lorry>();
+        if (ids.length != 0) {
+            let lorriesResponse = await GetLorries(
+                dbConn,
+                ids.map((v: any) => v.id_lorries)
+            );
+            let responseLorries = lorriesResponse as Array<OUT_Lorry>;
+
+            if (responseLorries.length == undefined) {
+                let error = lorriesResponse as { e: any; info: string };
+                tl.reportInternalError(res, error.e);
+                return;
+            }
+            lorries = responseLorries;
+        }
+
+        res.send(lorries);
+    });
+
     router.get("/:id", async (req, res) => {
         if (!req.params.id) {
             tl.reportInternalError(res, "NO ID");
