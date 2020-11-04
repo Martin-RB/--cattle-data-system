@@ -1,5 +1,5 @@
-export interface Head{
-    id?: string,
+export interface IN_Head{
+    id: string,
     siniga: string,
     idLocal: string,
     sex: "male" | "female",
@@ -7,4 +7,13 @@ export interface Head{
     alotName: string
     weight: number
     providerName: string
+}
+
+export interface OUT_Head{
+    siniga: string,
+    idLocal: string,
+    sex: "male" | "female",
+    idAlot: string
+    sexClass: string
+    weight: number
 }

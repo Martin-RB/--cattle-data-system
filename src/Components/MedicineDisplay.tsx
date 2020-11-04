@@ -1,12 +1,12 @@
 import React from "react";
 import { MaterialButton } from "./Button";
-import { IMedicine } from "../Classes/DataStructures/Medicine";
+import { IN_Medicine } from "../Classes/DataStructures/Medicine";
 import { Modal, ModalData } from "./Modal";
 import { List, ListRow } from "./List";
 
 export interface  DisplayableMedicine{
     kg?: number
-    med: IMedicine
+    med: IN_Medicine
 }
 
 export interface MedicineDisplayProps{

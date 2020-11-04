@@ -5,13 +5,15 @@ import { IN_Protocol } from "./Protocol";
 export interface IN_Alot {
     id: string;
     name: string, 
-    maxHeadNum: number, 
     sex: ("male" | "female"),
-    maxWeight: number, 
-    minWeight: number, 
+    headNum: number,
+    maxHeadNum: number, 
+    reimplants: Array<IImplant>
     arrivalProtocol: IN_Protocol, 
     hostCorral: IN_Corral, 
-    reimplants: Array<IImplant>
+    
+    maxWeight: number, 
+    minWeight: number, 
 }
 
 export interface OUT_Alot {
