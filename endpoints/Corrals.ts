@@ -139,14 +139,21 @@ export function Corrals(router: Router, dbConn: Connection, tl: Telemetry) {
                 GROUP BY c.id_corrals;`;*/
         // Deleted the elements WHERE isSold = 0 AND isClosed = 1) 
         // and WHERE isWorked = 0 
-        let sql = `select c.id_corrals, c.name, f.*, a.id_alots is not null, l.id_lorries is not null, a.id_alots is not null OR l.id_lorries is not null
+        /*let sql = `select c.id_corrals, c.name, f.*, a.id_alots is not null, l.id_lorries is not null, a.id_alots is not null OR l.id_lorries is not null
                 FROM corrals c 
                     LEFT JOIN (SELECT * FROM alots) a ON c.id_corrals = a.id_corrals 
                     LEFT JOIN (Select * from lorries) l ON l.idStayCorral = c.id_corrals 
                     LEFT JOIN (SELECT * FROM feeds WHERE date >= ? AND date <= ?) f ON c.id_corrals = f.id_corrals 
                 WHERE a.id_alots is not null OR l.id_lorries is not null 
-                GROUP BY c.id_corrals;`;
+                GROUP BY c.id_corrals;`;*/
         let sql_params = [dateMinor.getTime(), dateMajor.getTime()];
+
+        let sql = `SELECT * 
+                FROM feeds f
+                    LEFT JOIN (SELECT * FROM corrals) c ON c.id_corrals = f.id_corrals 
+                WHERE date >= ? AND date <= ?
+                GROUP BY f.id_corrals;`;
+
 
         let qr = await doQuery(dbConn, sql, sql_params)
         if (qr.error) {
