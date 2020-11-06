@@ -188,6 +188,13 @@ body{
   text-align: center;
   /* background-color: darkcyan; */
 }
+
+.myList--small-item-left{
+  display: block;
+  width: 30px;
+  padding: 10px 0px;
+  margin: -30px -50px;
+}
 .myList--small-item--verticalItems{
   height: 100%;
   display: flexbox;

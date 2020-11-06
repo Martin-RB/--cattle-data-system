@@ -14,6 +14,7 @@ import {
 import { History } from "history";
 import { Login } from "./Screens/Login";
 import { Menu } from "./Screens/Menu";
+import { UserAdmin } from "./Screens/UserAdmin";
 import M from "materialize-css";
 
 export var HISTORY: History;
@@ -42,6 +43,11 @@ let view = (
                 exact
                 path="/login"
                 render={(a) => historyRefresher(a, <Login />)}
+            />
+            <Route
+                exact
+                path="/admon"
+                render={(a) => historyRefresher(a, <UserAdmin />)}
             />
             <Route
                 path="/menu"

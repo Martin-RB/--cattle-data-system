@@ -1,7 +1,7 @@
 import React from "react";
 import { ElementSample, IState } from "./ElementSample";
 import { Input } from "../../Components/Input";
-import { IProvider } from "../../Classes/DataStructures/Provider";
+import { IN_Provider , OUT_Provider } from "../../Classes/DataStructures/Provider";
 import { toast } from "../../App";
 import { IOption } from "../../Classes/IOption";
 import { Radio } from "../../Components/Radio";
@@ -20,7 +20,7 @@ interface IProvidersProps{
 // State / props
 interface IProvidersState{
     fStt: IState;
-    items: Array<IProvider>;
+    items: Array<IN_Provider>;
     item: IFieldedProvider;
     wrongFields: Array<Fields>;
     lockedFields: Array<Fields>;
@@ -71,7 +71,7 @@ export class Providers extends React.Component<IProvidersProps, IProvidersState>
         this.onGather(await srv.get());
     }
 
-    onGather = (data: Array<IProvider>) =>{
+    onGather = (data: Array<IN_Provider>) =>{
         this.setState({
             fStt: new WaitingState(this),
             items: data
@@ -110,7 +110,7 @@ export class Providers extends React.Component<IProvidersProps, IProvidersState>
         </>
     }
 
-    private fromItemToOption(items: Array<IProvider>){
+    private fromItemToOption(items: Array<IN_Provider>){
         let options = new Array<IOption>();
         for (let i = 0; i < items.length; i++) {
             const el = items[i];
@@ -214,7 +214,7 @@ class AddState implements IState{
             return;
         }
 
-        ProvidersSrv.getInstance().add(stt.item as IProvider);
+        ProvidersSrv.getInstance().add(stt.item as IN_Provider);
 
         this.context.setStt({
             fStt: new WaitingState(this.context),
@@ -258,7 +258,7 @@ class EditState implements IState{
         }
         ProvidersSrv.getInstance().edit(
                                 this.context.getStt().selectedItem, 
-                                this.context.getStt().item as IProvider);
+                                this.context.getStt().item as IN_Provider);
 
         this.context.setStt({
             fStt: new WaitingState(this.context),
@@ -341,7 +341,7 @@ class ViewState implements IState{
 
 
 class ProvidersSrv{
-    data = new Array<IProvider>();
+    data = new Array<IN_Provider>();
 
     private static entity: ProvidersSrv | undefined;
 
@@ -384,8 +384,7 @@ class ProvidersSrv{
         }
     }
 
-    async add(d: IProvider){
-        d.id_user = -1
+    async add(d: OUT_Provider){
         try {
             fetch(url + "/providers", {
             method: 'POST', 
@@ -411,7 +410,7 @@ class ProvidersSrv{
         }
     }
 
-    async edit(id: string, d: IProvider){
+    async edit(id: string, d: IN_Provider){
         for (let i = 0; i < this.data.length; i++) {
             const el = this.data[i];
             if(el.id == id){
@@ -466,9 +465,7 @@ export class ProvidersContent extends React.Component<IProvidersContentProps>{
                 <div className="col s6">
                     <div className="elcfg--field--margin">
                         <Input placeholder="Nombre del proveedor" name={Fields.NAME} value={this.props.value.name} onChange={this.onChange}/>
-                    </div>
-                    
-                
+                    </div>            
                 </div>
             </div>
         </>

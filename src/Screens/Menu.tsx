@@ -1,5 +1,5 @@
 import React from "react";
-import { Switch, Route, useRouteMatch, Link } from "react-router-dom";
+import { Switch, Route, useRouteMatch, Link, Redirect } from "react-router-dom";
 import { Info } from "./Info";
 import { MATCH, historyRefresher, HISTORY } from "../App";
 import { Login } from "./Login";
@@ -76,6 +76,16 @@ export class Menu extends React.Component<MenuProps>{
             
             <div className="sidenaved">
                 <Switch>
+                    {/*<Route path= "/" render = {() => (
+                        getSession() ? (
+                            <App to ="/" />
+                        ) : (
+                            <Redirect to = "/login"/>
+                        )
+                        )}/>*/}
+
+            
+
                     <Route path={`${path}/reg-lorry`} component={LorryRegister}/>
                     <Route path={`${path}/work-heads`} render={(a) => historyRefresher(a, <RegisterHeads/>)}/>
                     <Route path={`${path}/feed-corrals`} render={(a) => historyRefresher(a, <FeedCorrals/>)}/>
