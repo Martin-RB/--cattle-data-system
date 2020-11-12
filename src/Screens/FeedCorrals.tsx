@@ -2,13 +2,14 @@ import React, { createContext } from "react";
 import { List, ListRow } from "../Components/List";
 import { MaterialInput } from "../Components/Input";
 import { MaterialButton } from "../Components/Button";
-import { CorralFeeding } from "../Classes/DataStructures/CorralFeeding";
 import { toast } from "../App";
+import { IN_Feeds } from "../Classes/DataStructures/Feeds";
+import url from "./ConfigI";
 
 interface FeedCorralsState{
     screenState: ScreenState
     kg: string
-    corrals: Array<CorralFeeding>
+    corrals: Array<IN_Feeds>
     selectedCorral: number
 }
 
@@ -17,14 +18,21 @@ export class FeedCorrals extends React.Component<{}, FeedCorralsState>{
         super(props)
 
         this.state = {
-            corrals: [{corral: {id:"1", name: "XD", headNum:"1"}, kg: 2101}],
+            corrals: [],
             kg:"",
             screenState: new WaitingState(this),
             selectedCorral: -1
         }
     }
+
+    componentDidMount(){
+        this.gatherCorrals();
+    }
     render():JSX.Element{
-        let corrals = this.state.corrals.map((v,i) => ({id: i.toString(), columns: [v.corral.name, v.kg.toFixed(2)]} as ListRow))
+        let corrals = this.state.corrals.map((v,i) => 
+        ({
+            id: i.toString(), 
+            columns: [v.name, v.kg?v.kg.toFixed(2):"-"]} as ListRow))
         return (
             <>
             <h2>Alimentar corrales</h2>
@@ -49,6 +57,28 @@ export class FeedCorrals extends React.Component<{}, FeedCorralsState>{
             </>
         );
     }
+
+    async gatherCorrals(){
+        let data: IN_Feeds[];
+        try {
+            let date = new Date().getTime()
+            const response = await fetch(url + `/corrals/alimentacion/${date}`, {
+                method: 'GET', 
+                mode: 'cors', 
+                cache: 'no-cache', 
+            }); 
+
+            data = await response.json() as IN_Feeds[]
+
+        } catch (error) {
+            console.log(error);
+            data = []
+        }
+
+        this.setState({
+            corrals: data
+        })
+    }
 }
 
 interface ScreenState{
@@ -59,6 +89,22 @@ interface ScreenState{
     getCorralView: () => JSX.Element
 }
 
+class GatherState implements ScreenState{
+    viewCorral: (id: string) => void = () => {
+        toast("Recibiendo datos, por favor espere")
+    };
+    accept: (id: string, kg: string) => void = () => {
+        toast("Recibiendo datos, por favor espere")
+    };
+    cancel: () => void = () => {
+        toast("Recibiendo datos, por favor espere")
+    };;
+    getCorralView: () => JSX.Element = () => {
+        return <p>Recibiendo datos, por favor espere</p>
+    };;
+
+}
+
 class WaitingState implements ScreenState{
     constructor(private ctx:FeedCorrals){}
     
@@ -67,7 +113,7 @@ class WaitingState implements ScreenState{
         let corral = this.ctx.state.corrals[i]
         this.ctx.setState({
             selectedCorral: parseInt(id),
-            kg: corral.kg.toString(),
+            kg: corral.kg?.toString() || "0",
             screenState: new EditingState(this.ctx)
         })
     }
@@ -113,7 +159,7 @@ class EditingState implements ScreenState{
         
         return (
             <div>
-                <p>Corral: {corral.corral.name}</p>
+                <p>Corral: {corral.name}</p>
                 <MaterialInput placeholder="Kg a surtir" onChange={(_,kg) => {this.ctx.setState({kg})}} value={this.ctx.state.kg}/>
                 <MaterialButton className="right" text="Acceptar" onClick={()=>this.ctx.state.screenState.accept(id.toString(), kg)}/>
                 <MaterialButton className="right" text="Cancelar" onClick={()=>this.ctx.state.screenState.cancel()}/>
