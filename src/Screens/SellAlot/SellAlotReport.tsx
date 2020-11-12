@@ -7,30 +7,35 @@ import * as Factory from "../../../node_modules/factory.ts/lib/sync";
 
 
 export interface ReportData{
-    alotName: string
-    corralName: string
+    alotName: string,
+    corralName:string,
     headsSold: number
     headsTotal: number
-    fedKg: number
-    fedCost: number
-    providers: Array<HeadedProvider>
-    priceStand: number
-    priceTotal: number
-    sellTotal: number
+    standPrice: number
+    headsPrice: number
+    feedKg: number
+    feedCost: number
+    providers: Array<{
+        name: string,
+        numHeads: number
+    }>
+    total: number
 }
 
 export type HeadedProvider = {
-    provider: IProvider,
+    providerName: string,
     headNumber: number
 }
 
 export class SellAlotReport extends React.Component<RouteComponentProps>{
     render():JSX.Element{
         let {location, history} = this.props;
-        let report = location.state as ReportData;
+        let report = (location.state as unknown as any).report as ReportData;
+        console.log(report);
+        
 
         //Random data gen
-        let provFactory = Factory.makeFactory<IProvider>({
+        /* let provFactory = Factory.makeFactory<IProvider>({
             name: Factory.each(i=>faker.name.firstName())
         })
         let heaProFac = Factory.makeFactory<HeadedProvider>({
@@ -49,7 +54,7 @@ export class SellAlotReport extends React.Component<RouteComponentProps>{
             priceTotal: Factory.each(i=>faker.random.number(999999)),
             sellTotal: Factory.each(i=>faker.random.number(999999)),
         })
-        report = reportFac.build();
+        report = reportFac.build(); */
         // End random data gen
 
         return (
@@ -77,20 +82,20 @@ export class SellAlotReport extends React.Component<RouteComponentProps>{
                                         <li>Cabezas vendidas: <span>{report.headsSold}</span> / <span>{report.headsTotal}</span></li>
                                     </ul>
                                 </div>
-                                <div className="col s4">${report.fedCost}</div>
+                                <div className="col s4"></div>
                             </div>
                             <div className="row c-table--footer-row">
                                 <div className="col s8">
                                     Precio de pie
                                 </div>
                                 <div className="col s4">
-                                    ${report.priceStand}
+                                    ${report.standPrice}
                                 </div>
                                 <div className="col s8">
                                     Precio final
                                 </div>
                                 <div className="col s4">
-                                    ${report.priceTotal}
+                                    ${report.headsPrice}
                                 </div>
                             </div>
                         </div>
@@ -108,8 +113,8 @@ export class SellAlotReport extends React.Component<RouteComponentProps>{
                                 </div>
                             </div>
                             <div className="row c-table--row">
-                                <div className="col s8"><span>{report.fedKg}</span> kg.</div>
-                                <div className="col s4">${report.fedCost}</div>
+                                <div className="col s8"><span>{report.feedKg}</span> kg.</div>
+                                <div className="col s4">${report.feedCost}</div>
                             </div>
                         </div>
                     </div>
@@ -128,8 +133,8 @@ export class SellAlotReport extends React.Component<RouteComponentProps>{
                             {
                                 report.providers.map((v,i) => 
                                 <div className="row c-table--row" key={i.toString()}>
-                                    <div className="col s8"><span>{v.provider.name}</span></div>
-                                    <div className="col s4">{v.headNumber}</div>
+                                    <div className="col s8"><span>{v.name}</span></div>
+                                    <div className="col s4">{v.numHeads}</div>
                                 </div>)
                             }
                         </div>
@@ -138,7 +143,7 @@ export class SellAlotReport extends React.Component<RouteComponentProps>{
                     <div className="section">
                         <div className="row row--padding grey lighten-1">
                             <div className="col s8">Total</div>
-                            <div className="col s4">${report.sellTotal}</div>
+                            <div className="col s4">${report.total}</div>
                         </div>
                     </div>
                 </div>

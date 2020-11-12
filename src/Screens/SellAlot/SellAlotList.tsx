@@ -9,6 +9,7 @@ import * as faker from "faker";
 import { MaterialInput } from "../../Components/Input";
 import { toast } from "../../App";
 import url from "../ConfigI";
+import { Report } from "../../Classes/DataStructures/Report";
 
 interface SellAlotListProps extends RouteComponentProps{
 
@@ -76,6 +77,8 @@ export class SellAlotList extends React.Component<SellAlotListProps,
 
 
         this.idAlot = (props.location.state as unknown as any).idAlot;
+        console.log(props.location.state);
+        
 
         this.state = {
             modalData: null,
@@ -84,6 +87,10 @@ export class SellAlotList extends React.Component<SellAlotListProps,
             },
             heads: []
         }
+    }
+
+    componentDidMount(){
+        this.gather();
     }
 
     async gather(){
@@ -154,8 +161,8 @@ export class SellAlotList extends React.Component<SellAlotListProps,
         let heads = selHeads.map((v) => ({
             finalWeight: v.weight || 0,
             idHead: v.head.id,
-            priceStand: v.standSellPrice || 0,
-            priceTotal: v.finalSellPrice || 0
+            priceStand: parseFloat(v.standSellPrice || "0"),
+            priceTotal: parseFloat(v.finalSellPrice || "0")
         } as OUT_PricedHead))
 
         let result = await this.uploadHeads(heads);
@@ -165,11 +172,12 @@ export class SellAlotList extends React.Component<SellAlotListProps,
             return;
         }
         
-        let path = this.props.match.url
+        let path = this.props.match.url;
+        let report = await result.json() as Report;
         this.props.history.push({
             pathname:`${path}/report`,
             state: {
-                report: await result.json()
+                report
             }
         })
     }
