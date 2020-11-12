@@ -3,7 +3,7 @@ import { Connection } from "mysql";
 import { Telemetry } from "../Common/Telemetry";
 import { doQuery, doEditElement, IQueryResult } from "../Common/AwaitableSQL";
 import { OUT_Corral, IN_Corral, IN_Corral_Flex } from "../Common/DTO/Corral";
-import { OUT_Feeds } from "../Common/DTO/Feeds";
+import { IN_Feeds, OUT_Feeds } from "../Common/DTO/Feeds";
 // Feed corrals means:
 // send id_corral, kgs
 // We store that in  
@@ -139,7 +139,7 @@ export function Corrals(router: Router, dbConn: Connection, tl: Telemetry) {
                 GROUP BY c.id_corrals;`;*/
         // Deleted the elements WHERE isSold = 0 AND isClosed = 1) 
         // and WHERE isWorked = 0 
-        let sql = `select c.id_corrals, c.name, f.*, a.id_alots is not null, l.id_lorries is not null, a.id_alots is not null OR l.id_lorries is not null
+        let sql = `select c.id_corrals as idCorrals, c.name, f.*, a.id_alots is not null, l.id_lorries is not null, a.id_alots is not null OR l.id_lorries is not null
                 FROM corrals c 
                     LEFT JOIN (SELECT * FROM alots) a ON c.id_corrals = a.id_corrals 
                     LEFT JOIN (Select * from lorries) l ON l.idStayCorral = c.id_corrals 
@@ -147,7 +147,7 @@ export function Corrals(router: Router, dbConn: Connection, tl: Telemetry) {
                 WHERE a.id_alots is not null OR l.id_lorries is not null 
                 GROUP BY c.id_corrals;`;
         let sql_params = [dateMinor.getTime(), dateMajor.getTime()];
-
+        
         let qr = await doQuery(dbConn, sql, sql_params)
         if (qr.error) {
             tl.reportInternalError(res, qr.error);
@@ -160,7 +160,7 @@ export function Corrals(router: Router, dbConn: Connection, tl: Telemetry) {
         qrr.forEach((el: any) => {
             let feed: OUT_Feeds = {
                 id_feeds: el.id_feeds,
-                id_corrals: el.id_corrals,
+                id_corrals: el.idCorrals,
                 name: el.name,
                 kg: el.kg,
                 create_datetime: el.date
@@ -230,18 +230,27 @@ export function Corrals(router: Router, dbConn: Connection, tl: Telemetry) {
         // Create a table
         //let c = req.body as IN_Corral;
 
-        let c = req.body;
+        let c = req.body as IN_Feeds[];
         let date = new Date().getTime().toString();
         //let date = (1).toString();
         console.log(date);
         // handle same day alimentacion with get
 
+        let feedsArrs = c.map((v) => [-1,v.idCorral,-1,v.idCorral, v.kg, date, date ,date]);
+        let sql_params = feedsArrs.reduce((p,c) => p.concat(c), [])
+        let values = c.reduce((p,c,i)=>{
+            let ret = ""
+            if(i != 0) ret += ","
+            ret += "(?,(?),?,?, ?,?, ?, ?)";
+            return p += ret
+        }, "");
+
         let qr = await doQuery(
             dbConn,
             `INSERT INTO feeds 
-                                (id_user,id_alots , id_rations, id_corrals, kg , date, create_datetime, edit_datetime) VALUES 
-                                        (?,?,?,?, ?,?, ?, ?);`,
-            [-1, -1, -1, c.id_corrals, c.kg, date, date, date]
+                (id_user,id_alots , id_rations, id_corrals, kg , date, create_datetime, edit_datetime) 
+                VALUES ${values};`,
+            sql_params
         );
 
         if (qr.error) {
@@ -249,9 +258,9 @@ export function Corrals(router: Router, dbConn: Connection, tl: Telemetry) {
             return;
         }
 
-        let insertId = qr.result.insertId;
+        //let insertId = qr.result.insertId;
 
-        res.send({ id: insertId });
+        res.send();
 
     });
 

@@ -4,5 +4,9 @@ export interface OUT_Feeds {
 	name?: string;
 	kg: number;
 	create_datetime: number;
+}
 
+export interface IN_Feeds {
+	idCorral: string,
+	kg: number
 }
