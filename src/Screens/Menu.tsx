@@ -19,9 +19,15 @@ import { Lots } from "./config/Lots";
 import { LorryRegister } from "./LorryRegister";
 import { RegisterHeads } from "./RegisterHeads";
 import { FeedCorrals } from "./FeedCorrals";
+import cookie from 'react-cookies';
 
 interface MenuProps{
 
+}
+
+interface MenuState{
+    name: string,
+    email : string
 }
 
 enum SIDE_OPT {
@@ -30,10 +36,14 @@ enum SIDE_OPT {
     login = "login"
 }
 
-export class Menu extends React.Component<MenuProps>{
+export class Menu extends React.Component<MenuProps, MenuState>{
 
     constructor(props: MenuProps){
         super(props);
+        this.state = {
+            name: "",
+            email: ""
+        }
 
         this.routeTo = this.routeTo.bind(this);
         this.onLogout = this.onLogout.bind(this);
@@ -49,10 +59,15 @@ export class Menu extends React.Component<MenuProps>{
     }
 
     onLogout(){
+        cookie.remove("id_users", {path : '/'})
         HISTORY.push("/login");
+        
     }
 
-
+    componentDidMount(){
+        this.setState({name:cookie.load("name"), email:cookie.load("email") })
+    }
+    
     render() {
 
         let {path, url} = MATCH;        
@@ -71,21 +86,11 @@ export class Menu extends React.Component<MenuProps>{
             {/* <div className="menu--side">
                 <MaterialButton text="Ver información" onClick={() => this.routeTo(SIDE_OPT.info)}/>
             </div> */}
-            <Sidenav user={{email: "martin.riv.ben@hotmail.com", name: "Martín Rivas"}}/>
+            <Sidenav user={{email: this.state.email, name: this.state.name}}/>
             
-            
+
             <div className="sidenaved">
                 <Switch>
-                    {/*<Route path= "/" render = {() => (
-                        getSession() ? (
-                            <App to ="/" />
-                        ) : (
-                            <Redirect to = "/login"/>
-                        )
-                        )}/>*/}
-
-            
-
                     <Route path={`${path}/reg-lorry`} component={LorryRegister}/>
                     <Route path={`${path}/work-heads`} render={(a) => historyRefresher(a, <RegisterHeads/>)}/>
                     <Route path={`${path}/feed-corrals`} render={(a) => historyRefresher(a, <FeedCorrals/>)}/>

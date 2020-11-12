@@ -16,6 +16,7 @@ import { Login } from "./Screens/Login";
 import { Menu } from "./Screens/Menu";
 import { UserAdmin } from "./Screens/UserAdmin";
 import M from "materialize-css";
+import cookie from 'react-cookies';
 
 export var HISTORY: History;
 export var MATCH: match;
@@ -31,9 +32,11 @@ export function toast(message: string) {
     M.toast({ html: message });
 }
 
+
 let view = (
     <BrowserRouter>
         <Switch>
+
             <Route
                 exact
                 path="/"
@@ -42,7 +45,7 @@ let view = (
             <Route
                 exact
                 path="/login"
-                render={(a) => historyRefresher(a, <Login />)}
+                render={(a) => historyRefresher(a, <Login status= {true} />)}
             />
             <Route
                 exact
@@ -52,10 +55,17 @@ let view = (
             <Route
                 path="/menu"
                 render={(a) => {
-                    return historyRefresher(a, <Menu />);
+
+                    return (
+                    cookie.load("id_users") == "" || cookie.load("id_users") == undefined ?
+                      <Redirect to="/login" /> :
+                      historyRefresher(a, <Menu />)
+                    )
+                    
                 }}
             />
         </Switch>
     </BrowserRouter>
 );
+
 render(view, document.getElementById("app"));

@@ -5,7 +5,7 @@ import { Select } from "../Components/Select";
 import { SexClassifier } from "../Components/SexCassifier";
 import { TimeInput, ITime } from "../Components/TimeInput";
 import { DateInput } from "../Components/DateInput";
-import { ISexClass } from "~/Classes/DataStructures/SexClass";
+import { IN_SexClass } from "~/Classes/DataStructures/SexClass";
 import { IOption } from "../Classes/IOption";
 import { MaterialButton } from "../Components/Button";
 
@@ -24,8 +24,8 @@ interface LorryRegisterState{
     heads: string,
     kgOrigin: string,
     provider: string,
-    classMale: Array<ISexClass>,
-    classFemale: Array<ISexClass>,
+    classMale: Array<IN_SexClass>,
+    classFemale: Array<IN_SexClass>,
     providers: Array<IOption>
 }
 

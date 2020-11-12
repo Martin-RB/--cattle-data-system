@@ -11,7 +11,7 @@ interface IFieldedUser {
     users?: Array<string>
 }
 interface IUserProp {
-    onChange: (newValue: IFieldedUser) => void;
+
 }
 
 interface UserAdminState{
@@ -45,7 +45,6 @@ export class UserAdmin extends React.Component<IUserProp, UserAdminState>{
     }
 
     getUser: ( ) => void = async() =>{
-
         try {
             const response = await fetch(url + "/admon", {
             method: 'GET', 
@@ -53,7 +52,6 @@ export class UserAdmin extends React.Component<IUserProp, UserAdminState>{
             cache: 'no-cache', 
             }); 
         let users = await response.json()
-        console.log(users)
         this.setState(users)
         } catch (error) {
            return error
