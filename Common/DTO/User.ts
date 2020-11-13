@@ -15,7 +15,7 @@ export interface OUT_User_email {
     password: string
 }
 
-export interface OUT_User_name {
+export interface IN_UserLogin {
     name: string
     password: string
 }

@@ -1,24 +1,25 @@
+import cookieParser, { JSONCookie } from "cookie-parser";
 import { Router } from "express";
 import { Connection } from "mysql";
 import { doQuery, IQueryResult, doEditElement } from "../Common/AwaitableSQL";
 import {
     IN_User,
     OUT_User,
-    OUT_User_name,
+    IN_UserLogin,
 } from "../Common/DTO/User";
 import { Telemetry } from "../Common/Telemetry";
 
-export function Users(router: Router, dbConn: Connection, tl: Telemetry) {
+export function Login(router: Router, dbConn: Connection, tl: Telemetry) {
     
 
-    router.post("/login", async (req, res) => {
-        let m = req.body as OUT_User_name;
+    router.post("/", async (req, res) => {
+        let m = req.body as IN_UserLogin;
         let qr: IQueryResult | undefined = undefined;
+        
         qr = await doQuery(
             dbConn,
-            
-                "SELECT password, FROM user WHERE name = ?",
-                [m.name]
+                "SELECT id_user, name, password, email, businessName FROM user WHERE name = ? AND password = ?",
+                [m.name, m.password]
             );
 
         if (qr.error) {
@@ -26,16 +27,33 @@ export function Users(router: Router, dbConn: Connection, tl: Telemetry) {
             return;
         }
 
-        let pass = qr.result.password;
+        if(qr.result.length == 0){
+            tl.reportNotFoundError(res, qr.error, "Credenciales incorrectas");
+            return;
+        }
 
-        if(m.password == pass){
-            res.send({login: true});
-        }
-        else{
-            res.send({login: false});
-        }
+        console.log(qr.result);
+        
+        
+        let time = new Date().getTime();
+        res.cookie("idUser", qr.result[0].id_user, {
+            expires: new Date(time + 1000*60*60*24),
+            path: "/"
+        })
+        .cookie("email", qr.result[0].email, {
+            expires: new Date(time + 1000*60*60*24),
+            path: "/"
+        })
+        .cookie("businessName", qr.result[0].businessName, {
+            expires: new Date(time + 1000*60*60*24),
+            path: "/"
+        })
+        .cookie("name", qr.result[0].name, {
+            expires: new Date(time + 1000*60*60*24),
+            path: "/"
+        })
+        .send()
     });
-
 
     router.post("/admon", async (req, res) => {
         let m = req.body as OUT_User;
