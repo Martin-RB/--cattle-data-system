@@ -2,20 +2,19 @@ import React from "react";
 import { Input, MaterialInput } from "../Components/Input";
 import { Button, MaterialButton } from "../Components/Button";
 import { OUT_User , IN_User } from "../Classes/DataStructures/User";
-import { useHistory } from "react-router-dom";
-import { HISTORY } from "../App";
+import { RouteComponentProps, useHistory } from "react-router-dom";
 import vaquita from "./../../img/vaquita.svg";
 import url from "./ConfigI";
 import { toast } from "../App";
 import cookie from 'react-cookies';
 
-interface LoginProps{
+interface LoginProps extends RouteComponentProps{
   status :boolean
 
 }
 
 interface LoginRequest{
-  email: string
+  name: string
   password : string
 }
 
@@ -50,47 +49,46 @@ export class Login extends React.Component<LoginProps, LoginState>{
         this.onInputChanged = this.onInputChanged.bind(this);
     }
 
-    varsetCookie : () => void = () =>{
+    varsetCookie : (usr: IN_User) => void = (usr) =>{
       let expires = new Date();
       expires.setTime(expires.getTime() + (20*60*1000))
-      cookie.save('id_users', this.state.access?.id_user , {path:'/', expires})
-      cookie.save('name', this.state.access?.name , {path:'/', expires})
-      cookie.save('email', this.state.access?.email , {path:'/', expires})
+      cookie.save('id_users', usr.id_user , {path:'/', expires})
+      cookie.save('name', usr.name , {path:'/', expires})
+      cookie.save('email', usr.email , {path:'/', expires})
     }
 
     onSubmit : () => void = async() =>{
-      let d : LoginRequest = {email : this.state.name, password : this.state.password } 
-          try {
-            let newurl = "https://aadd3a6e-85ac-4ed5-8a34-b6b26ff2e442.mock.pstmn.io"
-            const response = await fetch(url + "/login", {
-            method: 'POST', 
-            body: JSON.stringify(d),
-            headers:{
-                'Content-Type': 'application/json',
-            }
-            }); 
-              let user = await response.json() as IN_User
-              
-              this.setState({access:user})
-              console.log(this.state.access)
-              this.varsetCookie()
-          } catch (error) {
-            console.log(error)
-          }
-       
-
-        if(this.state.access?.id_user != ""){
-          HISTORY.push({
-              pathname: "/menu",
-              state: {
-                  username: this.state.fields[LoginFields.username],
-                  password: this.state.fields[LoginFields.password],
-              }
-          })
-        } else {
-          toast("Usuario incorrecto")
-        }
+      console.log("sub");
       
+      let d : LoginRequest = {
+        name : this.state.name, 
+        password : this.state.password } 
+      let result = false;
+      try {
+        let newurl = "https://aadd3a6e-85ac-4ed5-8a34-b6b26ff2e442.mock.pstmn.io"
+        const response = await fetch(url + "/login", {
+          method: 'POST', 
+          credentials: "include",
+          body: JSON.stringify(d),
+          headers:{
+              'Content-Type': 'application/json',
+          }
+        }); 
+        result = response.status == 200;
+      } 
+      catch (error) {
+        console.log(error)
+      }
+
+      if(result){
+        console.log(this.props.match.url);
+        
+        this.props.history.push({
+            pathname: "/menu"
+        })
+      } else {
+        toast("Credenciales incorrectas")
+      }
 
     }
    
@@ -117,7 +115,7 @@ export class Login extends React.Component<LoginProps, LoginState>{
               <div className="container">
                 <div className="z-depth-1 grey lighten-4 row contenedor" >
 
-                    <form className="col s12" method="post">
+                    <form className="col s12" onSubmit={(e)=>{e.preventDefault(); this.onSubmit()}}>
                       
 
                       <div className='row'>

@@ -45,7 +45,7 @@ let view = (
             <Route
                 exact
                 path="/login"
-                render={(a) => historyRefresher(a, <Login status= {true} />)}
+                render={(a) => (<Login status={true} {...a}/>)}
             />
             <Route
                 exact
@@ -55,9 +55,8 @@ let view = (
             <Route
                 path="/menu"
                 render={(a) => {
-
                     return (
-                    cookie.load("id_users") == "" || cookie.load("id_users") == undefined ?
+                    cookie.load("idUser") == "" || cookie.load("idUser") == undefined ?
                       <Redirect to="/login" /> :
                       historyRefresher(a, <Menu />)
                     )
