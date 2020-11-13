@@ -1,12 +1,13 @@
 import { Connection } from "mysql";
 import { doQuery, checkResponseErrors } from "../Common/AwaitableSQL";
-import { OUT_Lorry, IN_Lorry } from "../Common/DTO/Lorry";
+import { OUT_Lorry, IN_Lorry, } from "../Common/DTO/Lorry";
 import { OUT_WeightClassfy } from "../Common/DTO/WeightClassfy";
 import { GetCorrals } from "./Corrals";
 import { GetOrigins } from "./Origins";
 import { OUT_Corral } from "../Common/DTO/Corral";
 import { OUT_Origin } from "../Common/DTO/Origin";
 import { OUT_Provider } from "../Common/DTO/Provider";
+import { IN_Heads } from "../Common/DTO/Heads";
 import { DateTimeOps } from "../Common/DateTimeOps";
 import { GetProviders } from "./Providers";
 import { Router } from "express";
@@ -268,5 +269,41 @@ export function Lorries(router: Router, dbConn: Connection, tl: Telemetry) {
 
         res.send({id: idLorry});
     });
+    // Place the get all for a specific ID. 
+    // Post the heads of the jaulas
+    router.post('/:id/heads', async (req, res) => {
+        let data = req.body as IN_Heads;
+        let date = new Date().getTime().toString();
+        let lorryID = req.params.id;
+        console.log(lorryID);
+        let sql = "";
+        let sql_params = [];
+        //let searchArr = ['idBreed', 'idAlot', 'siniga', 'localID', 'sex', 'weight'];
+        // post 1 by one
+        // Use the in and out
+        /*sql = `
+        INSERT INTO Heads 
+            (id_breeds, idActualAlot, siniga, localID, sex, weight, id_lorries) 
+            VALUES (?,?,?,?,?,?,?)";`;*/
+       
+       sql = `
+            INSERT INTO heads 
+                (id_user,id_breeds,id_lorries, idActialAlot, siniga, localID, 
+                    sex, weight, create_datetime, edit_datetime, weightRatio) 
+                VALUES (?,?,?,?,?,?,?,?,?,?,?);
+        `
+       sql_params = [-1, data.idBreed, lorryID , data.idAlot , data.siniga, data.localID, data.sex, data.weight, date, date, -1];
+        let qr = await doQuery(dbConn, sql, sql_params);
+
+        if (qr.error) {
+            tl.reportInternalError(res, qr.error);
+            return;
+        }
+        // 
+        let idHeads = qr.result.insertId;
+        res.send({id: idHeads});
+
+    });
+
     return router;
 }

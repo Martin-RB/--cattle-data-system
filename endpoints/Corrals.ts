@@ -147,7 +147,7 @@ export function Corrals(router: Router, dbConn: Connection, tl: Telemetry) {
                 WHERE a.id_alots is not null OR l.id_lorries is not null 
                 GROUP BY c.id_corrals;`;
         let sql_params = [dateMinor.getTime(), dateMajor.getTime()];
-        
+
         let qr = await doQuery(dbConn, sql, sql_params)
         if (qr.error) {
             tl.reportInternalError(res, qr.error);
