@@ -13,6 +13,7 @@ import { Corrals } from "./endpoints/Corrals";
 import { Implants } from "./endpoints/Implants";
 import { Alots } from "./endpoints/Alots";
 import { Lorries } from "./endpoints/Lorries";
+import { Search } from "./endpoints/Search";
 
 let app = express();
 
@@ -45,7 +46,10 @@ app.use("/api/providers", Providers(express.Router(), conn, new Telemetry("/prov
 app.use("/api/corrals", Corrals(express.Router(), conn, new Telemetry("/corrals")));
 app.use("/api/implants", Implants(express.Router(), conn, new Telemetry("/implants")));
 app.use("/api/alots", Alots(express.Router(), conn, new Telemetry("/alots")));
+
 app.use("/api/lorries", Lorries(express.Router(), conn, new Telemetry("/lorries")));
+
+app.use("/api/search", Search(express.Router(), conn, new Telemetry("/search")));
 
 app.get('/*', function(req, res) {
     res.sendFile((__dirname + '/html/index.html'), function(err: any) {
