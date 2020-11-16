@@ -71,7 +71,7 @@ export async function GetLorries(dbConn: Connection, ids: Array<string>) {
             return errors;
         }
 
-        if ((corralResponse as Array<OUT_Corral>).length == 0) {
+        /*if ((corralResponse as Array<OUT_Corral>).length == 0) {
             return { e: "No Corral", info: "No Protocol" };
         }
         if ((originResponse as Array<OUT_Origin>).length == 0) {
@@ -79,7 +79,7 @@ export async function GetLorries(dbConn: Connection, ids: Array<string>) {
         }
         if ((providerResponse as Array<OUT_Provider>).length == 0) {
             return { e: "No Provider", info: "No Corral" };
-        }
+        }*/
 
         let openDays = -1;
         if (el.workDate != null) {
@@ -111,6 +111,13 @@ export async function GetLorries(dbConn: Connection, ids: Array<string>) {
 
 export function Lorries(router: Router, dbConn: Connection, tl: Telemetry) {
     router.get("/", async (req, res) => {
+        /*let qr = await doQuery(
+            dbConn,
+            `
+            DELETE FROM lorries;
+        `,
+            []
+        );*/
         let qr = await doQuery(
             dbConn,
             `
@@ -233,39 +240,65 @@ export function Lorries(router: Router, dbConn: Connection, tl: Telemetry) {
 
         let values_str = "";
         let values_arr = [];
-        for (let i = 0; i < p.maleClassfies.length; i++) {
-            if (i != 0) {
-                values_str += ",";
+        let classfyQr = null;
+        if(p.maleClassfies.length > 0){
+            for (let i = 0; i < p.maleClassfies.length; i++) {
+                if (i != 0) {
+                    values_str += ",";
+                }
+                const el = p.maleClassfies[i];
+                values_arr.push(-1,idLorry, el.name, -1, el.cost, "male", date);
+                values_str += "(?,?,?,?,?,?,?)";
             }
-            const el = p.maleClassfies[i];
-            values_arr.push(-1,idLorry, el.name, -1, el.cost, "male", date);
-            values_str += "(?,?,?,?,?,?,?)";
-        }
-        for (let i = 0; i < p.femaleClassfies.length; i++) {
-            if (i != 0) {
-                values_str += ",";
+
+            classfyQr = await doQuery(
+                dbConn,
+                `
+                INSERT INTO weight_class 
+                    (id_user,id_lorries, name, heads, cost, sex, create_datetime) VALUES 
+                    :values:;
+            `.replace(":values:", values_str),
+                values_arr
+            );
+
+            if (classfyQr.error) {
+                tl.reportInternalError(res, classfyQr.error);
+                console.log(classfyQr.obj.sql);
+
+                return;
             }
-            const el = p.femaleClassfies[i];
-            values_arr.push(-1,idLorry, el.name, -1, el.cost, "female", date);
-            values_str += "(?,?,?,?,?,?,?)";
         }
+        // agregar female
+        if(p.femaleClassfies.length > 0){
+            values_str = "";
+            values_arr = [];
+            for (let i = 0; i < p.femaleClassfies.length; i++) {
+                if (i != 0) {
+                    values_str += ",";
+                }
+                const el = p.femaleClassfies[i];
+                values_arr.push(-1,idLorry, el.name, -1, el.cost, "female", date);
+                values_str += "(?,?,?,?,?,?,?)";
+            }
+            classfyQr = await doQuery(
+                dbConn,
+                `
+                INSERT INTO weight_class 
+                    (id_user,id_lorries, name, heads, cost, sex, create_datetime) VALUES 
+                    :values:;
+            `.replace(":values:", values_str),
+                values_arr
+            );
 
-        let classfyQr = await doQuery(
-            dbConn,
-            `
-            INSERT INTO weight_class 
-                (id_user,id_lorries, name, heads, cost, sex, create_datetime) VALUES 
-                :values:;
-        `.replace(":values:", values_str),
-            values_arr
-        );
+            if (classfyQr.error) {
+                tl.reportInternalError(res, classfyQr.error);
+                console.log(classfyQr.obj.sql);
 
-        if (classfyQr.error) {
-            tl.reportInternalError(res, classfyQr.error);
-            console.log(classfyQr.obj.sql);
+                return;
+            }
 
-            return;
         }
+        
 
         res.send({id: idLorry});
     });

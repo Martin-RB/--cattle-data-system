@@ -30,7 +30,8 @@ export async function GetProtocol(dbConn: Connection, ids: Array<string>) {
                                             LEFT JOIN medicine_protocol mp ON p.id_protocols = mp.id_protocols 
                                             LEFT JOIN medicines m ON mp.id_medicines = m.id_medicines 
                                             WHERE p.id_protocols IN (?) AND 
-                                                    (mp.create_datetime is null OR p.edit_datetime >= mp.create_datetime) 
+                                                    (mp.create_datetime is null OR p.edit_datetime >= mp.create_datetime)
+                                                    AND p.isEnabled = 1
                                             GROUP BY p.id_protocols;`,
         [ids]
     );
@@ -123,10 +124,13 @@ export function Protocols(router: Router, dbConn: Connection, tl: Telemetry) {
         let protResponse = await GetProtocol(dbConn, [req.params.id]);
         let responseProts = protResponse as Array<OUT_Protocol>;
 
-        if (responseProts.length == undefined) {
-            let error = protResponse as { e: any; info: string };
-            tl.reportInternalError(res, error.e);
-            return;
+        
+        if (responseProts.length == 0) {
+            tl.reportNotFoundError(
+                res,
+                req.params.id,
+                "Protocolo no encontrado"
+            );
         }
         res.send(responseProts[0]);
     });

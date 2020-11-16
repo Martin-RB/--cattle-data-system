@@ -16,7 +16,7 @@ export async function GetCorrals(dbConn: Connection, ids: Array<string>) {
 
     let qr = await doQuery(
         dbConn,
-        "SELECT * FROM corrals WHERE id_corrals IN (?)",
+        "SELECT * FROM corrals WHERE id_corrals IN (?) AND isEnabled = 1",
         [ids]
     );
     if (qr.error) {
@@ -220,6 +220,13 @@ export function Corrals(router: Router, dbConn: Connection, tl: Telemetry) {
             let error = corralResponse as { e: any; info: string };
             tl.reportInternalError(res, error.e);
             return;
+        }
+         if (responseCorr.length == 0) {
+            tl.reportNotFoundError(
+                res,
+                req.params.id,
+                "Corral no encontrado"
+            );
         }
 
         res.send(responseCorr[0]);

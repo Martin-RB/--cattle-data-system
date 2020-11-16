@@ -13,7 +13,7 @@ export async function GetProviders(dbConn: Connection, ids: Array<string>) {
     let qr = await doQuery(
         dbConn,
         `
-        SELECT * FROM providers WHERE id_providers IN (?);
+        SELECT * FROM providers WHERE id_providers IN (?) AND isEnabled = 1;
     `,
         [ids]
     );
@@ -92,6 +92,13 @@ export function Providers(router: Router, dbConn: Connection, tl: Telemetry) {
             };
             providers.push(provider);
         });
+        if (providers.length == 0) {
+            tl.reportNotFoundError(
+                res,
+                req.params.id,
+                "Proveedor no encontrado"
+            );
+        }
 
         res.send(providers[0]);
     });

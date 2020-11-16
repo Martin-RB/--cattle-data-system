@@ -32,6 +32,7 @@ export async function GetAlots(dbConn: Connection, ids: Array<string>, justEnabl
     );
 
     if (qr.error) {
+        console.log("entered", qr)
         return qr.error;
     }
 
@@ -110,12 +111,13 @@ export function Alots(router: Router, dbConn: Connection, tl: Telemetry) {
         ids = (ids as Array<{id_alots: number}>).map(v=>v.id_alots);
         
         let alots = new Array<OUT_Alot>();
-
+        console.log("aqui", ids);
         let alotResponse = await GetAlots(
             dbConn,
-            ids
-            //ids.map((v: any) => v.id_alots)
+            ids,
+            ids.map((v: any) => v.id_alots)
         );
+        console.log("despues", alotResponse)
         let responseAlot = alotResponse as Array<OUT_Alot>;
 
         if (responseAlot.length == undefined) {
@@ -132,7 +134,7 @@ export function Alots(router: Router, dbConn: Connection, tl: Telemetry) {
         let qr = await doQuery(
             dbConn,
             `
-            SELECT id_alots FROM alots WHERE isEnabled = 1 AND isClosed = 0;
+            SELECT id_alots FROM alots WHERE isEnabled = 1 AND isClosed = 0 AND isSold = 0;
         `,
             []
         );
@@ -358,8 +360,9 @@ export function Alots(router: Router, dbConn: Connection, tl: Telemetry) {
         let alots = new Array<OUT_Alot>();
         let alotResponse = await GetAlots(dbConn, [req.params.id]);
         let responseAlot = alotResponse as Array<OUT_Alot>;
-
+        console.log("alot response", responseAlot)
         if (responseAlot.length == undefined) {
+            console.log("error");
             let error = alotResponse as { e: any; info: string };
             tl.reportInternalError(res, error.e);
             return;
@@ -403,7 +406,6 @@ export function Alots(router: Router, dbConn: Connection, tl: Telemetry) {
         }
 
         let idAlot = qr.result.insertId;
-
         for (let i = 0; i < a.reimplants.length; i++) {
             const p = a.reimplants[i];
             qr = await doQuery(
@@ -413,7 +415,7 @@ export function Alots(router: Router, dbConn: Connection, tl: Telemetry) {
                 (id_user,id_alots, id_protocols, day, create_datetime) 
                 VALUES (?,?, ?, ?, ?);
             `,
-                [-1, idAlot, p.idProtocol, p.day, date.toString()]
+                [-1, idAlot, a.arrivalProtocol, p.day, date.toString()]
             );
 
             if (qr.error) {
