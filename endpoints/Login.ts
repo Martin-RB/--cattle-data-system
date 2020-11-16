@@ -55,7 +55,7 @@ export function Login(router: Router, dbConn: Connection, tl: Telemetry) {
         .send()
     });
 
-    router.post("/admon", async (req, res) => {
+/*    router.post("/admon", async (req, res) => {
         let m = req.body as OUT_User;
         let date = new Date().getTime();
         let qr: IQueryResult | undefined = undefined;
@@ -80,7 +80,6 @@ export function Login(router: Router, dbConn: Connection, tl: Telemetry) {
 
         let idUser = qr.result.insertId;
 
-        res.send({ id: idUser });
     });
 
     router.delete("/admon/:id", async (req, res) => {
@@ -135,6 +134,6 @@ export function Login(router: Router, dbConn: Connection, tl: Telemetry) {
 
         res.send(users);
 
-    });
+    }); */
     return router;
 }

@@ -1,10 +1,11 @@
-export interface IN_User {
+export interface OUT_User {
     id_user: string 
     name: string 
     email: string
+    isEnabled: boolean
 }
 
-export interface OUT_User {
+export interface IN_User {
     name: string
     email: string
     password: string
