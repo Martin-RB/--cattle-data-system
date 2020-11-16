@@ -2,29 +2,52 @@ import React, { createContext } from "react";
 import { List, ListRow } from "../Components/List";
 import { MaterialInput } from "../Components/Input";
 import { MaterialButton } from "../Components/Button";
-import { CorralFeeding } from "../Classes/DataStructures/CorralFeeding";
+import { IN_CorralFeeding, OUT_CorralFeeding } from "../Classes/DataStructures/CorralFeeding";
 import { toast } from "../App";
+import url from "./ConfigI";
 
 interface FeedCorralsState{
     screenState: ScreenState
     kg: string
-    corrals: Array<CorralFeeding>
+    corrals: Array<IN_CorralFeeding>
     selectedCorral: number
 }
 
 export class FeedCorrals extends React.Component<{}, FeedCorralsState>{
     constructor(props: {}){
         super(props)
-
         this.state = {
-            corrals: [{corral: {id:"1", name: "XD", headNum:"1"}, kg: 2101}],
+            corrals: [],
             kg:"",
             screenState: new WaitingState(this),
             selectedCorral: -1
         }
     }
+
+    getFeedCorrals: () => void = async() => {
+        try {
+            let date = new Date()
+            const response = await fetch(url + "/corrals/alimentacion/" + date.getTime(), {
+            method: 'GET', 
+            mode: 'cors', 
+            cache: 'no-cache', 
+            }); 
+            
+        let corrals = await response.json() as Array<IN_CorralFeeding>
+        console.log(corrals)
+        this.setState({corrals:corrals})
+        } catch (error) {
+           return error
+        }
+    }
+
+    componentDidMount(){
+        this.getFeedCorrals()
+    }
+    
+
     render():JSX.Element{
-        let corrals = this.state.corrals.map((v,i) => ({id: i.toString(), columns: [v.corral.name, v.kg.toFixed(2)]} as ListRow))
+        let corrals = this.state.corrals.map((v,i) => ({id: v.id_corrals, columns: [v.name  , v.kg == null? "0": v.kg.toFixed(2) ]} as ListRow))
         return (
             <>
             <h2>Alimentar corrales</h2>
@@ -63,11 +86,11 @@ class WaitingState implements ScreenState{
     constructor(private ctx:FeedCorrals){}
     
     viewCorral: (id: string) => void = (id) => {
-        let i = parseInt(id);
-        let corral = this.ctx.state.corrals[i]
+        let i = parseInt(id) ;
+        let corral = this.ctx.state.corrals[i-1]
         this.ctx.setState({
-            selectedCorral: parseInt(id),
-            kg: corral.kg.toString(),
+            selectedCorral: parseInt(id) - 1,
+            kg: corral.kg==null? "0":corral.kg.toString(),
             screenState: new EditingState(this.ctx)
         })
     }
@@ -91,12 +114,28 @@ class EditingState implements ScreenState{
     }
     accept: (id: string, kg: string) => void = (id, kg) =>{
         let corrals = Object.assign(this.ctx.state.corrals, {});
+        let newcorral : OUT_CorralFeeding= {idCorral: id, kg : parseInt(kg)}
         corrals[parseInt(id)].kg = parseFloat(kg);
+        console.log(newcorral)
+        try {
+            let date = new Date()
+            fetch(url + "/corrals/alimentacion/" + date.getTime() , {
+            method: 'PUT', 
+            body: JSON.stringify(newcorral),
+            headers:{
+                'Content-Type': 'application/json'
+            }
+            });  
+        } catch (error) {
+           return error
+        }
+
         this.ctx.setState({
             screenState: new WaitingState(this.ctx),
             corrals,
             kg: ""
         })
+
     }
     
     cancel: () => void = () => {
@@ -113,7 +152,7 @@ class EditingState implements ScreenState{
         
         return (
             <div>
-                <p>Corral: {corral.corral.name}</p>
+                <p>Corral: {corral.name}</p>
                 <MaterialInput placeholder="Kg a surtir" onChange={(_,kg) => {this.ctx.setState({kg})}} value={this.ctx.state.kg}/>
                 <MaterialButton className="right" text="Acceptar" onClick={()=>this.ctx.state.screenState.accept(id.toString(), kg)}/>
                 <MaterialButton className="right" text="Cancelar" onClick={()=>this.ctx.state.screenState.cancel()}/>

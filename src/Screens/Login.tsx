@@ -58,7 +58,6 @@ export class Login extends React.Component<LoginProps, LoginState>{
     }
 
     onSubmit : () => void = async() =>{
-      console.log("sub");
       
       let d : LoginRequest = {
         name : this.state.name, 
@@ -84,7 +83,11 @@ export class Login extends React.Component<LoginProps, LoginState>{
         console.log(this.props.match.url);
         
         this.props.history.push({
-            pathname: "/menu"
+            pathname: "/menu",
+            state: {
+                username: this.state.fields[LoginFields.username],
+                password: this.state.fields[LoginFields.password],
+            }
         })
       } else {
         toast("Credenciales incorrectas")

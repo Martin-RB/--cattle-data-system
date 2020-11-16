@@ -1,7 +1,7 @@
 import React, { createFactory, useState } from "react";
 import { RouteComponentProps } from "react-router-dom";
 import * as Factory from "../../../node_modules/factory.ts/lib/sync";
-import { Head } from "../../Classes/DataStructures/Head";
+import { OUT_Head, Head } from "../../Classes/DataStructures/Head";
 import { MaterialButton } from "../../Components/Button";
 import { List, ListRow } from "../../Components/List";
 import { Modal, ModalData, ModalExitOptions } from "../../Components/Modal";
@@ -24,7 +24,7 @@ interface SellAlotListState{
 }
 
 interface FilledHead{
-    head: Head
+    head: OUT_Head
     weight: string | null
     standSellPrice: string | null
     finalSellPrice: string | null
@@ -37,15 +37,15 @@ export class SellAlotList extends React.Component<SellAlotListProps,
     constructor(props: SellAlotListProps){
         super(props);
 
-        let headFac = Factory.makeFactory<Head>({
+        let headFac = Factory.makeFactory<OUT_Head>({
             id: Factory.each(i => i.toString()),
             siniga: Factory.each(i => faker.random.alphaNumeric(8)),//(Math.random() * 1000).toFixed(0),
             alotName: "",
-            idAlot: "1",
+            idAlot: 1,
             idLocal: Factory.each(i => faker.random.alphaNumeric(6)),
             providerName: Factory.each(i=>faker.name.firstName()),
             sex: Factory.each(i=>Math.random()>0.5?"female":"male"),
-            weight: Factory.each(i=>(Math.random() * 1000))
+            lastWeight: Factory.each(i=>(Math.random() * 1000))
         })
 
         let filledHeadFac = Factory.makeFactory<FilledHead>({

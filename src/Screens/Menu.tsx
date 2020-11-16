@@ -59,14 +59,10 @@ export class Menu extends React.Component<MenuProps, MenuState>{
     }
 
     onLogout(){
-        cookie.remove("id_users", {path : '/'})
         HISTORY.push("/login");
         
     }
 
-    componentDidMount(){
-        this.setState({name:cookie.load("name"), email:cookie.load("email") })
-    }
     
     render() {
 
@@ -86,7 +82,7 @@ export class Menu extends React.Component<MenuProps, MenuState>{
             {/* <div className="menu--side">
                 <MaterialButton text="Ver información" onClick={() => this.routeTo(SIDE_OPT.info)}/>
             </div> */}
-            <Sidenav user={{email: this.state.email, name: this.state.name}}/>
+            <Sidenav user={{email: "martin.riv.ben@hotmail.com", name: "Martín Rivas"}}/>
             
 
             <div className="sidenaved">

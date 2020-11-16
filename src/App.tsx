@@ -16,7 +16,6 @@ import { Login } from "./Screens/Login";
 import { Menu } from "./Screens/Menu";
 import { UserAdmin } from "./Screens/UserAdmin";
 import M from "materialize-css";
-import cookie from 'react-cookies';
 
 export var HISTORY: History;
 export var MATCH: match;
@@ -45,7 +44,8 @@ let view = (
             <Route
                 exact
                 path="/login"
-                render={(a) => (<Login status={true} {...a}/>)}
+                render=
+                {(a) => (<Login status={true} {...a}/>)}
             />
             <Route
                 exact
@@ -56,8 +56,6 @@ let view = (
                 path="/menu"
                 render={(a) => {
                     return (
-                    cookie.load("idUser") == "" || cookie.load("idUser") == undefined ?
-                      <Redirect to="/login" /> :
                       historyRefresher(a, <Menu />)
                     )
                     
