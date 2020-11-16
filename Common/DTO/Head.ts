@@ -24,6 +24,7 @@ export interface IN_Head{
     idAlot: number
     sexClass: number
     weight: number
+    idBreed: number
 }
 
 export interface IN_PricedHead{
