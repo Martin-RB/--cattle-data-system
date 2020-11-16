@@ -12,7 +12,7 @@ import {
     BrowserRouter,
 } from "react-router-dom";
 import { History } from "history";
-import { Login } from "./Screens/Login";
+import { isLoggedIn, Login } from "./Screens/Login";
 import { Menu } from "./Screens/Menu";
 import { UserAdmin } from "./Screens/UserAdmin";
 import M from "materialize-css";
@@ -55,10 +55,11 @@ let view = (
             <Route
                 path="/menu"
                 render={(a) => {
+                    console.log("menu", isLoggedIn());
+                    
                     return (
-                    cookie.load("idUser") == "" || cookie.load("idUser") == undefined ?
-                      <Redirect to="/login" /> :
-                      historyRefresher(a, <Menu />)
+                    isLoggedIn() ?
+                    <Menu {...a}/>: <Redirect to="/login" /> 
                     )
                     
                 }}

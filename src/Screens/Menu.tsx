@@ -1,8 +1,8 @@
 import React from "react";
-import { Switch, Route, useRouteMatch, Link, Redirect } from "react-router-dom";
+import { Switch, Route, useRouteMatch, Link, Redirect, RouteComponentProps } from "react-router-dom";
 import { Info } from "./Info";
 import { MATCH, historyRefresher, HISTORY } from "../App";
-import { Login } from "./Login";
+import { Login, logOut } from "./Login";
 import { Button, MaterialButton } from "../Components/Button";
 import { TopNav } from "../Components/TopNav";
 import image from "./../../img/logo.png";
@@ -21,7 +21,7 @@ import { RegisterHeads } from "./RegisterHeads";
 import { FeedCorrals } from "./FeedCorrals";
 import cookie from 'react-cookies';
 
-interface MenuProps{
+interface MenuProps extends RouteComponentProps{
 
 }
 
@@ -59,19 +59,16 @@ export class Menu extends React.Component<MenuProps, MenuState>{
     }
 
     onLogout(){
-        cookie.remove("id_users", {path : '/'})
-        HISTORY.push("/login");
-        
+        logOut();
+        this.props.history.replace("/login")
     }
 
     componentDidMount(){
         this.setState({name:cookie.load("name"), email:cookie.load("email") })
     }
     
-    render() {
-
-        let {path, url} = MATCH;        
-        
+    render() {    
+        let path = this.props.match.path
         return <div style={{height: "100vh"}}>
 
         <TopNav todos={[new TodoWork("Faltan corrales por alimentar", "menu/info")]} 

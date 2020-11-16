@@ -2,7 +2,7 @@ import React from "react";
 import { Input, MaterialInput } from "../Components/Input";
 import { Button, MaterialButton } from "../Components/Button";
 import { OUT_User , IN_User } from "../Classes/DataStructures/User";
-import { RouteComponentProps, useHistory } from "react-router-dom";
+import { Redirect, RouteComponentProps, useHistory } from "react-router-dom";
 import vaquita from "./../../img/vaquita.svg";
 import url from "./ConfigI";
 import { toast } from "../App";
@@ -102,6 +102,10 @@ export class Login extends React.Component<LoginProps, LoginState>{
     }
 
     render(): JSX.Element{
+
+        if(isLoggedIn()){
+          return <Redirect to="/menu"/>
+        }
         
         return <div className="login--background">
           
@@ -150,3 +154,15 @@ export class Login extends React.Component<LoginProps, LoginState>{
 
 
 
+export function isLoggedIn(){
+  return cookie.load("idUser") != undefined
+}
+
+export function logOut(){
+  console.log("removing");
+  
+  cookie.remove("idUser", {path: "/"})
+  cookie.remove("name", {path: "/"})
+  cookie.remove("businessName", {path: "/"})
+  cookie.remove("email", {path: "/"})
+}
