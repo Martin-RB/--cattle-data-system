@@ -5,4 +5,5 @@ export interface IN_Heads {
     localID: string
     sex: string
     weight: number
+    sexClass: number
 }

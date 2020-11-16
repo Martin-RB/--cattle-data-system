@@ -322,10 +322,10 @@ export function Lorries(router: Router, dbConn: Connection, tl: Telemetry) {
        sql = `
             INSERT INTO heads 
                 (id_user,id_breeds,id_lorries, idActialAlot, siniga, localID, 
-                    sex, weight, create_datetime, edit_datetime, weightRatio) 
-                VALUES (?,?,?,?,?,?,?,?,?,?,?);
+                    sex, weight, create_datetime, edit_datetime, weightRatio, id_weight_class) 
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?);
         `
-       sql_params = [-1, data.idBreed, lorryID , data.idAlot , data.siniga, data.localID, data.sex, data.weight, date, date, -1];
+       sql_params = [-1, -1, lorryID , data.idAlot , data.siniga, data.localID, data.sex, data.weight, date, date, -1, data.sexClass];
         let qr = await doQuery(dbConn, sql, sql_params);
 
         if (qr.error) {
