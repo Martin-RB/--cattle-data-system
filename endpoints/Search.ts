@@ -191,7 +191,7 @@ export function Search(router: Router, dbConn: Connection, tl: Telemetry) {
             alots = respuestaAlot;
 
 
-        res.send(alots);
+        res.send({ alots: alots, heads: heads, corrals: corrals});
     });
 
 
