@@ -18,7 +18,7 @@ export function Login(router: Router, dbConn: Connection, tl: Telemetry) {
         
         qr = await doQuery(
             dbConn,
-                "SELECT id_user, name, password, email, businessName FROM user WHERE name = ? AND password = ?",
+                "SELECT id_user, name, password, email, businessName, (active = 1) as isActive FROM user WHERE name = ? AND password = ?",
                 [m.name, m.password]
             );
 
@@ -33,6 +33,11 @@ export function Login(router: Router, dbConn: Connection, tl: Telemetry) {
         }
 
         console.log(qr.result);
+        
+        if(qr.result[0].isActive == "0"){
+            tl.reportNotFoundError(res, qr.error, "Cuenta bloqueada");
+            return;
+        }
         
         
         let time = new Date().getTime();
