@@ -17,6 +17,7 @@ import { Menu } from "./Screens/Menu";
 import { UserAdmin } from "./Screens/UserAdmin";
 import M from "materialize-css";
 import cookie from 'react-cookies';
+import { AdmonLogin, isAdmonLoggedIn } from "./Screens/AdmonLogin";
 
 export var HISTORY: History;
 export var MATCH: match;
@@ -45,18 +46,28 @@ let view = (
             <Route
                 exact
                 path="/login"
-                render={(a) => (<Login status={true} {...a}/>)}
+                render={(a) => (<Login {...a}/>)}
             />
             <Route
                 exact
                 path="/admon"
-                render={(a) => historyRefresher(a, <UserAdmin />)}
+                render={(a) => <Redirect to="/admon/login"/>}
             />
+            <Route
+                exact
+                path="/admon/login"
+                render={(a) => <AdmonLogin {...a}/>}
+            />
+            <Route
+                exact
+                path="/admon/platform"
+                render={(a) => 
+                    isAdmonLoggedIn()?
+                    <UserAdmin {...a}/>: <Redirect to="/admon/login"/>}
+                    />
             <Route
                 path="/menu"
                 render={(a) => {
-                    console.log("menu", isLoggedIn());
-                    
                     return (
                     isLoggedIn() ?
                     <Menu {...a}/>: <Redirect to="/login" /> 

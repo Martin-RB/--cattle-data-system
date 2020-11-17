@@ -6,17 +6,18 @@ import { IN_User } from "../Classes/DataStructures/User";
 import { OUT_User } from "../Classes/DataStructures/User";
 import { toast } from "../App";
 import url from "./ConfigI";
+import { Redirect, RouteComponentProps } from "react-router-dom";
+import { admonLogOut, isAdmonLoggedIn } from "./AdmonLogin";
 
 interface IFieldedUser {
     users?: Array<string>
 }
-interface IUserProp {
+interface IUserProp extends RouteComponentProps{
 
 }
 
 interface UserAdminState{
     users: Array<IN_User>
-    selectedUser: Array<Number>
     name : string
     email : string
     password : string
@@ -36,32 +37,35 @@ export class UserAdmin extends React.Component<IUserProp, UserAdminState>{
         super(props)
         this.headers = ["Nombre","Email"]
         this.state = {
-            users: [{id_user:"1", name: "Usuario 1", email: "newmail@mail.com"},{id_user:"2", name: "Usuario 2", email: "newmail2@mail.com"}],
+            users: [],
             name : "",
             password : "",
-            email : "",
-            selectedUser: [1, 2, 3],
+            email : ""
         }
     }
 
-    getUser: ( ) => void = async() =>{
+    getUser = async() =>{
         try {
-            const response = await fetch(url + "/admon", {
-            method: 'GET', 
-            mode: 'cors', 
-            cache: 'no-cache', 
-            }); 
-        let users = await response.json()
-        this.setState(users)
+            const response = await fetch(url + "/admon/users", {
+                method: 'GET', 
+                mode: 'cors', 
+                cache: 'no-cache', 
+                }); 
+            let users = await response.json() as IN_User[]
+            this.setState({
+                users,
+                email: "",
+                name: "",
+                password: ""
+            })
         } catch (error) {
-           return error
+            return error
         }
 
     }
 
     componentDidMount(){
         this.getUser()
-           
     }
 
     onItemChange = (id: string, arrIdx: number, value: string) => {
@@ -69,20 +73,22 @@ export class UserAdmin extends React.Component<IUserProp, UserAdminState>{
     }
 
     onAllSelected = (isSelected: boolean) => {
-        
+         
     }
 
-    onItemSelected = (id: string, isSelected: boolean) => {        
-        
+    onItemSelected = (idx: string, isSelected: boolean) => {     
+        let id = this.state.users[parseInt(idx)].id_user
+        this.setEnability(id, isSelected);
+
     }
 
-    accept: ( ) => void = async() =>{
+    accept = async() =>{
 
         let d : OUT_User = {name : this.state.name,email: this.state.email, password : this.state.password}
-          if(d.name &&  d.email && d.password ){
+        if(d.name &&  d.email && d.password ){
 
             try {
-                fetch(url + "/admon", {
+                let response = await fetch(url + "/admon/users", {
                 method: 'POST', 
                 body: JSON.stringify(d),
                 headers:{
@@ -96,13 +102,29 @@ export class UserAdmin extends React.Component<IUserProp, UserAdminState>{
             toast("Ingresa todos los campos")
         }
 
+        await this.getUser()
+
+    }
+
+    logout = () => {
+        admonLogOut()
+        this.forceUpdate()
     }
 
 
 
     render():JSX.Element{
-        console.log(this.state.users)
-        let users = this.state.users.map((v,i) => ({id: i.toString(), columns: [v.name, v.email, ""]} as ListRow))
+
+        if(!isAdmonLoggedIn()){
+            return <Redirect to="/admon"/>
+        }
+
+        let users = this.state.users.map((v,i) => (
+            {
+                id: i.toString(), 
+                columns: [v.name, v.email, ""],
+                isSelected: v.isEnabled
+        } as ListRow))
 
         return (
             <>
@@ -136,10 +158,42 @@ export class UserAdmin extends React.Component<IUserProp, UserAdminState>{
                                 />
                     </div>
                 </div>  
+                <MaterialButton className="right" text="Cerrar Sesión" onClick={()=>this.logout()}/>
                 </div>
             </div>
             </>
         );
+    }
+
+    setEnability = async (idUser: string, isEnabled: boolean) => {
+        try {
+            let response = await fetch(url + `/admon/users/${idUser}`, {
+                method: 'PUT', 
+                body: JSON.stringify({isEnabled}),
+                headers:{
+                    'Content-Type': 'application/json'
+                }
+            }); 
+        } catch (error) {
+            console.log(error)
+        }
+
+        await this.getUser()
+    }
+
+    addUser = async (user: OUT_User) => {
+        try {
+            let response = await fetch(url + `/admon/`, {
+                method: 'POST', 
+                body: JSON.stringify(user),
+                headers:{
+                    'Content-Type': 'application/json'
+                }
+            }); 
+            return response.ok
+        } catch (error) {
+            console.log(error)
+        }
     }
 }
 
