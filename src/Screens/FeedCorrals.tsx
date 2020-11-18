@@ -45,6 +45,23 @@ export class FeedCorrals extends React.Component<{}, FeedCorralsState>{
         this.getFeedCorrals()
     }
     
+    onFinishFeed: () => void = () =>{
+        console.log(this.state.corrals)
+        try {
+            fetch(url + "/corrals/alimentacion/", { 
+                method: 'POST', 
+                body: JSON.stringify(this.state.corrals),
+                headers:{
+                    'Content-Type': 'application/json'
+                  }
+                }); 
+            } catch (error) {
+                console.log(error)
+            }
+    } 
+
+    
+    
 
     render():JSX.Element{
         let corrals = this.state.corrals.map((v,i) => ({id: v.id_corrals, columns: [v.name  , v.kg == null? "0": v.kg.toFixed(2) ]} as ListRow))
@@ -67,7 +84,7 @@ export class FeedCorrals extends React.Component<{}, FeedCorralsState>{
                 </div>
             </div>
             <div className="row">
-                <MaterialButton className="right" text="Terminar alimentación"/>
+                <MaterialButton className="right" text="Terminar alimentación" onClick={this.onFinishFeed}/>
             </div>
             </>
         );
@@ -117,18 +134,7 @@ class EditingState implements ScreenState{
         let newcorral : OUT_CorralFeeding= {idCorral: id, kg : parseInt(kg)}
         corrals[parseInt(id)].kg = parseFloat(kg);
         console.log(newcorral)
-        try {
-            let date = new Date()
-            fetch(url + "/corrals/alimentacion" , {
-            method: 'POST', 
-            body: JSON.stringify(newcorral),
-            headers:{
-                'Content-Type': 'application/json'
-            }
-            });  
-        } catch (error) {
-           return error
-        }
+        
 
         this.ctx.setState({
             screenState: new WaitingState(this.ctx),
@@ -154,7 +160,7 @@ class EditingState implements ScreenState{
             <div>
                 <p>Corral: {corral.name}</p>
                 <MaterialInput placeholder="Kg a surtir" onChange={(_,kg) => {this.ctx.setState({kg})}} value={this.ctx.state.kg}/>
-                <MaterialButton className="right" text="Acceptar" onClick={()=>this.ctx.state.screenState.accept(id.toString(), kg)}/>
+                <MaterialButton className="right" text="Aceptar" onClick={()=>this.ctx.state.screenState.accept(id.toString(), kg)}/>
                 <MaterialButton className="right" text="Cancelar" onClick={()=>this.ctx.state.screenState.cancel()}/>
             </div>);
     };
