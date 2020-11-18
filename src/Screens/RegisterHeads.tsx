@@ -44,7 +44,7 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps, RegisterH
         this.state = {
             lorries: [],
             alots: [],
-            selectedLorry: "",
+            selectedLorry: "-1",
             selectedAlot: -1,
             siniga: "",
             weight: 0,
@@ -52,11 +52,7 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps, RegisterH
             sex: "male",
             heads: [],
             idLocal: "",
-            classes: [
-                {id: "1", cost: "400", name: "Clase 1", heads: 1, sex: "Macho"},
-                {id: "2", cost: "500", name: "Clase 2", heads: 2, sex: "Macho"},
-                {id: "3", cost: "600", name: "Clase 3", heads: 3, sex: "Macho"},
-                {id: "4", cost: "700", name: "Clase 4", heads: 0, sex: "Macho"}],
+            classes: [],
             selectedClass: -1
         }
     }
@@ -117,7 +113,9 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps, RegisterH
             return;
         }
         
-        let alot = this.state.alots[this.state.selectedAlot];
+        let alots = [...this.state.alots];
+        let alot =  alots[this.state.selectedAlot];
+        alot.headNum++;
         let head = {
             idAlot: alot.id.toString(),
             idLocal: this.state.idLocal,
@@ -127,18 +125,19 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps, RegisterH
             sexClaas: this.state.sexClass
 
         } as OUT_Head;
-        
 
-            let heads = this.state.heads;
-            heads.push(head)
-            this.setState({
-                heads,
-                weight: 0,
-                sex: "",
-                siniga: "",
-                idLocal: "",
-                selectedAlot: -1
-            })
+        let heads = this.state.heads;
+        heads.push(head)
+        this.setState({
+            alots,
+            heads,
+            weight: 0,
+            sex: "",
+            siniga: "",
+            idLocal: "",
+            selectedAlot: -1,
+            selectedClass: -1
+        })
 
 
     }
@@ -146,16 +145,21 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps, RegisterH
     onDeleteHead = (id: string) => {
         let i = parseInt(id);
         let heads = Object.assign(this.state, {}).heads;
+        let alots = [...this.state.alots];
+        let alot = alots.find((v) => heads[i].idAlot == v.id)
+        if(alot) alot.headNum--;
         heads.splice(i, 1);
         this.setState({
-            heads
+            heads,
+            alots
         })
     }
 
     onChangeLorry = (id: string) => {
         console.log("id: " + id)
         this.setState({
-            selectedLorry: this.state.lorries[parseInt(id)].id,
+            //selectedLorry: this.state.lorries[parseInt(id)].id,
+            selectedLorry: id,
             selectedClass: -1,
             heads: []
         });
@@ -226,6 +230,27 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps, RegisterH
                                         idLocal: v
                                     })}/>
                     <div className="field--margin">
+                        <Radio name="sex" 
+                                checked={this.state.sex == "male"} 
+                                onChange={() => this.setState({
+                                    sex: "male",
+                                    classes: this.state.lorries[parseInt(this.state.selectedLorry)].maleClassfies
+                                })}
+                                text="Macho"
+                                value="male"/>
+                    </div>
+                    <div className="field--margin">
+                        <Radio name="sex" 
+                                checked={this.state.sex == "female"} 
+                                onChange={() => this.setState({
+                                    sex: "female",
+                                    classes: this.state.lorries[parseInt(this.state.selectedLorry)].femaleClassfies
+                                })}
+                                text="Hembra"
+                                value="female"/>
+                    </div>
+                    <div className="field--margin">
+                        <label htmlFor="">Clasificación</label>
                         <Select placeholder="Seleccione clasificación" 
                                     elements={classes} 
                                     value={this.state.selectedClass.toString()}
@@ -235,27 +260,7 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps, RegisterH
                                             selectedClass: parseInt(v)
                                         });
                                         return true;}}/>
-
-                    
                     </div>
-                        <div className="field--margin">
-                            <Radio name="sex" 
-                                    checked={this.state.sex == "male"} 
-                                    onChange={() => this.setState({
-                                        sex: "male"
-                                    })}
-                                    text="Macho"
-                                    value="male"/>
-                        </div>
-                        <div className="field--margin">
-                            <Radio name="sex" 
-                                    checked={this.state.sex == "female"} 
-                                    onChange={() => this.setState({
-                                        sex: "female"
-                                    })}
-                                    text="Hembra"
-                                    value="female"/>
-                        </div>
                     <div className="field--margin">
                         <MaterialInput placeholder="Peso"
                                         type="number"
@@ -368,11 +373,11 @@ class AlotController extends React.Component
 
     render():JSX.Element{
         
-        let lotes = this.getSortedAlots().map((v,i) => ({key: i.toString(), 
+        let lotes = this.props.alots.map((v,i) => ({key: i.toString(), 
                                                     name: v.name} as IOption));
         let alot:IN_Alot|undefined = this.props.alots[this.props.alotSelected];
         let maxHeads = alot?.maxHeadNum?.toString() || "-";
-        let heads = alot?.headNum || "-";
+        let heads = alot?.headNum ?? "-";
         let maxWeight = alot?.maxWeight.toString() || "-";
         let minWeight = alot?.minWeight.toString() || "-";
         let protocol = alot?.arrivalProtocol?.name || "-";

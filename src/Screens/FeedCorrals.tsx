@@ -119,8 +119,8 @@ class EditingState implements ScreenState{
         console.log(newcorral)
         try {
             let date = new Date()
-            fetch(url + "/corrals/alimentacion/" + date.getTime() , {
-            method: 'PUT', 
+            fetch(url + "/corrals/alimentacion" , {
+            method: 'POST', 
             body: JSON.stringify(newcorral),
             headers:{
                 'Content-Type': 'application/json'
