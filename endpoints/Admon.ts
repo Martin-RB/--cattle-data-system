@@ -1,5 +1,5 @@
 import cookieParser from "cookie-parser";
-import { Router } from "express";
+import { NextFunction, Router, Request, Response } from "express";
 import { Connection } from "mysql";
 import { doQuery, IQueryResult, doEditElement } from "../Common/AwaitableSQL";
 import {
@@ -8,6 +8,17 @@ import {
     IN_UserLogin,
 } from "../Common/DTO/User";
 import { Telemetry } from "../Common/Telemetry";
+
+export function checkAdminLogin(tl: Telemetry){
+    return (req: Request, res: Response, next: NextFunction) => {
+        if(req.cookies.idUserAdmon){
+            next()
+        }
+        else{
+            tl.reportNotLoggedError(res,JSON.stringify(req.cookies));
+        }
+    }
+}
 
 export function Admon(router: Router, dbConn: Connection, tl: Telemetry) {
     
@@ -32,15 +43,13 @@ export function Admon(router: Router, dbConn: Connection, tl: Telemetry) {
         }
         
         let time = new Date().getTime();
-        res.cookie("idUserAdmon", qr.result.id_user, {
+        res.cookie("idUserAdmon", qr.result[0].id_user, {
             expires: new Date(time + 1000*60*10),
             path: "/"
-        })
-
-        res.send()
+        }).send()
     });
 
-    router.post("/users", async (req, res) => {
+    router.post("/users", checkAdminLogin(new Telemetry("admin login")), async (req, res) => {
         let m = req.body as IN_User;
         let date = new Date().getTime();
         let qr: IQueryResult | undefined = undefined;
@@ -68,7 +77,7 @@ export function Admon(router: Router, dbConn: Connection, tl: Telemetry) {
         res.send();
     })
 
-    router.get("/users", async (req, res) => {
+    router.get("/users", checkAdminLogin(new Telemetry("admin login")), async (req, res) => {
         let qr: IQueryResult | undefined = undefined;
         qr = await doQuery(
             dbConn,
@@ -98,7 +107,7 @@ export function Admon(router: Router, dbConn: Connection, tl: Telemetry) {
         res.send(users);
     })
 
-    router.put("/users/:id", async (req, res) => {
+    router.put("/users/:id", checkAdminLogin(new Telemetry("admin login")), async (req, res) => {
         let user = req.body as {isEnabled: boolean}
         if (!req.params.id) {
             tl.reportInternalError(res, "NO ID");

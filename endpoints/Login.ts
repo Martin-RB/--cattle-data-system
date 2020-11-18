@@ -1,5 +1,5 @@
 import cookieParser, { JSONCookie } from "cookie-parser";
-import { Router } from "express";
+import { NextFunction, Router, Response, Request } from "express";
 import { Connection } from "mysql";
 import { doQuery, IQueryResult, doEditElement } from "../Common/AwaitableSQL";
 import {
@@ -8,6 +8,17 @@ import {
     IN_UserLogin,
 } from "../Common/DTO/User";
 import { Telemetry } from "../Common/Telemetry";
+
+export function checkUserLogin(tl: Telemetry){
+    return (req: Request, res: Response, next: NextFunction) => {
+        if(req.cookies.idUser){
+            next()
+        }
+        else{
+            tl.reportNotLoggedError(res,{});
+        }
+    }
+}
 
 export function Login(router: Router, dbConn: Connection, tl: Telemetry) {
     
