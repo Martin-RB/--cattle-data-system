@@ -49,6 +49,7 @@ export class UserAdmin extends React.Component<IUserProp, UserAdminState>{
             const response = await fetch(url + "/admon/users", {
                 method: 'GET', 
                 mode: 'cors', 
+                credentials: "include",
                 cache: 'no-cache', 
                 }); 
             let users = await response.json() as IN_User[]
@@ -90,6 +91,7 @@ export class UserAdmin extends React.Component<IUserProp, UserAdminState>{
             try {
                 let response = await fetch(url + "/admon/users", {
                 method: 'POST', 
+                credentials: "include",
                 body: JSON.stringify(d),
                 headers:{
                     'Content-Type': 'application/json'
@@ -169,6 +171,7 @@ export class UserAdmin extends React.Component<IUserProp, UserAdminState>{
         try {
             let response = await fetch(url + `/admon/users/${idUser}`, {
                 method: 'PUT', 
+                credentials: "include",
                 body: JSON.stringify({isEnabled}),
                 headers:{
                     'Content-Type': 'application/json'
@@ -185,6 +188,7 @@ export class UserAdmin extends React.Component<IUserProp, UserAdminState>{
         try {
             let response = await fetch(url + `/admon/`, {
                 method: 'POST', 
+                credentials: "include",
                 body: JSON.stringify(user),
                 headers:{
                     'Content-Type': 'application/json'

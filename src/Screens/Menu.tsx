@@ -97,7 +97,7 @@ export class Menu extends React.Component<MenuProps, MenuState>{
                     <Route path={`${path}/providers`} render={(a) => historyRefresher(a, <Providers/>)}/>
                     <Route path={`${path}/corrals`} render={(a) => historyRefresher(a, <Corrals/>)}/>
                     <Route path={`${path}/lots`} render={(a) => historyRefresher(a, <Lots/>)}/>
-                    <Route component={Home}/>
+                    <Route render={(a) => <Home {...a}/>}/>
                 </Switch>
             </div>
         </div>

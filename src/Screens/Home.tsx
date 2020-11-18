@@ -4,8 +4,9 @@ import head from "./../../img/head.png";
 import alot from "./../../img/alot.png";
 import { HISTORY, toast } from "../App";
 import { IOption } from "../Classes/IOption";
+import { RouteComponentProps } from "react-router-dom";
 
-export interface HomeProps{
+export interface HomeProps extends RouteComponentProps{
 
 }
 
@@ -43,7 +44,7 @@ export class Home extends React.Component<HomeProps, HomeState>{
 				}
 				else if(option == "sell"){
 					//alert(`${type} ${option}`)
-					HISTORY.push("/menu/sell-alot", {idAlot: 1})
+					this.props.history.push("/menu/sell-alot", {idAlot: 1})
 				}
 				break;
 			case "head":
