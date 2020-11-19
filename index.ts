@@ -14,12 +14,20 @@ import { Implants } from "./endpoints/Implants";
 import { Alots } from "./endpoints/Alots";
 import { Lorries } from "./endpoints/Lorries";
 import { Search } from "./endpoints/Search";
+import { checkUserLogin, Login } from "./endpoints/Login";
+
+import cookieParser from "cookie-parser";
+import { Admon } from "./endpoints/Admon";
 
 let app = express();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(cors());
+app.use(cors({
+    origin: "http://localhost:8060",
+    credentials: true
+}));
+app.use(cookieParser())
 
 let DATABASE = "test";
 let conn = mysql.createConnection({
@@ -37,17 +45,42 @@ conn.connect((e) => {
 
 app.use(express.static(__dirname + "/html"));
 
-app.use("/api/home", Home(express.Router(), conn));
-app.use("/api/medicines", Medicines(express.Router(), conn, new Telemetry("/medicines")));
-app.use("/api/protocols", Protocols(express.Router(), conn, new Telemetry("/protocols")));
-app.use("/api/breeds", Breeds(express.Router(), conn, new Telemetry("/breeds")));
-app.use("/api/origins", Origins(express.Router(), conn, new Telemetry("/origins")));
-app.use("/api/providers", Providers(express.Router(), conn, new Telemetry("/providers")));
-app.use("/api/corrals", Corrals(express.Router(), conn, new Telemetry("/corrals")));
-app.use("/api/implants", Implants(express.Router(), conn, new Telemetry("/implants")));
-app.use("/api/alots", Alots(express.Router(), conn, new Telemetry("/alots")));
+app.use("/api/home", 
+    checkUserLogin(new Telemetry("login check")), 
+    Home(express.Router(), conn));
+app.use("/api/medicines", 
+    checkUserLogin(new Telemetry("login check")), 
+    Medicines(express.Router(), conn, new Telemetry("/medicines")));
+app.use("/api/protocols", 
+    checkUserLogin(new Telemetry("login check")), 
+    Protocols(express.Router(), conn, new Telemetry("/protocols")));
+app.use("/api/breeds", 
+    checkUserLogin(new Telemetry("login check")), 
+    Breeds(express.Router(), conn, new Telemetry("/breeds")));
+app.use("/api/origins", 
+    checkUserLogin(new Telemetry("login check")), 
+    Origins(express.Router(), conn, new Telemetry("/origins")));
+app.use("/api/providers", 
+    checkUserLogin(new Telemetry("login check")), 
+    Providers(express.Router(), conn, new Telemetry("/providers")));
+app.use("/api/corrals", 
+    checkUserLogin(new Telemetry("login check")), 
+    Corrals(express.Router(), conn, new Telemetry("/corrals")));
+app.use("/api/implants", 
+    checkUserLogin(new Telemetry("login check")), 
+    Implants(express.Router(), conn, new Telemetry("/implants")));
+app.use("/api/alots", 
+    checkUserLogin(new Telemetry("login check")), 
+    Alots(express.Router(), conn, new Telemetry("/alots")));
+app.use("/api/lorries", 
+    checkUserLogin(new Telemetry("login check")), 
+    Lorries(express.Router(), conn, new Telemetry("/lorries")));
+app.use("/api/login", 
+    Login(express.Router(), conn, new Telemetry("/login")));
+app.use("/api/admon", 
+    Admon(express.Router(), conn, new Telemetry("/admon")));
+//app.use("/api/admon", Users(express.Router(), conn, new Telemetry("/admon")));
 
-app.use("/api/lorries", Lorries(express.Router(), conn, new Telemetry("/lorries")));
 
 app.use("/api/search", Search(express.Router(), conn, new Telemetry("/search")));
 

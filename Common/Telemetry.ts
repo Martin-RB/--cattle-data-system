@@ -37,4 +37,14 @@ export class Telemetry{
         response.status(404);
         response.send(response.statusMessage);
     }
+    reportNotLoggedError = (response: Response, data: any) => {
+        let date = new Date().getTime();
+        cerr(`${this.endpoint} :: ${date} >> NotLoggedIn: No has iniciado sesión`);
+        console.log(data);
+        console.log("***************************************************");
+        response.statusMessage = `No has iniciado sesión: ${date}`;
+        response.setHeader("ERROR_TEXT", response.statusMessage);
+        response.status(401);
+        response.send(response.statusMessage);
+    }
 }
