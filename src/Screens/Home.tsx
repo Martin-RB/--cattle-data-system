@@ -1,6 +1,6 @@
 import React from "react";
 import { DropDown } from "../Components/DropDown";
-import head from "./../../img/head.png";
+import head from "./../../img/head.jpg";
 import alot from "./../../img/alot.png";
 import { HISTORY, toast } from "../App";
 import { IOption } from "../Classes/IOption";
