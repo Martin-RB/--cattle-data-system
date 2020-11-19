@@ -21,7 +21,7 @@ export async function GetAlots(dbConn: Connection, ids: Array<string>, idUser: s
     let qr = await doQuery(
         dbConn,
         `
-        SELECT a.*, (a.isClosed = 1) as IsClosed, (a.isSold = 1) as IsSold, 
+        SELECT a.*, (select COUNT(*) from heads where idActialAlot = a.id_alots) as cnt, (a.isClosed = 1) as IsClosed, (a.isSold = 1) as IsSold, 
                 GROUP_CONCAT(im.id_implants) as im_ids
         FROM alots a 
         LEFT JOIN implants im ON im.id_alots = a.id_alots 
@@ -78,7 +78,7 @@ export async function GetAlots(dbConn: Connection, ids: Array<string>, idUser: s
             id: el.id_alots,
             name: el.name,
             sex: el.sex,
-            headNum: el.heads,
+            headNum: el.cnt,
             maxHeadNum: el.maxHeads,
             reimplants: implResponse as Array<OUT_Implant>,
             arrivalProtocol: (protResponse as Array<OUT_Protocol>)[0],

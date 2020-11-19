@@ -79,7 +79,7 @@ export async function GetAloatsQuery(dbConn: Connection, ids: Array<string>, idU
     
 	let qr = await doQuery(
 	    dbConn,
-	    "SELECT * FROM alots a WHERE isEnabled = 1 AND a.name LIKE (?) ",
+	    "SELECT *, (select COUNT(*) from heads where idActialAlot = a.id_alots) as cnt FROM alots a WHERE isEnabled = 1 AND a.name LIKE (?) ",
 	    [ids[0] + '%']
 	);
     if (qr.error) {
@@ -129,7 +129,7 @@ export async function GetAloatsQuery(dbConn: Connection, ids: Array<string>, idU
             id: el.id_alots,
             name: el.name,
             sex: el.sex,
-            headNum: el.heads,
+            headNum: el.cnt,
             maxHeadNum: el.maxHeads,
             reimplants: implResponse as Array<OUT_Implant>,
             arrivalProtocol: (protResponse as Array<OUT_Protocol>)[0],
