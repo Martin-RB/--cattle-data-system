@@ -31,6 +31,7 @@ export class FeedCorrals extends React.Component<{}, FeedCorralsState>{
         try {
             let date = new Date()
             const response = await fetch(url + "/corrals/alimentacion/" + date.getTime(), {
+                credentials: "include",
             method: 'GET', 
             mode: 'cors', 
             cache: 'no-cache', 
@@ -64,13 +65,16 @@ export class FeedCorrals extends React.Component<{}, FeedCorralsState>{
 
     upload = async (corrals: OUT_Feeds[]) => {
         try {
-            await fetch(url + "/corrals/alimentacion/", { 
+            let resp = await fetch(url + "/corrals/alimentacion/", { 
                 method: 'POST', 
                 body: JSON.stringify(corrals),
+                credentials: "include",
                 headers:{
                     'Content-Type': 'application/json'
                   }
                 }); 
+
+            if(resp.ok) toast("Alimentación terminada con exito")
         } catch (error) {
             console.log(error)
         }
@@ -80,7 +84,7 @@ export class FeedCorrals extends React.Component<{}, FeedCorralsState>{
 
     render():JSX.Element{
         let corrals = this.state.corrals.map((v,i) => ({
-            id: v.id_corrals, 
+            id: i.toString(), 
             columns: [v.name  , v.kg == null? "0": v.kg.toFixed(2) ]
         } as ListRow))
         return (
@@ -122,9 +126,9 @@ class WaitingState implements ScreenState{
     
     viewCorral: (id: string) => void = (id) => {
         let i = parseInt(id) ;
-        let corral = this.ctx.state.corrals[i-1]
+        let corral = this.ctx.state.corrals[i]
         this.ctx.setState({
-            selectedCorral: parseInt(id) - 1,
+            selectedCorral: parseInt(id),
             kg: corral.kg==null? "0":corral.kg.toString(),
             screenState: new EditingState(this.ctx),
             canEdit: corral.id_feeds != null

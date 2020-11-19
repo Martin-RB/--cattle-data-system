@@ -214,8 +214,8 @@ class WaitingState implements IState{
             selectedItem: idx,
             item: ({
                 ...item,
-                hostCorral: item?.hostCorral.id,
-                arrivalProtocol: item?.arrivalProtocol.id
+                hostCorral: item?.hostCorral?.id,
+                arrivalProtocol: item?.arrivalProtocol?.id
             }) as IFieldedLot
         })
         return true;
@@ -398,8 +398,8 @@ class ViewState implements IState{
             selectedItem: idx,
             item: ({
                 ...item,
-                hostCorral: item?.hostCorral.id,
-                arrivalProtocol: item?.arrivalProtocol.id
+                hostCorral: item?.hostCorral?.id,
+                arrivalProtocol: item?.arrivalProtocol?.id
             }) as IFieldedLot
         })
         return true;
@@ -439,6 +439,7 @@ class ProtocolsSrv{
                     method: 'GET', 
                     mode: 'cors', 
                     cache: 'no-cache', 
+                    credentials: "include",
                 }); 
     
                 let data = (await response.json()) as Array<IN_Protocol>
@@ -467,6 +468,7 @@ class CorralsSrv{
             method: 'GET', 
             mode: 'cors', 
             cache: 'no-cache', 
+            credentials: "include",
         }); 
 
         let data = await response.json()
@@ -497,6 +499,7 @@ class LotsSrv{
             method: 'GET', 
             mode: 'cors', 
             cache: 'no-cache', 
+            credentials: "include",
         }); 
 
         let data = await response.json()
@@ -525,6 +528,7 @@ class LotsSrv{
             fetch(url + "/alots", {
                 method: 'POST', 
                 body: JSON.stringify(d),
+                credentials: "include",
                 headers:{
                     'Content-Type': 'application/json'
                 }
@@ -540,6 +544,7 @@ class LotsSrv{
             const response = await fetch(url + "/alots/" + id, {
             method: 'DELETE', 
             mode: 'cors', 
+            credentials: "include",
             }); 
 
         } catch (error) {

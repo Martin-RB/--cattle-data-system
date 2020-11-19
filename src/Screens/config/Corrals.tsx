@@ -360,6 +360,7 @@ class CorralsSrv{
             method: 'GET', 
             mode: 'cors', 
             cache: 'no-cache', 
+            credentials: "include",
             }); 
 
         let data = await response.json()
@@ -382,6 +383,7 @@ async add(d: OUT_Corral){
         fetch(url + "/corrals", {
         method: 'POST', 
         body: JSON.stringify(d),
+        credentials: "include",
         headers:{
             'Content-Type': 'application/json'
           }
@@ -397,6 +399,7 @@ async remove(id: string){
         const response = await fetch(url + "/corrals/" + id, {
         method: 'DELETE', 
         mode: 'cors', 
+        credentials: "include",
         }); 
 
     } catch (error) {

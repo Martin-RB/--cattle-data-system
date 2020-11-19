@@ -62,6 +62,7 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps, RegisterH
             const response = await fetch(url + "/lorries" , {
             method: 'GET', 
             mode: 'cors', 
+            credentials: "include",
             cache: 'no-cache', 
             }); 
             
@@ -79,6 +80,7 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps, RegisterH
             const response = await fetch(url + "/alots" , {
             method: 'GET', 
             mode: 'cors', 
+            credentials: "include",
             cache: 'no-cache', 
             }); 
             
@@ -166,17 +168,24 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps, RegisterH
 
     }
 
-    onFinishWork: () => void = () =>{
-        console.log(this.state.heads)
+    onFinishWork: () => void = async () =>{
         if(this.state.heads.length > 0){
-        try {
-            fetch(url + "/lorries/" + this.state.selectedLorry + "/heads" , { 
-                method: 'POST', 
-                body: JSON.stringify(this.state.heads),
-                headers:{
-                    'Content-Type': 'application/json'
-                  }
-                }); 
+            let res;
+            try {   
+                res = await fetch(url + "/lorries/" + this.state.lorries[parseInt(this.state.selectedLorry)].id + "/heads" , { 
+                    method: 'POST', 
+                    body: JSON.stringify(this.state.heads),
+                    credentials: "include",
+                    headers:{
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if(res.ok){
+                    this.setState({
+                        heads: []
+                    })
+                }
             } catch (error) {
                 console.log(error)
             }

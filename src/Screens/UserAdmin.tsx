@@ -50,6 +50,7 @@ export class UserAdmin extends React.Component<IUserProp, UserAdminState>{
             method: 'GET', 
             mode: 'cors', 
             cache: 'no-cache', 
+            credentials: "include",
             }); 
         let users = await response.json()
         this.setState(users)
@@ -85,6 +86,7 @@ export class UserAdmin extends React.Component<IUserProp, UserAdminState>{
                 fetch(url + "/admon", {
                 method: 'POST', 
                 body: JSON.stringify(d),
+                credentials: "include",
                 headers:{
                     'Content-Type': 'application/json'
                 }

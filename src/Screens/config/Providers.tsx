@@ -357,6 +357,7 @@ class ProvidersSrv{
             const response = await fetch(url + "/providers", {
             method: 'GET', 
             mode: 'cors', 
+            credentials: "include",
             cache: 'no-cache', 
             }); 
 
@@ -373,6 +374,7 @@ class ProvidersSrv{
             const response = await fetch(url + "/providers/" + id, {
             method: 'GET', 
             mode: 'cors', 
+            credentials: "include",
             cache: 'no-cache', 
             }); 
 
@@ -388,6 +390,7 @@ class ProvidersSrv{
         try {
             fetch(url + "/providers", {
             method: 'POST', 
+            credentials: "include",
             body: JSON.stringify(d),
             headers:{
                 'Content-Type': 'application/json'
@@ -403,6 +406,7 @@ class ProvidersSrv{
             const response = await fetch(url + "/providers/" + id, {
             method: 'DELETE', 
             mode: 'cors', 
+            credentials: "include",
             }); 
 
         } catch (error) {

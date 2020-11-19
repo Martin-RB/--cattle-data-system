@@ -364,6 +364,7 @@ class DrugsSrv{
                 method: 'GET', 
                 mode: 'cors', 
                 cache: 'no-cache', 
+                credentials: "include",
                 }); 
 
             let data = await response.json()
@@ -395,6 +396,7 @@ class DrugsSrv{
             fetch(url + "/medicines", {
             method: 'POST', 
             body: JSON.stringify(d),
+            credentials: "include",
             headers:{
                 'Content-Type': 'application/json'
               }
@@ -409,6 +411,7 @@ class DrugsSrv{
         try {
             const response = await fetch(url + "/medicines/" + id, {
             method: 'DELETE', 
+            credentials: "include",
             mode: 'cors', 
             }); 
 

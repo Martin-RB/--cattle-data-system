@@ -244,6 +244,7 @@ export class LorryRegister extends React.Component<LorryRegisterProps, LorryRegi
             const response = await fetch(url + "/providers", {
             method: 'GET', 
             mode: 'cors', 
+            credentials: "include",
             cache: 'no-cache', 
             }); 
 
@@ -261,6 +262,7 @@ export class LorryRegister extends React.Component<LorryRegisterProps, LorryRegi
             const response = await fetch(url + "/corrals", {
             method: 'GET', 
             mode: 'cors', 
+            credentials: "include",
             cache: 'no-cache', 
             }); 
 
@@ -281,6 +283,7 @@ export class LorryRegister extends React.Component<LorryRegisterProps, LorryRegi
                 method: 'POST', 
                 mode: 'cors', 
                 headers,
+                credentials: "include",
                 cache: 'no-cache', 
                 body: JSON.stringify(data)
             }); 
