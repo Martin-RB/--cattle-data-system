@@ -349,8 +349,8 @@ body{
   height: 100%;
   grid-row-start: 1;
   grid-row-end: 3;
-  background-color: red;
 }
+
 .search-item--title{}
 .search-item--title--fontSize{
   font-size: 1.75em;
