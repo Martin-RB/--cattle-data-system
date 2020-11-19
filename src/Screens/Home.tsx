@@ -5,6 +5,7 @@ import vaquita from "./../../img/vaquita.jpg";
 import alot from "./../../img/alot.png";
 import { HISTORY, toast } from "../App";
 import { IOption } from "../Classes/IOption";
+import url from "./ConfigI";
 
 export interface HomeProps{
 
@@ -26,8 +27,23 @@ export class Home extends React.Component<HomeProps, HomeState>{
 		}		
 	}
 
-	onSubmitSearch = () => {
-		toast("Submited " + this.state.search);
+	onSubmitSearch = async () => {
+		toast("Busqueda: " + this.state.search);
+		let d = this.state.search
+		console.log(d)
+		try {
+			const response = await fetch(url + "/search/" + d, {
+			method: 'GET', 
+			mode: "no-cors",
+			cache: 'no-cache', 
+			});
+		let data = await response
+		console.log(data)
+		//this.setState({searchItems : data})
+		} catch (error) {
+			console.log(error)
+			return error
+		}
 	}
 
 	onCancelSearch = () => {
