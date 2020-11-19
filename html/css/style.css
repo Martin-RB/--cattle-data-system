@@ -1,4 +1,6 @@
 /* Codigo que no se de que es pero se necesita para no se que */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans&display=swap');
+
 html{
   margin: 0 !important;
   padding: 0 !important;
@@ -22,6 +24,7 @@ body{
     
     margin: 0 !important;
     padding: 0 !important;
+    font-family: 'Noto Sans', sans-serif;
 }
 
 ::-webkit-scrollbar{
@@ -58,6 +61,11 @@ body{
 .my-sidenav li>a{
   color: var(--color-primary-hard2)!important;
 }
+.my-sidenav li>a:hover{
+  color: var(--color-primary-hard2)!important;
+  background-color:  #D3D3D3;
+}
+
 .my-sidenav li>a>i{
     color: var(--color-primary-hard2)!important;
 }
@@ -341,8 +349,8 @@ body{
   height: 100%;
   grid-row-start: 1;
   grid-row-end: 3;
-  background-color: red;
 }
+
 .search-item--title{}
 .search-item--title--fontSize{
   font-size: 1.75em;
