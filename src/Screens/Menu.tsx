@@ -1,8 +1,8 @@
 import React from "react";
-import { Switch, Route, useRouteMatch, Link, Redirect } from "react-router-dom";
+import { Switch, Route, useRouteMatch, Link, Redirect, RouteComponentProps } from "react-router-dom";
 import { Info } from "./Info";
 import { MATCH, historyRefresher, HISTORY } from "../App";
-import { Login } from "./Login";
+import { Login, logOut } from "./Login";
 import { Button, MaterialButton } from "../Components/Button";
 import { TopNav } from "../Components/TopNav";
 import image from "./../../img/logo.png";
@@ -21,7 +21,7 @@ import { RegisterHeads } from "./RegisterHeads";
 import { FeedCorrals } from "./FeedCorrals";
 import cookie from 'react-cookies';
 
-interface MenuProps{
+interface MenuProps extends RouteComponentProps{
 
 }
 
@@ -59,15 +59,14 @@ export class Menu extends React.Component<MenuProps, MenuState>{
     }
 
     onLogout(){
-        HISTORY.push("/login");
-        
+
+        logOut();
+        this.props.history.replace("/login")
     }
 
     
-    render() {
-
-        let {path, url} = MATCH;        
-        
+    render() {    
+        let path = this.props.match.path
         return <div style={{height: "100vh"}}>
 
         <TopNav todos={[new TodoWork("Faltan corrales por alimentar", "menu/info")]} 
@@ -82,7 +81,7 @@ export class Menu extends React.Component<MenuProps, MenuState>{
             {/* <div className="menu--side">
                 <MaterialButton text="Ver información" onClick={() => this.routeTo(SIDE_OPT.info)}/>
             </div> */}
-            <Sidenav user={{email: "martin.riv.ben@hotmail.com", name: "Martín Rivas"}}/>
+            <Sidenav user={{email: cookie.load("email"), name: cookie.load("name")}}/>
             
 
             <div className="sidenaved">
@@ -96,7 +95,7 @@ export class Menu extends React.Component<MenuProps, MenuState>{
                     <Route path={`${path}/providers`} render={(a) => historyRefresher(a, <Providers/>)}/>
                     <Route path={`${path}/corrals`} render={(a) => historyRefresher(a, <Corrals/>)}/>
                     <Route path={`${path}/lots`} render={(a) => historyRefresher(a, <Lots/>)}/>
-                    <Route component={Home}/>
+                    <Route render={(a) => <Home {...a}/>}/>
                 </Switch>
             </div>
         </div>

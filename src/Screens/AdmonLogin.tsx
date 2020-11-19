@@ -8,7 +8,7 @@ import url from "./ConfigI";
 import { toast } from "../App";
 import cookie from 'react-cookies';
 
-interface LoginProps extends RouteComponentProps{
+interface AdmonLoginProps extends RouteComponentProps{
 
 }
 
@@ -21,10 +21,11 @@ interface HashMap{
     [key: string]: string
 }
 
-interface LoginState{
+interface AdmonLoginState{
     fields: HashMap
     name : string
     password : string
+    access :  IN_User
 
 }
 
@@ -33,14 +34,15 @@ enum LoginFields{
     password = "password"
 }
 
-export class Login extends React.Component<LoginProps, LoginState>{
+export class AdmonLogin extends React.Component<AdmonLoginProps, AdmonLoginState>{
 
-    constructor(props: LoginProps){
+    constructor(props: AdmonLoginProps){
         super(props);
         this.state = {
             fields: {},
             name : "",
-            password : ""
+            password : "",
+            access : {id_user : "", name : "" , email : "" }
         };
         this.onSubmit = this.onSubmit.bind(this);
         this.onInputChanged = this.onInputChanged.bind(this);
@@ -55,15 +57,15 @@ export class Login extends React.Component<LoginProps, LoginState>{
     }
 
     onSubmit : () => void = async() =>{
+      console.log("sub");
       
       let d : LoginRequest = {
         name : this.state.name, 
         password : this.state.password } 
       let result = false;
-      let res = "";
-      let error;
       try {
-        const response = await fetch(url + "/login", {
+        let newurl = "https://aadd3a6e-85ac-4ed5-8a34-b6b26ff2e442.mock.pstmn.io"
+        const response = await fetch(url + "/admon/login", {
           method: 'POST', 
           credentials: "include",
           body: JSON.stringify(d),
@@ -71,25 +73,20 @@ export class Login extends React.Component<LoginProps, LoginState>{
               'Content-Type': 'application/json',
           }
         }); 
-        result = response.ok;
-        res = await response?.text();
+        result = response.status == 200;
       } 
-      catch (e) {
-        error = e;
+      catch (error) {
         console.log(error)
       }
 
       if(result){
+        console.log(this.props.match.url);
+        
         this.props.history.push({
-            pathname: "/menu",
-            state: {
-                username: this.state.fields[LoginFields.username],
-                password: this.state.fields[LoginFields.password],
-            }
+            pathname: "/admon/platform"
         })
       } else {
-        toast(res)
-        //toast("Credenciales incorrectas")
+        toast("Credenciales incorrectas")
       }
 
     }
@@ -105,8 +102,8 @@ export class Login extends React.Component<LoginProps, LoginState>{
 
     render(): JSX.Element{
 
-        if(isLoggedIn()){
-          return <Redirect to="/menu"/>
+        if(isAdmonLoggedIn()){
+          return <Redirect to="/admon/platform"/>
         }
         
         return <div className="login--background">
@@ -114,9 +111,10 @@ export class Login extends React.Component<LoginProps, LoginState>{
         <div className="section"></div>
           <main>
             <center>
+                <h3>Administración</h3>
               <img className="responsive-img" width="210px" src={vaquita} />
 
-              <h5 className="indigo-text">Introduzca sus credenciales</h5>
+              <h5 className="indigo-text">Introduzca sus credenciales de administrador</h5>
 
               <div className="container">
                 <div className="z-depth-1 grey lighten-4 row contenedor" >
@@ -156,15 +154,14 @@ export class Login extends React.Component<LoginProps, LoginState>{
 
 
 
-export function isLoggedIn(){
-  return cookie.load("idUser") != undefined
+export function isAdmonLoggedIn(){
+  return cookie.load("idUserAdmon") != undefined
 }
 
-export function logOut(){
-  console.log("removing");
-  
-  cookie.remove("idUser", {path: "/"})
-  cookie.remove("name", {path: "/"})
-  cookie.remove("businessName", {path: "/"})
-  cookie.remove("email", {path: "/"})
+export function admonLogOut(){
+  cookie.remove("idUserAdmon", {path: "/"})
+  cookie.remove("isAdmon", {path: "/"})
+  cookie.remove("nameAdmon", {path: "/"})
+  cookie.remove("businessNameAdmon", {path: "/"})
+  cookie.remove("emailAdmon", {path: "/"})
 }
