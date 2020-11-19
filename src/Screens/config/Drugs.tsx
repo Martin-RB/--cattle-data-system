@@ -362,7 +362,7 @@ class DrugsSrv{
 
                 const response = await fetch(url + "/medicines", {
                 method: 'GET', 
-                mode: 'cors', 
+                mode: 'no-cors', 
                 cache: 'no-cache', 
                 }); 
 
