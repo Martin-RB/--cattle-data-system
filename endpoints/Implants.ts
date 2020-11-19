@@ -6,7 +6,7 @@ import { OUT_Implant, IN_Implant, IN_Implant_Implanted } from "../Common/DTO/Imp
 import { OUT_Protocol } from "../Common/DTO/Protocol";
 import { GetProtocol } from "./Protocols";
 
-export async function GetImplants(dbConn: Connection, ids: Array<string>){
+export async function GetImplants(dbConn: Connection, ids: Array<string>, idUser: string){
 
     if(ids.length == 0){
         return [];
@@ -14,7 +14,7 @@ export async function GetImplants(dbConn: Connection, ids: Array<string>){
 
     let qr = await doQuery(dbConn, `SELECT * 
                                     FROM implants i 
-                                    WHERE id_implants IN (?);`, [ids])
+                                    WHERE id_implants IN (?) AND id_user = ?;`, [ids, idUser])
     
     if(qr.error){
         return qr.error;
@@ -26,7 +26,7 @@ export async function GetImplants(dbConn: Connection, ids: Array<string>){
     for (let i = 0; i < qrr.length; i++) {
         const el = qrr[i];
         
-        let protResponse = await GetProtocol(dbConn, [el.id_protocols]);
+        let protResponse = await GetProtocol(dbConn, [el.id_protocols], idUser);
         let protocols = (protResponse as Array<OUT_Protocol>);
 
         if(protocols.length == undefined && protocols.length > 0){
@@ -78,7 +78,7 @@ export function Implants(router: Router, dbConn: Connection, tl: Telemetry){
             return;
         }
 
-        let implantResponse = await GetImplants(dbConn, qrr.map((v:any)=>v.id_implants))
+        let implantResponse = await GetImplants(dbConn, qrr.map((v:any)=>v.id_implants), req.cookies.idUser)
         let responseImpl = implantResponse as Array<OUT_Implant>;
 
         if(responseImpl.length == undefined){
@@ -118,8 +118,8 @@ export function Implants(router: Router, dbConn: Connection, tl: Telemetry){
 
         let qr = await doQuery(dbConn, `UPDATE implants 
                                         SET dateImplanted = ? 
-                                        WHERE id_implants = ?`,
-                                        [p.date, id]);
+                                        WHERE id_implants = ? AND id_user = ?`,
+                                        [p.date, id, req.cookies.idUser]);
 
         if(qr.error){
             tl.reportInternalError(res, qr.error);

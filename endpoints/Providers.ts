@@ -9,13 +9,13 @@ import {
     IN_Provider_Flex,
 } from "../Common/DTO/Provider";
 
-export async function GetProviders(dbConn: Connection, ids: Array<string>) {
+export async function GetProviders(dbConn: Connection, ids: Array<string>, idUser: string) {
     let qr = await doQuery(
         dbConn,
         `
-        SELECT * FROM providers WHERE id_providers IN (?);
+        SELECT * FROM providers WHERE id_providers IN (?) AND isEnabled = 1 AND id_user = ?;
     `,
-        [ids]
+        [ids, idUser]
     );
 
     if (qr.error) {
@@ -38,8 +38,8 @@ export function Providers(router: Router, dbConn: Connection, tl: Telemetry) {
     router.get("/", async (req, res) => {
         let qr = await doQuery(
             dbConn,
-            "SELECT id_providers FROM providers WHERE isEnabled = 1",
-            []
+            "SELECT id_providers FROM providers WHERE isEnabled = 1 AND id_user = ?",
+            [req.cookies.idUser]
         );
         if (qr.error) {
             tl.reportInternalError(res, qr.error);
@@ -51,7 +51,8 @@ export function Providers(router: Router, dbConn: Connection, tl: Telemetry) {
         if (ids.length != 0) {
             let providerResponse = await GetProviders(
                 dbConn,
-                ids.map((v: any) => v.id_providers)
+                ids.map((v: any) => v.id_providers),
+                req.cookies.idUser
             );
             let responseProvider = providerResponse as Array<OUT_Provider>;
 
@@ -75,8 +76,8 @@ export function Providers(router: Router, dbConn: Connection, tl: Telemetry) {
             dbConn,
             `SELECT * 
                                         FROM providers 
-                                        WHERE id_providers = ? AND isEnabled = 1`,
-            [req.params.id]
+                                        WHERE id_providers = ? AND isEnabled = 1 AND id_user = ?`,
+            [req.params.id, req.cookies.idUser]
         );
         if (qr.error) {
             tl.reportInternalError(res, qr.error);
@@ -92,6 +93,13 @@ export function Providers(router: Router, dbConn: Connection, tl: Telemetry) {
             };
             providers.push(provider);
         });
+        if (providers.length == 0) {
+            tl.reportNotFoundError(
+                res,
+                req.params.id,
+                "Proveedor no encontrado"
+            );
+        }
 
         res.send(providers[0]);
     });
@@ -105,7 +113,7 @@ export function Providers(router: Router, dbConn: Connection, tl: Telemetry) {
             `INSERT INTO providers 
                                         (id_user, name, create_datetime, edit_datetime) VALUES 
                                         (?, ?, ?, ?);`,
-            [p.id_user, p.name, date, date]
+            [req.cookies.idUser, p.name, date, date]
         );
 
         if (qr.error) {

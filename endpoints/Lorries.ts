@@ -1,18 +1,19 @@
 import { Connection } from "mysql";
 import { doQuery, checkResponseErrors } from "../Common/AwaitableSQL";
-import { OUT_Lorry, IN_Lorry } from "../Common/DTO/Lorry";
+import { OUT_Lorry, IN_Lorry, } from "../Common/DTO/Lorry";
 import { OUT_WeightClassfy } from "../Common/DTO/WeightClassfy";
 import { GetCorrals } from "./Corrals";
 import { GetOrigins } from "./Origins";
 import { OUT_Corral } from "../Common/DTO/Corral";
 import { OUT_Origin } from "../Common/DTO/Origin";
 import { OUT_Provider } from "../Common/DTO/Provider";
+import { IN_Heads } from "../Common/DTO/Heads";
 import { DateTimeOps } from "../Common/DateTimeOps";
 import { GetProviders } from "./Providers";
 import { Router } from "express";
 import { Telemetry } from "../Common/Telemetry";
 
-export async function GetLorries(dbConn: Connection, ids: Array<string>) {
+export async function GetLorries(dbConn: Connection, ids: Array<string>, idUser: string) {
     if (ids.length == 0) {
         return [];
     }
@@ -58,9 +59,9 @@ export async function GetLorries(dbConn: Connection, ids: Array<string>) {
             }
         }
 
-        let corralResponse = await GetCorrals(dbConn, [el.idStayCorral]);
-        let originResponse = await GetOrigins(dbConn, [el.id_origins]);
-        let providerResponse = await GetProviders(dbConn, [el.id_providers]);
+        let corralResponse = await GetCorrals(dbConn, [el.idStayCorral], idUser);
+        let originResponse = await GetOrigins(dbConn, [el.id_origins], idUser);
+        let providerResponse = await GetProviders(dbConn, [el.id_providers], idUser);
         let errors = checkResponseErrors(
             corralResponse,
             originResponse,
@@ -70,7 +71,7 @@ export async function GetLorries(dbConn: Connection, ids: Array<string>) {
             return errors;
         }
 
-        if ((corralResponse as Array<OUT_Corral>).length == 0) {
+        /*if ((corralResponse as Array<OUT_Corral>).length == 0) {
             return { e: "No Corral", info: "No Protocol" };
         }
         if ((originResponse as Array<OUT_Origin>).length == 0) {
@@ -78,7 +79,7 @@ export async function GetLorries(dbConn: Connection, ids: Array<string>) {
         }
         if ((providerResponse as Array<OUT_Provider>).length == 0) {
             return { e: "No Provider", info: "No Corral" };
-        }
+        }*/
 
         let openDays = -1;
         if (el.workDate != null) {
@@ -110,6 +111,13 @@ export async function GetLorries(dbConn: Connection, ids: Array<string>) {
 
 export function Lorries(router: Router, dbConn: Connection, tl: Telemetry) {
     router.get("/", async (req, res) => {
+        /*let qr = await doQuery(
+            dbConn,
+            `
+            DELETE FROM lorries;
+        `,
+            []
+        );*/
         let qr = await doQuery(
             dbConn,
             `
@@ -129,7 +137,44 @@ export function Lorries(router: Router, dbConn: Connection, tl: Telemetry) {
         if (ids.length != 0) {
             let lorriesResponse = await GetLorries(
                 dbConn,
-                ids.map((v: any) => v.id_lorries)
+                ids.map((v: any) => v.id_lorries),
+                req.cookies.idUser
+            );
+            let responseLorries = lorriesResponse as Array<OUT_Lorry>;
+
+            if (responseLorries.length == undefined) {
+                let error = lorriesResponse as { e: any; info: string };
+                tl.reportInternalError(res, error.e);
+                return;
+            }
+            lorries = responseLorries;
+        }
+
+        res.send(lorries);
+    });
+
+    router.get("/notWorked", async (req, res) => {
+        let qr = await doQuery(
+            dbConn,
+            `
+            SELECT id_lorries FROM lorries
+            WHERE isWorked = 0 AND id_user = ?;
+        `,
+            [req.cookies.idUser]
+        );
+        if (qr.error) {
+            tl.reportInternalError(res, qr.error);
+            return;
+        }
+
+        let ids = qr.result;
+
+        let lorries = new Array<OUT_Lorry>();
+        if (ids.length != 0) {
+            let lorriesResponse = await GetLorries(
+                dbConn,
+                ids.map((v: any) => v.id_lorries),
+                req.cookies.idUser
             );
             let responseLorries = lorriesResponse as Array<OUT_Lorry>;
 
@@ -150,7 +195,7 @@ export function Lorries(router: Router, dbConn: Connection, tl: Telemetry) {
             return;
         }
 
-        let protResponse = await GetLorries(dbConn, [req.params.id]);
+        let protResponse = await GetLorries(dbConn, [req.params.id], req.cookies.idUser);
         let responseProts = protResponse as Array<OUT_Lorry>;
 
         if (responseProts.length == undefined) {
@@ -175,9 +220,9 @@ export function Lorries(router: Router, dbConn: Connection, tl: Telemetry) {
                 VALUES (?,?,?,?,?,?,?,?,?,?);
         `,
             [
-                p.id_user,
+                req.cookies.idUser,
                 p.plateNum,
-                p.origin,
+                -1,
                 p.provider,
                 p.maxHeads,
                 p.weight,
@@ -195,36 +240,120 @@ export function Lorries(router: Router, dbConn: Connection, tl: Telemetry) {
 
         let idLorry = qr.result.insertId;
 
-        let allClassfies = p.maleClassfies.concat(p.femaleClassfies);
         let values_str = "";
         let values_arr = [];
-        for (let i = 0; i < allClassfies.length; i++) {
-            if (i != 0) {
-                values_str += ",";
+        let classfyQr = null;
+        if(p.maleClassfies.length > 0){
+            for (let i = 0; i < p.maleClassfies.length; i++) {
+                if (i != 0) {
+                    values_str += ",";
+                }
+                const el = p.maleClassfies[i];
+                values_arr.push(req.cookies.idUser,idLorry, el.name, -1, el.cost, "male", date);
+                values_str += "(?,?,?,?,?,?,?)";
             }
-            const el = allClassfies[i];
-            values_arr.push(p.id_user,idLorry, el.name, -1, el.cost, el.sex, date);
-            values_str += "(?,?,?,?,?,?,?)";
+
+            classfyQr = await doQuery(
+                dbConn,
+                `
+                INSERT INTO weight_class 
+                    (id_user,id_lorries, name, heads, cost, sex, create_datetime) VALUES 
+                    :values:;
+            `.replace(":values:", values_str),
+                values_arr
+            );
+
+            if (classfyQr.error) {
+                tl.reportInternalError(res, classfyQr.error);
+                console.log(classfyQr.obj.sql);
+
+                return;
+            }
         }
+        // agregar female
+        if(p.femaleClassfies.length > 0){
+            values_str = "";
+            values_arr = [];
+            for (let i = 0; i < p.femaleClassfies.length; i++) {
+                if (i != 0) {
+                    values_str += ",";
+                }
+                const el = p.femaleClassfies[i];
+                values_arr.push(req.cookies.idUser,idLorry, el.name, -1, el.cost, "female", date);
+                values_str += "(?,?,?,?,?,?,?)";
+            }
+            classfyQr = await doQuery(
+                dbConn,
+                `
+                INSERT INTO weight_class 
+                    (id_user,id_lorries, name, heads, cost, sex, create_datetime) VALUES 
+                    :values:;
+            `.replace(":values:", values_str),
+                values_arr
+            );
 
-        let classfyQr = await doQuery(
-            dbConn,
-            `
-            INSERT INTO weight_class 
-                (id_user,id_lorries, name, heads, cost, sex, create_datetime) VALUES 
-                :values:;
-        `.replace(":values:", values_str),
-            values_arr
-        );
+            if (classfyQr.error) {
+                tl.reportInternalError(res, classfyQr.error);
+                console.log(classfyQr.obj.sql);
 
-        if (classfyQr.error) {
-            tl.reportInternalError(res, classfyQr.error);
-            console.log(classfyQr.obj.sql);
+                return;
+            }
 
-            return;
         }
+        
 
         res.send({id: idLorry});
     });
+    // Place the get all for a specific ID. 
+    // Post the heads of the jaulas
+    router.post('/:id/heads', async (req, res) => {
+        let data = req.body as IN_Heads[];
+        let date = new Date().getTime().toString();
+        let lorryID = req.params.id;
+        console.log(lorryID);
+        let sql = "";
+        let sql_params = [];
+        //let searchArr = ['idBreed', 'idAlot', 'siniga', 'localID', 'sex', 'weight'];
+        // post 1 by one
+        // Use the in and out
+        /*sql = `
+        INSERT INTO Heads 
+            (id_breeds, idActualAlot, siniga, localID, sex, weight, id_lorries) 
+            VALUES (?,?,?,?,?,?,?)";`;*/
+       
+        let valuesStr = "";
+        let valuesArr: string[] = [];
+        data.forEach((el, i) => {
+            if(i != 0) valuesStr += ","
+            valuesStr += "(?,?,?,?,?,?,?,?,?,?,?,?)";
+            valuesArr.push(req.cookies.idUser, "-1", lorryID , el.idAlot??"NULL" , el.siniga, el.idLocal, el.sex, el.weight.toString(), date, date, "-1", el.sexClass.toString())
+        });
+       sql = `
+            INSERT INTO heads 
+                (id_user,id_breeds,id_lorries, idActialAlot, siniga, localId, 
+                    sex, weight, create_datetime, edit_datetime, weightRatio, id_weight_class) 
+                VALUES ${valuesStr};
+        `
+       sql_params = [];
+        let qr = await doQuery(dbConn, sql, valuesArr);
+
+        if (qr.error) {
+            tl.reportInternalError(res, qr.error);
+            return;
+        }
+
+        sql = `
+            UPDATE lorries SET isWorked = 1 WHERE id_lorries = ?
+        `
+        let qrr = await doQuery(dbConn, sql, [lorryID]);
+        // 
+        if (qrr.error) {
+            tl.reportInternalError(res, qrr.error);
+            return;
+        }
+        res.send();
+
+    });
+
     return router;
 }

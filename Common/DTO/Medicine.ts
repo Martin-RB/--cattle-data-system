@@ -1,5 +1,5 @@
 export interface OUT_Medicine {
-    id?: string;
+    id: string;
     name: string;
     isPerHead: boolean;
     cost: number;
@@ -19,12 +19,10 @@ export interface IN_Medicine_Flex {
 }
 
 export interface IN_Medicine {
-    id?: string;
     name: string;
     isPerHead: boolean;
     cost: number;
     presentation: number;
     mlApplication: number;
     kgApplication: number;
-    id_user: number;
 }
