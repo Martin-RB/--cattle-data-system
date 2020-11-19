@@ -244,6 +244,7 @@ export class SellAlotList extends React.Component<SellAlotListProps,
         try {
             let response = await fetch(url + `/alots/${this.idAlot}/sell`, {
                 method: 'PUT', 
+                credentials: "include",
                 body: JSON.stringify(heads),
                 headers:{
                     'Content-Type': 'application/json'
@@ -261,6 +262,7 @@ export class SellAlotList extends React.Component<SellAlotListProps,
         try {
             let response = await fetch(url + `/alots/${this.idAlot}/heads`, {
                 method: 'GET', 
+                credentials: "include",
                 headers:{
                     'Content-Type': 'application/json'
                 }
