@@ -1,6 +1,6 @@
 import React from "react";
 import { DropDown } from "../Components/DropDown";
-import head from "./../../img/head.png";
+import head from "./../../img/head.jpg";
 import vaquita from "./../../img/vaquita.jpg";
 import alot from "./../../img/alot.png";
 import { HISTORY, toast } from "../App";
@@ -125,7 +125,7 @@ export class Home extends React.Component<HomeProps, HomeState>{
 				[{key:"sell", name: ":attach_money:"},{key:"detail", name: ":web_asset:"}];
 		return 	<div key={item.id} className="search-item search-item-grid">
 					<div className="search-item--icon">
-						<img src={isH?vaquita:vaquita} className="top-nav--logo-img--sizing"/>
+						<img src={isH?head:vaquita} className="top-nav--logo-img--sizing"/>
 					</div>
 					<div>
 						<span className="search-item--title search-item--title--fontSize">{item.title}</span>
