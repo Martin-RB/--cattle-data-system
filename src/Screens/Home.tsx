@@ -5,6 +5,10 @@ import alot from "./../../img/alot.png";
 import { HISTORY, toast } from "../App";
 import { IOption } from "../Classes/IOption";
 import { RouteComponentProps } from "react-router-dom";
+import { IN_Alot } from "../Classes/DataStructures/Alot";
+import { IN_Head } from "../Classes/DataStructures/Head";
+import { IN_Corral } from "../Classes/DataStructures/Corral";
+import url from "./ConfigI";
 
 export interface HomeProps extends RouteComponentProps{
 
@@ -26,8 +30,45 @@ export class Home extends React.Component<HomeProps, HomeState>{
 		}		
 	}
 
-	onSubmitSearch = () => {
+	onSubmitSearch = async () => {
 		toast("Submited " + this.state.search);
+
+		try {
+			const response = await fetch(url + "/search?search=" + this.state.search, {
+				method: 'GET', 
+				mode: 'cors', 
+				credentials: "include",
+				cache: 'no-cache', 
+			}); 
+
+			if(response.ok){
+				let data = await response.json() as {
+					alots: IN_Alot[], heads: IN_Head[], corrals: IN_Corral[]
+				}
+
+				let alots = data.alots;
+				let heads = data.heads
+
+				let sHeads: SearchItem[] = heads.map(v => ({type: "head", data: v} as SearchItem));
+				let sAlot: SearchItem[] = alots.map(v => ({type: "alot", data: v} as SearchItem));
+				let searchItems = [...sAlot, ... sHeads]
+				console.log(sAlot);
+				
+				this.setState({
+					searchItems
+				})
+			}
+			else{
+				toast(await response.text())
+			}
+
+
+
+			
+		} catch (error) {
+			console.log(error);
+			toast(error)
+		}
 	}
 
 	onCancelSearch = () => {
@@ -36,15 +77,15 @@ export class Home extends React.Component<HomeProps, HomeState>{
 		})
 	}
 
-	onOptionClicked = (type: "head"|"alot", id: string, option: string) => {
+	onOptionClicked = (type: "head"|"alot", idx: string, option: string) => {
 		switch(type){
 			case "alot":
 				if(option == "detail"){
 					alert(`${type} ${option}`)
 				}
 				else if(option == "sell"){
-					//alert(`${type} ${option}`)
-					this.props.history.push("/menu/sell-alot", {idAlot: 1})
+					let id = this.state.searchItems[parseInt(idx)].data.id
+					this.props.history.push("/menu/sell-alot", {idAlot: id})
 				}
 				break;
 			case "head":
@@ -57,7 +98,7 @@ export class Home extends React.Component<HomeProps, HomeState>{
 
 	render() : JSX.Element{
 
-
+		let srch = this.state.searchItems.map((v,i) => this.itemToJSX(v, i));
 
 		return (
 		<>
@@ -106,24 +147,93 @@ export class Home extends React.Component<HomeProps, HomeState>{
 				</div>
 			</div>) */}
 
-			{new Array(10).fill("").map((_,i) => this.itemToJSX({
-				id: i.toString(),
-				subtitle: (Math.random() * 1000).toString(),
-				title: (Math.random() * 1000).toString(),
-				type: Math.random() > 0.5?"alot":"head"
-			}))}
+			{srch}
 
-			{this.itemToJSX({id:"1", subtitle: "asd",title:"2", type: "head"})}
+			{/* {this.itemToJSX({id:"1", subtitle: "asd",title:"2", type: "head"})} */}
 		</>
 		)
 	}
 
-	itemToJSX = (item: SearchItem) => {
+	headToJSX = (v: IN_Head, i: number) => {
+		return <div key={i.toString()} className="search-item search-item-grid">
+					<div className="search-item--icon">
+						<img src={head} className="top-nav--logo-img--sizing"/>
+					</div>
+					<div>
+						<span className="search-item--title search-item--title--fontSize">{v.siniga}</span>
+						<span className="search-item--subtit search-item--subtit--fontSize">({v.idLocal})</span>
+					</div>
+					<div className="search-item--options">
+						{/* Opcion generalizada de "Detalles" */}
+{/* 						<div className="search-item--option hide-on-small-only"
+							onClick={() => this.onOptionClicked("head", i.toString(), "detail")}>
+								<i className="material-icons">web_asset</i>
+						</div> */}
+
+						{/* <DropDown className="hide-on-med-and-up" 
+									content={dropdownOptions} 
+									onClick={
+										(e) => {this.onOptionClicked(item.type, item.id, e)}
+									}
+						/> */}
+					</div>
+					
+					<div className="search-item--description">
+						<span>OK</span><span>{v.sex}</span><span>{v.alotName}</span><span>{v.corralName}</span>
+					</div>
+				</div>
+	}
+
+	alotToJSX = (v: IN_Alot, i: number) => {
+		let dropdownOptions : Array<IOption> = 
+				[{key:"sell", name: ":attach_money:"}];
+		return <div key={i.toString()} className="search-item search-item-grid">
+					<div className="search-item--icon">
+						<img src={alot} className="top-nav--logo-img--sizing"/>
+					</div>
+					<div>
+						<span className="search-item--title search-item--title--fontSize">{v.name}</span>
+						<span className="search-item--subtit search-item--subtit--fontSize">({v.hostCorral?.name})</span>
+					</div>
+					<div className="search-item--options">
+
+						<div className="search-item--option hide-on-small-only"
+								onClick={() => this.onOptionClicked("alot", i.toString(), "sell")}>
+									<i className="material-icons">attach_money</i>
+							</div>
+						{/* Opcion generalizada de "Detalles" */}
+{/* 						<div className="search-item--option hide-on-small-only"
+							onClick={() => this.onOptionClicked(item.type, item.id, "detail")}>
+								<i className="material-icons">web_asset</i>
+						</div> */}
+
+						<DropDown className="hide-on-med-and-up" 
+									content={dropdownOptions} 
+									onClick={
+										(e) => {this.onOptionClicked("alot", i.toString(), e)}
+									}
+						/>
+					</div>
+					
+					<div className="search-item--description">
+								<span>OK</span><span>{v.sex}</span><span>{v.headNum / v.maxHeadNum}</span><span>{v.arrivalProtocol?.name}</span>
+					</div>
+				</div>
+	}
+
+	itemToJSX = (item: SearchItem, idx: number) => {
+		console.log("item");
+		
+		return (item.type == "head")? this.headToJSX(item.data as IN_Head, idx): this.alotToJSX(item.data as IN_Alot, idx)
+	}
+	/* itemToJSX = (item: SearchItem, idx: number) => {
+		return (item.type == "head")? this.headToJSX(item.data as IN_Head, idx)
 		let isH = item.type == "head";
+		let va = item.data
 		let dropdownOptions : Array<IOption> = isH?
 				[{key:"detail", name: ":web_asset:"}]:
 				[{key:"sell", name: ":attach_money:"},{key:"detail", name: ":web_asset:"}];
-		return 	<div key={item.id} className="search-item search-item-grid">
+		return 	<div key={idx.toString()} className="search-item search-item-grid">
 					<div className="search-item--icon">
 						<img src={isH?head:alot} className="top-nav--logo-img--sizing"/>
 					</div>
@@ -142,7 +252,7 @@ export class Home extends React.Component<HomeProps, HomeState>{
 									<i className="material-icons">attach_money</i>
 							</div>
 						}
-						{/* Opcion generalizada de "Detalles" */}
+						// Opcion generalizada de "Detalles"
 						<div className="search-item--option hide-on-small-only"
 							onClick={() => this.onOptionClicked(item.type, item.id, "detail")}>
 								<i className="material-icons">web_asset</i>
@@ -160,12 +270,10 @@ export class Home extends React.Component<HomeProps, HomeState>{
 						<span>OK</span><span>Femenino</span><span>Lote 44</span><span>Corral 20</span>
 					</div>
 				</div>
-	}
+	} */
 }
 
 interface SearchItem{
 	type: "head" | "alot"
-	title: string
-	subtitle: string
-	id: string
+	data: IN_Alot | IN_Head
 }
