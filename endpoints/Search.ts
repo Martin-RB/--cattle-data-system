@@ -75,15 +75,19 @@ export async function GetHeadsQuery(dbConn: Connection, ids: Array<string>) {
 }
 
 export async function GetAloatsQuery(dbConn: Connection, ids: Array<string>, idUser: string) {
+    console.log(ids);
+    
 	let qr = await doQuery(
 	    dbConn,
 	    "SELECT * FROM alots a WHERE isEnabled = 1 AND a.name LIKE (?) ",
-	    [ids[0].concat('%')]
+	    [ids[0] + '%']
 	);
     if (qr.error) {
         return qr.error;
     }
     let qrr = qr.result;
+    console.log(qr.obj.sql);
+    
     let alots = new Array<OUT_Alot>();
 
     for (let i = 0; i < qrr.length; i++) {
@@ -142,8 +146,10 @@ export async function GetAloatsQuery(dbConn: Connection, ids: Array<string>, idU
 
 export function Search(router: Router, dbConn: Connection, tl: Telemetry) {
     router.get("/", async (req, res) => {
-    	let b = req.body as IN_Search;
-    	let texto = b.search || "";
+    	let b = req.query as IN_Search;
+        let texto = b.search || "";
+        console.log(texto);
+        
 
         let corrals = new Array<OUT_Corral>();
             let corralesResponse = await GetCorralsQuery(
