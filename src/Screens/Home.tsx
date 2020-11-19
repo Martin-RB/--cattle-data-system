@@ -1,6 +1,7 @@
 import React from "react";
 import { DropDown } from "../Components/DropDown";
 import head from "./../../img/head.png";
+import vaquita from "./../../img/vaquita.svg";
 import alot from "./../../img/alot.png";
 import { HISTORY, toast } from "../App";
 import { IOption } from "../Classes/IOption";
