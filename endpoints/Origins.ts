@@ -4,11 +4,11 @@ import { Telemetry } from "../Common/Telemetry";
 import { doQuery, doEditElement } from "../Common/AwaitableSQL";
 import { OUT_Origin, IN_Origin, IN_Origin_Flex } from "../Common/DTO/Origin";
 
-export async function GetOrigins(dbConn: Connection, ids: Array<string>){
+export async function GetOrigins(dbConn: Connection, ids: Array<string>, idUser: string){
     let qr = await doQuery(dbConn, `
-        SELECT * FROM origins WHERE id_origins IN (?);
+        SELECT * FROM origins WHERE id_origins IN (?) AND id_user = ?;
     `,
-    [ids]);
+    [ids, idUser]);
 
     if(qr.error){
         return qr.error;
@@ -40,7 +40,7 @@ export function Origins(router: Router, dbConn: Connection, tl: Telemetry){
         let ids = qr.result;
         let origins = new Array<OUT_Origin>();
         if(ids.length != 0){
-            let originResponse = await GetOrigins(dbConn, ids.map((v:any) => v.id_origins));
+            let originResponse = await GetOrigins(dbConn, ids.map((v:any) => v.id_origins), req.cookies.idUser);
             let responseOrigin = (originResponse as Array<OUT_Origin>);
 
 

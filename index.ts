@@ -82,7 +82,9 @@ app.use("/api/admon",
 //app.use("/api/admon", Users(express.Router(), conn, new Telemetry("/admon")));
 
 
-app.use("/api/search", Search(express.Router(), conn, new Telemetry("/search")));
+app.use("/api/search", 
+    checkUserLogin(new Telemetry("login check")), 
+    Search(express.Router(), conn, new Telemetry("/search")));
 
 app.get('/*', function(req, res) {
     res.sendFile((__dirname + '/html/index.html'), function(err: any) {

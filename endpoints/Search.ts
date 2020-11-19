@@ -74,7 +74,7 @@ export async function GetHeadsQuery(dbConn: Connection, ids: Array<string>) {
 
 }
 
-export async function GetAloatsQuery(dbConn: Connection, ids: Array<string>) {
+export async function GetAloatsQuery(dbConn: Connection, ids: Array<string>, idUser: string) {
 	let qr = await doQuery(
 	    dbConn,
 	    "SELECT * FROM alots a WHERE isEnabled = 1 AND a.name LIKE (?) ",
@@ -94,11 +94,13 @@ export async function GetAloatsQuery(dbConn: Connection, ids: Array<string>) {
                 ? el.im_ids.split(",")
                 : [];
 
+                console.log(el);
+                
         let [implResponse,
             protResponse,
-            corrResponse] = await Promise.all([GetImplants(dbConn, im_ids),
-                GetProtocol(dbConn, [el.idArrivalProtocol]),
-                GetCorrals(dbConn, [el.id_corrals])]);
+            corrResponse] = await Promise.all([GetImplants(dbConn, im_ids, idUser),
+                GetProtocol(dbConn, [el.idArrivalProtocol], idUser),
+                GetCorrals(dbConn, [el.id_corrals], idUser)]);
 
         /* let implResponse = await GetImplants(dbConn, im_ids);
         let protResponse = await GetProtocol(dbConn, [el.idArrivalProtocol]);
@@ -179,7 +181,8 @@ export function Search(router: Router, dbConn: Connection, tl: Telemetry) {
         let alots = new Array<OUT_Alot>();
             let alotResponse = await GetAloatsQuery(
                 dbConn,
-                [texto]
+                [texto],
+                req.cookies.idUser
             );
             let respuestaAlot = alotResponse as Array<OUT_Alot>;
 
@@ -190,6 +193,9 @@ export function Search(router: Router, dbConn: Connection, tl: Telemetry) {
             }
             alots = respuestaAlot;
 
+
+            console.log({ alots: alots, heads: heads, corrals: corrals});
+            
 
         res.send({ alots: alots, heads: heads, corrals: corrals});
     });

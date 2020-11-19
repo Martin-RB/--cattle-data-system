@@ -16,7 +16,8 @@ import { OUT_Corral } from "../Common/DTO/Corral";
 import { OUT_Head } from "../Common/DTO/Head";
 import { Report } from "../Common/DTO/Report";
 
-export async function GetAlots(dbConn: Connection, ids: Array<string>, justEnabled: boolean = true) {
+export async function GetAlots(dbConn: Connection, ids: Array<string>, idUser: string, justEnabled: boolean = true) {
+    if(ids.length == 0) return []
     let qr = await doQuery(
         dbConn,
         `
@@ -24,11 +25,11 @@ export async function GetAlots(dbConn: Connection, ids: Array<string>, justEnabl
                 GROUP_CONCAT(im.id_implants) as im_ids
         FROM alots a 
         LEFT JOIN implants im ON im.id_alots = a.id_alots 
-        WHERE ${justEnabled? "a.isEnabled = 1 AND ": ""} a.id_alots IN (?) 
+        WHERE ${justEnabled? "a.isEnabled = 1 AND ": ""} a.id_alots IN (?) AND a.id_user = ? 
         GROUP BY a.id_alots;
         ;
     `,
-        [ids]
+        [ids, idUser]
     );
 
     if (qr.error) {
@@ -50,9 +51,9 @@ export async function GetAlots(dbConn: Connection, ids: Array<string>, justEnabl
 
         let [implResponse,
             protResponse,
-            corrResponse] = await Promise.all([GetImplants(dbConn, im_ids),
-                GetProtocol(dbConn, [el.idArrivalProtocol]),
-                GetCorrals(dbConn, [el.id_corrals])]);
+            corrResponse] = await Promise.all([GetImplants(dbConn, im_ids, idUser),
+                GetProtocol(dbConn, [el.idArrivalProtocol], idUser),
+                GetCorrals(dbConn, [el.id_corrals], idUser)]);
 
         /* let implResponse = await GetImplants(dbConn, im_ids);
         let protResponse = await GetProtocol(dbConn, [el.idArrivalProtocol]);
@@ -96,9 +97,9 @@ export function Alots(router: Router, dbConn: Connection, tl: Telemetry) {
         let qr = await doQuery(
             dbConn,
             `
-            SELECT id_alots FROM alots WHERE isEnabled = 1;
+            SELECT id_alots FROM alots WHERE isEnabled = 1 AND id_user = ?;
         `,
-            []
+            [req.cookies.idUser]
         );
 
         if (qr.error) {
@@ -107,15 +108,13 @@ export function Alots(router: Router, dbConn: Connection, tl: Telemetry) {
         }
 
         let ids = qr.result;
-        console.log("ids", ids);
         ids = (ids as Array<{id_alots: number}>).map(v=>v.id_alots);
         
         let alots = new Array<OUT_Alot>();
-        console.log("aqui", ids);
         let alotResponse = await GetAlots(
             dbConn,
             ids,
-            ids.map((v: any) => v.id_alots)
+            req.cookies.idUser
         );
         console.log("despues", alotResponse)
         let responseAlot = alotResponse as Array<OUT_Alot>;
@@ -152,7 +151,8 @@ export function Alots(router: Router, dbConn: Connection, tl: Telemetry) {
             for(let i = 0; i < ids.length; i++){
                 let alotResponse = await GetAlots(
                     dbConn,
-                    ids[0].id_alots
+                    ids[0].id_alots,
+                    req.cookies.idUser
                     //ids.map((v: any) => v.id_alots)
                 );
                 let responseAlot = alotResponse as Array<OUT_Alot>;
@@ -186,8 +186,8 @@ export function Alots(router: Router, dbConn: Connection, tl: Telemetry) {
                     INNER JOIN lorries l ON l.id_lorries = h.id_lorries 
                     INNER JOIN providers p ON p.id_providers = l.id_providers 
                     INNER JOIN weight_class wc ON wc.id_weight_class = h.id_weight_class 
-            WHERE h.idActialAlot = ?`, 
-            [req.params.id])
+            WHERE h.idActialAlot = ? AND a.id_user = ?`, 
+            [req.params.id, req.cookies.idUser])
         
         if (qr.error) {
             tl.reportInternalError(res, qr.error);
@@ -277,7 +277,7 @@ export function Alots(router: Router, dbConn: Connection, tl: Telemetry) {
             return;
         }
 
-        let alotResponse = await GetAlots(dbConn, [req.params.id], false);
+        let alotResponse = await GetAlots(dbConn, [req.params.id], req.cookies.idUser, false);
         
         let responseAlot = alotResponse as Array<OUT_Alot>;
 
@@ -294,8 +294,8 @@ export function Alots(router: Router, dbConn: Connection, tl: Telemetry) {
             SELECT IFNULL(SUM(kg), 0) as kg, IFNULL(SUM(cost),0) as costs 
             FROM feeds_history 
             WHERE id_heads IN (?) 
-            GROUP BY id_heads`,
-            [idsArg]);
+            GROUP BY id_heads AND id_user = ?`,
+            [idsArg, req.cookies.idUser]);
         
         if (feedR.error) {
             tl.reportInternalError(res, feedR.error);
@@ -317,9 +317,10 @@ export function Alots(router: Router, dbConn: Connection, tl: Telemetry) {
             FROM providers p, lorries l, heads h
             WHERE h.id_heads IN (?) AND 
                 h.id_lorries = l.id_lorries AND 
-                p.id_providers = l.id_providers 
+                p.id_providers = l.id_providers AND
+                p.id_user = ?
             GROUP BY p.name`,
-            [idsArg])
+            [idsArg, req.cookies.idUser])
         
         if (providersR.error) {
             tl.reportInternalError(res, providersR.error);
@@ -339,14 +340,14 @@ export function Alots(router: Router, dbConn: Connection, tl: Telemetry) {
         let result: Report = {
             alotName: alot.name,
             corralName: alot.hostCorral.name,
-            feedCost: feedData.costs,
+            feedCost: feedData.kg,//feedData.costs,
             feedKg: feedData.kg,
             headsPrice,
             headsSold: heads.length,
             headsTotal: parseInt(alot.maxHeadNum),
             providers,
             standPrice: standPriceArg.reduce((p,v) => p+v),
-            total: headsPrice - parseFloat(feedData.costs),
+            total: headsPrice - parseFloat(feedData.kg)//parseFloat(feedData.costs),
         }
 
         res.send(result);
@@ -358,11 +359,9 @@ export function Alots(router: Router, dbConn: Connection, tl: Telemetry) {
             return;
         }
         let alots = new Array<OUT_Alot>();
-        let alotResponse = await GetAlots(dbConn, [req.params.id]);
+        let alotResponse = await GetAlots(dbConn, [req.params.id], req.cookies.idUser);
         let responseAlot = alotResponse as Array<OUT_Alot>;
-        console.log("alot response", responseAlot)
         if (responseAlot.length == undefined) {
-            console.log("error");
             let error = alotResponse as { e: any; info: string };
             tl.reportInternalError(res, error.e);
             return;
@@ -387,7 +386,7 @@ export function Alots(router: Router, dbConn: Connection, tl: Telemetry) {
             VALUES (?,?,?,?,?,?,?,?,?,?);
         `,
             [
-                -1,
+                req.cookies.idUser,
                 a.maxHeadNum,
                 a.maxWeight,
                 a.minWeight,
@@ -415,7 +414,7 @@ export function Alots(router: Router, dbConn: Connection, tl: Telemetry) {
                 (id_user,id_alots, id_protocols, day, create_datetime) 
                 VALUES (?,?, ?, ?, ?);
             `,
-                [-1, idAlot, a.arrivalProtocol, p.day, date.toString()]
+                [req.cookies.idUser, idAlot, a.arrivalProtocol, p.day, date.toString()]
             );
 
             if (qr.error) {

@@ -15,7 +15,9 @@ export function checkUserLogin(tl: Telemetry){
             next()
         }
         else{
-            tl.reportNotLoggedError(res,{});
+            console.log("NOT LOGGED IN");
+            
+            tl.reportNotLoggedError(res,JSON.stringify(req.cookies));
         }
     }
 }

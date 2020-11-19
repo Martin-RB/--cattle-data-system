@@ -9,15 +9,15 @@ import { IN_Feeds, OUT_Feeds } from "../Common/DTO/Feeds";
 // We store that in  
 
 
-export async function GetCorrals(dbConn: Connection, ids: Array<string>) {
+export async function GetCorrals(dbConn: Connection, ids: Array<string>, idUser: string) {
     if (ids.length == 0) {
         return [];
     }
 
     let qr = await doQuery(
         dbConn,
-        "SELECT * FROM corrals WHERE id_corrals IN (?) AND isEnabled = 1",
-        [ids]
+        "SELECT * FROM corrals WHERE id_corrals IN (?) AND isEnabled = 1 AND id_user = ?",
+        [ids, idUser]
     );
     if (qr.error) {
         return qr.error;
@@ -37,15 +37,15 @@ export async function GetCorrals(dbConn: Connection, ids: Array<string>) {
     return corrals;
 }
 
-export async function GetFeeds(dbConn: Connection, ids: Array<string>) {
+export async function GetFeeds(dbConn: Connection, ids: Array<string>, idUser: string) {
     if (ids.length == 0) {
         return [];
     }
 
     let qr = await doQuery(
         dbConn,
-        "SELECT * FROM feeds WHERE id_corrals IN (?)",
-        [ids]
+        "SELECT * FROM feeds WHERE id_corrals IN (?) AND id_user = ?",
+        [ids, idUser]
     );
     if (qr.error) {
         return qr.error;
@@ -144,9 +144,9 @@ export function Corrals(router: Router, dbConn: Connection, tl: Telemetry) {
                     LEFT JOIN (SELECT * FROM alots) a ON c.id_corrals = a.id_corrals 
                     LEFT JOIN (Select * from lorries) l ON l.idStayCorral = c.id_corrals 
                     LEFT JOIN (SELECT * FROM feeds WHERE date >= ? AND date <= ?) f ON c.id_corrals = f.id_corrals 
-                WHERE a.id_alots is not null OR l.id_lorries is not null 
+                WHERE c.id_user = ? AND (a.id_alots is not null OR (l.id_lorries is not null and l.isWorked = 0)) 
                 GROUP BY c.id_corrals;`;
-        let sql_params = [dateMinor.getTime(), dateMajor.getTime()];
+        let sql_params = [dateMinor.getTime(), dateMajor.getTime(), req.cookies.idUser];
 
         let qr = await doQuery(dbConn, sql, sql_params)
         if (qr.error) {
@@ -174,8 +174,8 @@ export function Corrals(router: Router, dbConn: Connection, tl: Telemetry) {
         console.log("start");
         let qr = await doQuery(
             dbConn,
-            "SELECT id_corrals FROM corrals WHERE isEnabled = 1",
-            []
+            "SELECT id_corrals FROM corrals WHERE isEnabled = 1 AND id_user = ?",
+            [req.cookies.idUser]
         );
         if (qr.error) {
             tl.reportInternalError(res, qr.error);
@@ -192,7 +192,8 @@ export function Corrals(router: Router, dbConn: Connection, tl: Telemetry) {
 
         let corralResponse = await GetCorrals(
             dbConn,
-            qrr.map((v: any) => v.id_corrals)
+            qrr.map((v: any) => v.id_corrals),
+            req.cookies.idUser
         );
         console.log("res", corralResponse);
         let responseCorr = corralResponse as Array<OUT_Corral>;
@@ -213,7 +214,7 @@ export function Corrals(router: Router, dbConn: Connection, tl: Telemetry) {
             return;
         }
 
-        let corralResponse = await GetCorrals(dbConn, [req.params.id]);
+        let corralResponse = await GetCorrals(dbConn, [req.params.id], req.cookies.idUser);
         let responseCorr = corralResponse as Array<OUT_Corral>;
 
         if (responseCorr.length == undefined) {
@@ -243,7 +244,7 @@ export function Corrals(router: Router, dbConn: Connection, tl: Telemetry) {
         console.log(date);
         // handle same day alimentacion with get
 
-        let feedsArrs = c.map((v) => [-1,v.idCorral,-1,v.idCorral, v.kg, date, date ,date]);
+        let feedsArrs = c.map((v) => [req.cookies.idUser,v.idCorral,-1,v.idCorral, v.kg, date, date ,date]);
         let sql_params = feedsArrs.reduce((p,c) => p.concat(c), [])
         let values = c.reduce((p,c,i)=>{
             let ret = ""
@@ -288,7 +289,7 @@ export function Corrals(router: Router, dbConn: Connection, tl: Telemetry) {
             `INSERT INTO corrals 
                                         (id_user, name, capacity, create_datetime, edit_datetime) VALUES 
                                         (?,?, ?, ?, ?);`,
-            [c.id_user, c.name, c.headNum, date, date]
+            [req.cookies.idUser, c.name, c.headNum, date, date]
         );
 
         if (qr.error) {

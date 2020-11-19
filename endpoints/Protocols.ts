@@ -13,7 +13,7 @@ import {
     IN_Protocol_Flex,
 } from "../Common/DTO/Protocol";
 
-export async function GetProtocol(dbConn: Connection, ids: Array<string>) {
+export async function GetProtocol(dbConn: Connection, ids: Array<string>, idUser: string) {
     if (ids.length == 0) {
         return [];
     }
@@ -31,14 +31,17 @@ export async function GetProtocol(dbConn: Connection, ids: Array<string>) {
                                             LEFT JOIN medicines m ON mp.id_medicines = m.id_medicines 
                                             WHERE p.id_protocols IN (?) AND 
                                                     (mp.create_datetime is null OR p.edit_datetime >= mp.create_datetime)
-                                                    AND p.isEnabled = 1
+                                                    AND p.isEnabled = 1 AND p.id_user = ? 
                                             GROUP BY p.id_protocols;`,
-        [ids]
+        [ids, idUser]
     );
 
     if (qrProtocols.error) {
         return qrProtocols.error;
     }
+
+    console.log(qrProtocols.result, idUser);
+    
 
     let qrrProtocols = qrProtocols!.result;
 
@@ -100,7 +103,8 @@ export function Protocols(router: Router, dbConn: Connection, tl: Telemetry) {
         if (ids.length != 0) {
             let protResponse = await GetProtocol(
                 dbConn,
-                ids.map((v: any) => v.id_protocols)
+                ids.map((v: any) => v.id_protocols),
+                req.cookies.idUser
             );
             let responseProts = protResponse as Array<OUT_Protocol>;
 
@@ -121,7 +125,7 @@ export function Protocols(router: Router, dbConn: Connection, tl: Telemetry) {
             return;
         }
 
-        let protResponse = await GetProtocol(dbConn, [req.params.id]);
+        let protResponse = await GetProtocol(dbConn, [req.params.id], req.cookies.idUser);
         let responseProts = protResponse as Array<OUT_Protocol>;
 
         
@@ -145,7 +149,7 @@ export function Protocols(router: Router, dbConn: Connection, tl: Telemetry) {
             `INSERT INTO protocols 
                                     (id_user,name, create_datetime, edit_datetime)
                                     VALUES (?,?, ?, ?);`,
-            [-1, p.name, date.toString(), date.toString()]
+            [req.cookies.idUser, p.name, date.toString(), date.toString()]
         );
 
         if (qr.error) {
@@ -163,7 +167,7 @@ export function Protocols(router: Router, dbConn: Connection, tl: Telemetry) {
                 medicines_string += ", ";
             }
             medicines_string += "(?,?,?,?)";
-            medicines_args.push(-1, el, idProtocol, date);
+            medicines_args.push(req.cookies.idUser, el, idProtocol, date);
         });
 
         qr = await doQuery(

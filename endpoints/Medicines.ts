@@ -12,8 +12,8 @@ export function Medicines(router: Router, dbConn: Connection, tl: Telemetry) {
     router.get("/", async (req, res) => {
         let qr = await doQuery(
             dbConn,
-            "SELECT *, (isPerHead = 1) as cisPerHead FROM medicines WHERE isEnabled = 1",
-            []
+            "SELECT *, (isPerHead = 1) as cisPerHead FROM medicines WHERE isEnabled = 1 AND id_user = ?",
+            [req.cookies.idUser]
         );
         if (qr.error) {
             tl.reportInternalError(res, qr.error);
@@ -46,8 +46,8 @@ export function Medicines(router: Router, dbConn: Connection, tl: Telemetry) {
         }
         let qr = await doQuery(
             dbConn,
-            "SELECT *, (isPerHead = 1) as cisPerHead FROM medicines WHERE isEnabled = 1 AND id_medicines = ?",
-            [req.params.id]
+            "SELECT *, (isPerHead = 1) as cisPerHead FROM medicines WHERE isEnabled = 1 AND id_medicines = ? AND id_user = ?",
+            [req.params.id, req.cookies.idUser]
         );
 
         if (qr.error) {
@@ -93,7 +93,7 @@ export function Medicines(router: Router, dbConn: Connection, tl: Telemetry) {
                                     (id_user, name, isPerHead, presentation, mlApplication, kgApplication, create_datetime, edit_datetime, actualCost)
                                     VALUES (?,?, ?, ?, ?, ?, ?, ?, ?);`,
             [
-                -1,
+                req.cookies.idUser,
                 m.name,
                 m.isPerHead ? 1 : 0,
                 m.presentation?.toString() || 0,
@@ -116,7 +116,7 @@ export function Medicines(router: Router, dbConn: Connection, tl: Telemetry) {
             `INSERT INTO medicine_costs 
                                     (id_user,id_medicines, cost, create_datetime) 
                                     VALUES (?,?, ?, ?);`,
-            [-1, idMedicine, m.cost, date]
+            [req.cookies.idUser, idMedicine, m.cost, date]
         );
 
         if (qr.error) {

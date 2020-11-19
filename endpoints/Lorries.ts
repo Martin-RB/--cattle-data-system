@@ -13,7 +13,7 @@ import { GetProviders } from "./Providers";
 import { Router } from "express";
 import { Telemetry } from "../Common/Telemetry";
 
-export async function GetLorries(dbConn: Connection, ids: Array<string>) {
+export async function GetLorries(dbConn: Connection, ids: Array<string>, idUser: string) {
     if (ids.length == 0) {
         return [];
     }
@@ -59,9 +59,9 @@ export async function GetLorries(dbConn: Connection, ids: Array<string>) {
             }
         }
 
-        let corralResponse = await GetCorrals(dbConn, [el.idStayCorral]);
-        let originResponse = await GetOrigins(dbConn, [el.id_origins]);
-        let providerResponse = await GetProviders(dbConn, [el.id_providers]);
+        let corralResponse = await GetCorrals(dbConn, [el.idStayCorral], idUser);
+        let originResponse = await GetOrigins(dbConn, [el.id_origins], idUser);
+        let providerResponse = await GetProviders(dbConn, [el.id_providers], idUser);
         let errors = checkResponseErrors(
             corralResponse,
             originResponse,
@@ -137,7 +137,8 @@ export function Lorries(router: Router, dbConn: Connection, tl: Telemetry) {
         if (ids.length != 0) {
             let lorriesResponse = await GetLorries(
                 dbConn,
-                ids.map((v: any) => v.id_lorries)
+                ids.map((v: any) => v.id_lorries),
+                req.cookies.idUser
             );
             let responseLorries = lorriesResponse as Array<OUT_Lorry>;
 
@@ -157,9 +158,9 @@ export function Lorries(router: Router, dbConn: Connection, tl: Telemetry) {
             dbConn,
             `
             SELECT id_lorries FROM lorries
-            WHERE isWorked = 0;
+            WHERE isWorked = 0 AND id_user = ?;
         `,
-            []
+            [req.cookies.idUser]
         );
         if (qr.error) {
             tl.reportInternalError(res, qr.error);
@@ -172,7 +173,8 @@ export function Lorries(router: Router, dbConn: Connection, tl: Telemetry) {
         if (ids.length != 0) {
             let lorriesResponse = await GetLorries(
                 dbConn,
-                ids.map((v: any) => v.id_lorries)
+                ids.map((v: any) => v.id_lorries),
+                req.cookies.idUser
             );
             let responseLorries = lorriesResponse as Array<OUT_Lorry>;
 
@@ -193,7 +195,7 @@ export function Lorries(router: Router, dbConn: Connection, tl: Telemetry) {
             return;
         }
 
-        let protResponse = await GetLorries(dbConn, [req.params.id]);
+        let protResponse = await GetLorries(dbConn, [req.params.id], req.cookies.idUser);
         let responseProts = protResponse as Array<OUT_Lorry>;
 
         if (responseProts.length == undefined) {
@@ -218,7 +220,7 @@ export function Lorries(router: Router, dbConn: Connection, tl: Telemetry) {
                 VALUES (?,?,?,?,?,?,?,?,?,?);
         `,
             [
-                -1,
+                req.cookies.idUser,
                 p.plateNum,
                 -1,
                 p.provider,
@@ -247,7 +249,7 @@ export function Lorries(router: Router, dbConn: Connection, tl: Telemetry) {
                     values_str += ",";
                 }
                 const el = p.maleClassfies[i];
-                values_arr.push(-1,idLorry, el.name, -1, el.cost, "male", date);
+                values_arr.push(req.cookies.idUser,idLorry, el.name, -1, el.cost, "male", date);
                 values_str += "(?,?,?,?,?,?,?)";
             }
 
@@ -277,7 +279,7 @@ export function Lorries(router: Router, dbConn: Connection, tl: Telemetry) {
                     values_str += ",";
                 }
                 const el = p.femaleClassfies[i];
-                values_arr.push(-1,idLorry, el.name, -1, el.cost, "female", date);
+                values_arr.push(req.cookies.idUser,idLorry, el.name, -1, el.cost, "female", date);
                 values_str += "(?,?,?,?,?,?,?)";
             }
             classfyQr = await doQuery(
@@ -305,7 +307,7 @@ export function Lorries(router: Router, dbConn: Connection, tl: Telemetry) {
     // Place the get all for a specific ID. 
     // Post the heads of the jaulas
     router.post('/:id/heads', async (req, res) => {
-        let data = req.body as IN_Heads;
+        let data = req.body as IN_Heads[];
         let date = new Date().getTime().toString();
         let lorryID = req.params.id;
         console.log(lorryID);
@@ -319,22 +321,37 @@ export function Lorries(router: Router, dbConn: Connection, tl: Telemetry) {
             (id_breeds, idActualAlot, siniga, localID, sex, weight, id_lorries) 
             VALUES (?,?,?,?,?,?,?)";`;*/
        
+        let valuesStr = "";
+        let valuesArr: string[] = [];
+        data.forEach((el, i) => {
+            if(i != 0) valuesStr += ","
+            valuesStr += "(?,?,?,?,?,?,?,?,?,?,?,?)";
+            valuesArr.push(req.cookies.idUser, "-1", lorryID , el.idAlot??"NULL" , el.siniga, el.idLocal, el.sex, el.weight.toString(), date, date, "-1", el.sexClass.toString())
+        });
        sql = `
             INSERT INTO heads 
-                (id_user,id_breeds,id_lorries, idActialAlot, siniga, localID, 
+                (id_user,id_breeds,id_lorries, idActialAlot, siniga, localId, 
                     sex, weight, create_datetime, edit_datetime, weightRatio, id_weight_class) 
-                VALUES (?,?,?,?,?,?,?,?,?,?,?,?);
+                VALUES ${valuesStr};
         `
-       sql_params = [-1, -1, lorryID , data.idAlot , data.siniga, data.localID, data.sex, data.weight, date, date, -1, data.sexClass];
-        let qr = await doQuery(dbConn, sql, sql_params);
+       sql_params = [];
+        let qr = await doQuery(dbConn, sql, valuesArr);
 
         if (qr.error) {
             tl.reportInternalError(res, qr.error);
             return;
         }
+
+        sql = `
+            UPDATE lorries SET isWorked = 1 WHERE id_lorries = ?
+        `
+        let qrr = await doQuery(dbConn, sql, [lorryID]);
         // 
-        let idHeads = qr.result.insertId;
-        res.send({id: idHeads});
+        if (qrr.error) {
+            tl.reportInternalError(res, qrr.error);
+            return;
+        }
+        res.send();
 
     });
 
