@@ -1,17 +1,17 @@
 import React from "react";
-import { ISexClass } from "~/Classes/DataStructures/SexClass";
+import { OUT_SexClass } from "~/Classes/DataStructures/SexClass";
 import { Input } from "./Input";
 import { MaterialButton } from "./Button";
 import { List, ListRow } from "./List";
 
 export interface SexClassifierProp{
-    values: Array<ISexClass>;
-    onChange: (list: Array<ISexClass>) => void;
+    values: Array<OUT_SexClass>;
+    onChange: (list: Array<OUT_SexClass>) => void;
     sex: string;
 }
 
 interface SexClassifierState{
-    values: Array<ISexClass>;
+    values: Array<OUT_SexClass>;
     name: string;
     cost: number;
 }
@@ -40,7 +40,7 @@ export class SexClassifier extends React.Component<SexClassifierProp,
 
     onAdd = () => {
         let vals = this.state.values;
-        vals.push({name: this.state.name, cost: this.state.cost})
+        vals.push({name: this.state.name, cost: this.state.cost.toString()})
         this.setState({
             values:vals,
             cost: 0,

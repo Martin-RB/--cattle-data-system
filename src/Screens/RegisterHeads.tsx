@@ -117,12 +117,12 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps, RegisterH
         let alot =  alots[this.state.selectedAlot];
         alot.headNum++;
         let head = {
-            idAlot: alot.id.toString(),
+            idAlot: parseInt(alot.id),
             idLocal: this.state.idLocal,
             sex: this.state.sex,
             siniga: this.state.siniga,
             weight: this.state.weight,
-            sexClaas: this.state.sexClass
+            sexClass: parseInt(this.state.classes[this.state.sexClass].id)
 
         } as OUT_Head;
 
@@ -146,7 +146,7 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps, RegisterH
         let i = parseInt(id);
         let heads = Object.assign(this.state, {}).heads;
         let alots = [...this.state.alots];
-        let alot = alots.find((v) => heads[i].idAlot == v.id)
+        let alot = alots.find((v) => heads[i].idAlot == parseInt(v.id))
         if(alot) alot.headNum--;
         heads.splice(i, 1);
         this.setState({
