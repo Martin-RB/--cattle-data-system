@@ -200,7 +200,9 @@ export class SellAlotList extends React.Component<SellAlotListProps,
             </div>
             <div className="row">
                 <MaterialButton text="Aceptar" className="right" onClick={this.onSubmit}/>
-                <MaterialButton text="Cancelar" className="right"/>
+                <MaterialButton text="Cancelar" className="right" onClick={() =>{
+                    this.props.history.goBack()
+                }}/>
             </div>
             {this.state.modalData? <Modal data={
                 {...this.state.modalData,

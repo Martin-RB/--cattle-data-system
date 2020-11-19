@@ -36,15 +36,15 @@ export class Home extends React.Component<HomeProps, HomeState>{
 		})
 	}
 
-	onOptionClicked = (type: "head"|"alot", id: string, option: string) => {
+	onOptionClicked = (type: "head"|"alot", idx: string, option: string) => {
 		switch(type){
 			case "alot":
 				if(option == "detail"){
 					alert(`${type} ${option}`)
 				}
 				else if(option == "sell"){
-					//alert(`${type} ${option}`)
-					this.props.history.push("/menu/sell-alot", {idAlot: 1})
+					let id = this.state.searchItems[parseInt(idx)];
+					this.props.history.push("/menu/sell-alot", {idAlot: id})
 				}
 				break;
 			case "head":
