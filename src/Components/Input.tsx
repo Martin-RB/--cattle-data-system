@@ -82,7 +82,7 @@ export class MaterialInput extends Input{
         return <div className="input-field">
             <input 
                 id={this.props.id? this.props.id : "lbled_" + MaterialInput.matInputCounter.toString()} 
-                type={this.props.type} 
+                type={this.props.type != undefined? this.props.type: "text"} 
                 onChange={this.onChange} 
                 value={this.props.value? this.props.value: ""} 
                 disabled={this.props.locked}
