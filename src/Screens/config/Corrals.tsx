@@ -7,6 +7,7 @@ import { Radio } from "../../Components/Radio";
 import { Modal, ModalData, ModalExitOptions } from "../../Components/Modal";
 import url from "../ConfigI";
 import { IN_Corral, OUT_Corral } from "../../Classes/DataStructures/Corral";
+import { parse } from "uuid";
 
 export interface IFieldedCorral{
     id?: string
@@ -25,7 +26,7 @@ interface ICorralsState{
     item: IFieldedCorral;
     wrongFields: Array<Fields>;
     lockedFields: Array<Fields>;
-    selectedItem: string;
+    idxSelectedItem: number;
     modalData: ModalData | null;
 }
 // Functional interfaces
@@ -49,7 +50,7 @@ export class Corrals extends React.Component<ICorralsProps, ICorralsState> imple
             lockedFields: [],
             items: [],
             item: {},
-            selectedItem: "-1",
+            idxSelectedItem: -1,
             modalData: null
         }
 
@@ -99,7 +100,7 @@ export class Corrals extends React.Component<ICorralsProps, ICorralsState> imple
                         state={this.state.fStt}
                         showContent={this.state.fStt.showContent()}
                         items={this.fromItemToOption(this.state.items)}
-                        selectedItem={this.state.selectedItem}
+                        idxSelectedItem={this.state.idxSelectedItem}
                         selectionPlaceholder="Corrales">
                 <CorralsContent 
                             value={this.state.item} 
@@ -135,7 +136,7 @@ class GatherState implements IState{
     onItemRemove(): void {
         toast("Obteniendo datos");
     }
-    onItemSelected(idx: string): boolean {
+    onItemSelected(idx: number): boolean {
         toast("Obteniendo datos");
         return false;
     }
@@ -167,11 +168,11 @@ class WaitingState implements IState{
     onItemRemove(): void {
         toast("Seleccione un corral a eliminar");
     }
-    onItemSelected(idx: string): boolean {
+    onItemSelected(idx: number): boolean {
         this.context.setStt({
             fStt: new ViewState(this.context),
-            selectedItem: idx,
-            item: this.context.getStt().items.find((v) => idx == v.id!.toString() )
+            idxSelectedItem: idx,
+            item: this.context.getStt().items.find((v) => idx == parseInt(v.id))
         })
         return true;
     }
@@ -202,7 +203,7 @@ class AddState implements IState{
     onItemRemove(): void {
         toast("Guarde el corral antes de continuar");
     }
-    onItemSelected(idx: string): boolean {
+    onItemSelected(idx: number): boolean {
         toast("Guarde el corral antes de continuar");
         return false;
     }
@@ -245,7 +246,7 @@ class AddState implements IState{
         toast("Corral eliminado con exito");
         this.context.setStt({
             item: {},
-            selectedItem: "-1",
+            idxSelectedItem: -1,
             fStt: new WaitingState(this.context)
         })
     };
@@ -258,12 +259,12 @@ class AddState implements IState{
             toast("Llene todos los campos");
         }
         CorralsSrv.getInstance().edit(
-                                this.context.getStt().selectedItem, 
+                                this.context.getStt().idxSelectedItem, 
                                 this.context.getStt().item as OUT_Corral);
 
         this.context.setStt({
             fStt: new WaitingState(this.context),
-            selectedItem: "-1",
+            idxSelectedItem: -1,
             item: {}
         })
         toast("Corral editado con exito");
@@ -271,7 +272,7 @@ class AddState implements IState{
     onCancel = () => {
         this.context.setStt({
             fStt: new WaitingState(this.context),
-            selectedItem: "-1",
+            idxSelectedItem: -1,
             item: {}
         })
     };
@@ -286,7 +287,7 @@ class ViewState implements IState{
     onItemAdd = () => {
         this.context.setStt({
             fStt: new AddState(this.context),
-            selectedItem: "-1",
+            idxSelectedItem: -1,
             item: {}
         })
     };
@@ -302,7 +303,7 @@ class ViewState implements IState{
                         toast("Corral eliminado con exito");
                         newState = {
                             item: {},
-                            selectedItem: "-1",
+                            idxSelectedItem: -1,
                             fStt: new WaitingState(this.context)
                         };
                     }
@@ -313,25 +314,25 @@ class ViewState implements IState{
         })
         
     };
-    onItemSelected = (idx: string) => {
+    onItemSelected = (idx: number) => {
         this.context.setStt({
             fStt: new ViewState(this.context),
-            selectedItem: idx,
-            item: this.context.getStt().items.find((v) => idx == v.id!.toString() )
+            idxSelectedItem: idx,
+            item: this.context.getStt().items.find((v) => idx == parseInt(v.id))
         });
         return true;
     };
     onAccept = () => {
         this.context.setStt({
             fStt: new WaitingState(this.context),
-            selectedItem: "-1",
+            idxSelectedItem: -1,
             item: {}
         });
     };
     onCancel = () => {
         this.context.setStt({
             fStt: new WaitingState(this.context),
-            selectedItem: "-1",
+            idxSelectedItem: -1,
             item: {}
         });
     };

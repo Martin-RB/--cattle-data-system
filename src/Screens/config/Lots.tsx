@@ -38,7 +38,7 @@ interface ILotsState{
     item: IFieldedLot;
     wrongFields: Array<Fields>;
     lockedFields: Array<Fields>;
-    selectedItem: string;
+    idxSelectedItem: number;
     modalData: ModalData | null;
 }
 // Functional interfaces
@@ -64,7 +64,7 @@ export class Lots extends React.Component<ILotsProps, ILotsState> implements IEd
             lockedFields: [],
             items: [],
             item: {},
-            selectedItem: "-1",
+            idxSelectedItem: -1,
             modalData: null,
             corrals: [],
             protocols: []
@@ -127,7 +127,7 @@ export class Lots extends React.Component<ILotsProps, ILotsState> implements IEd
                         state={this.state.fStt}
                         showContent={this.state.fStt.showContent()}
                         items={this.fromItemToOption(this.state.items)}
-                        selectedItem={this.state.selectedItem}
+                        idxSelectedItem={this.state.idxSelectedItem}
                         selectionPlaceholder="Lotes">
                 <LotsContent 
                             value={this.state.item} 
@@ -169,7 +169,7 @@ class GatherState implements IState{
     onItemRemove(): void {
         toast("Obteniendo datos");
     }
-    onItemSelected(idx: string): boolean {
+    onItemSelected(idx: number): boolean {
         toast("Obteniendo datos");
         return false;
     }
@@ -206,12 +206,12 @@ class WaitingState implements IState{
     onItemRemove(): void {
         toast("Seleccione un lote a eliminar");
     }
-    onItemSelected(idx: string): boolean {
-        let item = this.context.getStt().items.find((v) => idx == v.id!.toString() );
+    onItemSelected(idx: number): boolean {
+        let item = this.context.getStt().items.find((v) => idx == parseInt(v.id));
         
         this.context.setStt({
             fStt: new ViewState(this.context),
-            selectedItem: idx,
+            idxSelectedItem: idx,
             item: ({
                 ...item,
                 hostCorral: item?.hostCorral?.id,
@@ -252,7 +252,7 @@ class AddState implements IState{
     onItemRemove(): void {
         toast("Guarde el lote antes de continuar");
     }
-    onItemSelected(idx: string): boolean {
+    onItemSelected(idx: number): boolean {
         toast("Guarde el lote antes de continuar");
         return false;
     }
@@ -305,7 +305,7 @@ class AddState implements IState{
         toast("Lote eliminado con exito");
         this.context.setStt({
             item: {},
-            selectedItem: "-1",
+            idxSelectedItem: -1,
             fStt: new WaitingState(this.context)
         })
     };
@@ -318,12 +318,12 @@ class AddState implements IState{
             toast("Llene todos los campos");
         }
         LotsSrv.getInstance().edit(
-                                this.context.getStt().selectedItem, 
+                                this.context.getStt().idxSelectedItem, 
                                 this.context.getStt().item as IAlot);
 
         this.context.setStt({
             fStt: new WaitingState(this.context),
-            selectedItem: "-1",
+            idxSelectedItem: -1,
             item: {}
         })
         toast("Lote editado con exito");
@@ -334,12 +334,12 @@ class AddState implements IState{
             toast("Llene todos los campos");
         }
         LotsSrv.getInstance().edit(
-                                this.context.getStt().selectedItem, 
+                                this.context.getStt().idxSelectedItem, 
                                 this.context.getStt().item as IAlot);
 
         this.context.setStt({
             fStt: new WaitingState(this.context),
-            selectedItem: "-1",
+            idxSelectedItem: -1,
             item: {}
         })
         toast("Lote editado con exito");
@@ -348,7 +348,7 @@ class AddState implements IState{
     onCancel = () => {
         this.context.setStt({
             fStt: new WaitingState(this.context),
-            selectedItem: "-1",
+            idxSelectedItem: -1,
             item: {}
         })
     };
@@ -363,7 +363,7 @@ class ViewState implements IState{
     onItemAdd = () => {
         this.context.setStt({
             fStt: new AddState(this.context),
-            selectedItem: "-1",
+            idxSelectedItem: -1,
             item: {}
         })
     };
@@ -379,7 +379,7 @@ class ViewState implements IState{
                         toast("Lote eliminado con exito");
                         newState = {
                             item: {},
-                            selectedItem: "-1",
+                            idxSelectedItem: -1,
                             fStt: new WaitingState(this.context)
                         };
                     }
@@ -390,12 +390,12 @@ class ViewState implements IState{
         })
         
     };
-    onItemSelected = (idx: string) => {
-        let item = this.context.getStt().items.find((v) => idx == v.id!.toString() );
+    onItemSelected = (idx: number) => {
+        let item = this.context.getStt().items.find((v) => idx == parseInt(v.id));
         
         this.context.setStt({
             fStt: new ViewState(this.context),
-            selectedItem: idx,
+            idxSelectedItem: idx,
             item: ({
                 ...item,
                 hostCorral: item?.hostCorral?.id,
@@ -407,14 +407,14 @@ class ViewState implements IState{
     onAccept = () => {
         this.context.setStt({
             fStt: new WaitingState(this.context),
-            selectedItem: "-1",
+            idxSelectedItem: -1,
             item: {}
         });
     };
     onCancel = () => {
         this.context.setStt({
             fStt: new WaitingState(this.context),
-            selectedItem: "-1",
+            idxSelectedItem: -1,
             item: {}
         });
     };
@@ -622,16 +622,16 @@ export class LotsContent extends React.Component<ILotsContentProps>{
         this.props.onChange(v);
     }
 
-    onSelectChanged = (name: string, value: string) => {
+    onSelectChanged = (name: string, value: number) => {
         if(name == Fields.HOST_CORRAL){
-            let idCorral = this.props.corrals[parseInt(value)].id;
+            let idCorral = this.props.corrals[value].id;
             let v = Object.assign({}, this.props.value, {
                 [name]: idCorral
             })
             this.props.onChange(v);
         }
         else if(name == Fields.ARRIVAL_PROTOCOL){
-            let idCorral = this.props.protocols[parseInt(value)].id;
+            let idCorral = this.props.protocols[value].id;
             let v = Object.assign({}, this.props.value, {
                 [name]: idCorral
             })
@@ -664,10 +664,10 @@ export class LotsContent extends React.Component<ILotsContentProps>{
                         <Input placeholder="Peso maximo admitido" type="number" name={Fields.MAX_WEIGHT} value={el.maxWeight?.toString()} onChange={this.onChange}/>
                         <div>
                         <label>Protocolo de llegada</label>
-                        <Select placeholder="Protocolo de llegada" value={this.props.idxProtocol.toString()} onChange={(v)=>this.onSelectChanged(Fields.ARRIVAL_PROTOCOL, v)}
+                        <Select placeholder="Protocolo de llegada" value={this.props.idxProtocol} onChange={(v)=>this.onSelectChanged(Fields.ARRIVAL_PROTOCOL, v)}
                                     elements={this.props.protocols.map((v, i)=>({key: i.toString(), name: v.name})as IOption)}/>
                         <label>Corral anfitrión</label>
-                        <Select placeholder="Corral anfitrión" value={this.props.idxCorral.toString()} onChange={(v)=>this.onSelectChanged(Fields.HOST_CORRAL, v)}
+                        <Select placeholder="Corral anfitrión" value={this.props.idxCorral} onChange={(v)=>this.onSelectChanged(Fields.HOST_CORRAL, v)}
                                     elements={this.props.corrals.map((v, i)=>({key: i.toString(), name: v.name})as IOption)}/>
                         </div>
                     </div>

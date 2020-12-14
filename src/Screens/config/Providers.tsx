@@ -24,7 +24,7 @@ interface IProvidersState{
     item: IFieldedProvider;
     wrongFields: Array<Fields>;
     lockedFields: Array<Fields>;
-    selectedItem: string;
+    idxSelectedItem: number;
     modalData: ModalData | null;
 }
 // Functional interfaces
@@ -48,7 +48,7 @@ export class Providers extends React.Component<IProvidersProps, IProvidersState>
             lockedFields: [],
             items: [],
             item: {},
-            selectedItem: "-1",
+            idxSelectedItem: -1,
             modalData: null
         }
 
@@ -98,7 +98,7 @@ export class Providers extends React.Component<IProvidersProps, IProvidersState>
                         state={this.state.fStt}
                         showContent={this.state.fStt.showContent()}
                         items={this.fromItemToOption(this.state.items)}
-                        selectedItem={this.state.selectedItem}
+                        idxSelectedItem={this.state.idxSelectedItem}
                         selectionPlaceholder="Proveedores">
                 <ProvidersContent 
                             value={this.state.item} 
@@ -134,7 +134,7 @@ class GatherState implements IState{
     onItemRemove(): void {
         toast("Obteniendo datos");
     }
-    onItemSelected(idx: string): boolean {
+    onItemSelected(idx: number): boolean {
         toast("Obteniendo datos");
         return false;
     }
@@ -166,11 +166,11 @@ class WaitingState implements IState{
     onItemRemove(): void {
         toast("Seleccione un proveedor a eliminar");
     }
-    onItemSelected(idx: string): boolean {
+    onItemSelected(idx: number): boolean {
         this.context.setStt({
             fStt: new ViewState(this.context),
-            selectedItem: idx,
-            item: this.context.getStt().items.find((v) => idx == v.id!.toString() )
+            idxSelectedItem: idx,
+            item: this.context.getStt().items.find((v) => idx == parseInt(v.id))
         })
         return true;
     }
@@ -201,7 +201,7 @@ class AddState implements IState{
     onItemRemove(): void {
         toast("Guarde el proveedor antes de continuar");
     }
-    onItemSelected(idx: string): boolean {
+    onItemSelected(idx: number): boolean {
         toast("Guarde el proveedor antes de continuar");
         return false;
     }
@@ -244,11 +244,11 @@ class EditState implements IState{
         toast("Proveedor eliminado con exito");
         this.context.setStt({
             item: {},
-            selectedItem: "-1",
+            idxSelectedItem: -1,
             fStt: new WaitingState(this.context)
         })
     };
-    onItemSelected = (idx: string) => {
+    onItemSelected = (idx: number) => {
         toast("Guarde el proveedor antes de continuar");
         return false;
     };
@@ -257,12 +257,12 @@ class EditState implements IState{
             toast("Llene todos los campos");
         }
         ProvidersSrv.getInstance().edit(
-                                this.context.getStt().selectedItem, 
+                                this.context.getStt().idxSelectedItem.toString(), 
                                 this.context.getStt().item as IN_Provider);
 
         this.context.setStt({
             fStt: new WaitingState(this.context),
-            selectedItem: "-1",
+            idxSelectedItem: -1,
             item: {}
         })
         toast("Proveedor editado con exito");
@@ -270,7 +270,7 @@ class EditState implements IState{
     onCancel = () => {
         this.context.setStt({
             fStt: new WaitingState(this.context),
-            selectedItem: "-1",
+            idxSelectedItem: -1,
             item: {}
         })
     };
@@ -285,7 +285,7 @@ class ViewState implements IState{
     onItemAdd = () => {
         this.context.setStt({
             fStt: new AddState(this.context),
-            selectedItem: "-1",
+            idxSelectedItem: -1,
             item: {}
         })
     };
@@ -301,7 +301,7 @@ class ViewState implements IState{
                         toast("Proveedor eliminado con exito");
                         newState = {
                             item: {},
-                            selectedItem: "-1",
+                            idxSelectedItem: -1,
                             fStt: new WaitingState(this.context)
                         };
                     }
@@ -312,25 +312,25 @@ class ViewState implements IState{
         })
         
     };
-    onItemSelected = (idx: string) => {
+    onItemSelected = (idx: number) => {
         this.context.setStt({
             fStt: new ViewState(this.context),
-            selectedItem: idx,
-            item: this.context.getStt().items.find((v) => idx == v.id!.toString() )
+            idxSelectedItem: idx,
+            item: this.context.getStt().items.find((v) => idx == parseInt(v.id) )
         });
         return true;
     };
     onAccept = () => {
         this.context.setStt({
             fStt: new WaitingState(this.context),
-            selectedItem: "-1",
+            idxSelectedItem: -1,
             item: {}
         });
     };
     onCancel = () => {
         this.context.setStt({
             fStt: new WaitingState(this.context),
-            selectedItem: "-1",
+            idxSelectedItem: -1,
             item: {}
         });
     };
