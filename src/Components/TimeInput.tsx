@@ -1,4 +1,5 @@
 import React from "react";
+import { TextInput } from "../../node_modules/react-materialize/lib/index";
 import { Input, MaterialInput } from "./Input";
 
 export interface ITime{
@@ -14,7 +15,7 @@ export interface TimeInputProps{
 }
 
 export interface TimeInputState{
-    
+    dateSet: boolean
 }
 
 export class TimeInput extends React.Component<TimeInputProps, TimeInputState>{
@@ -23,7 +24,9 @@ export class TimeInput extends React.Component<TimeInputProps, TimeInputState>{
     constructor(props: TimeInputProps){
         super(props);
 
-        this.state = {};
+        this.state = {
+            dateSet: false
+        };
     }
 
     componentDidMount(){
@@ -45,15 +48,23 @@ export class TimeInput extends React.Component<TimeInputProps, TimeInputState>{
         let hour = parseInt(instance.hours)
         this.props.onChange({
             hour: (instance.amOrPm == "PM")? hour+12: hour,
-            minute: parseInt(instance.minutes)
+            minute: parseInt(instance.minutes),
         });
+        this.setState({
+            dateSet: true
+        })
         
     }
 
     render():JSX.Element{
         let time = this.setDate(this.props.value);
         return (
-            <MaterialInput className="timepicker" value={time} id={this.props.id} placeholder={this.props.placeholder}/>
+            <TextInput inputClassName={`timepicker ${this.state.dateSet?"valid":""}`} 
+                        noLayout
+                        label="Hora"
+                        value={time} 
+                        id={this.props.id} 
+                        placeholder={this.props.placeholder}/>
         );
     }
 

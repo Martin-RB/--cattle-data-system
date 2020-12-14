@@ -112,8 +112,8 @@ export class SellAlotList extends React.Component<SellAlotListProps,
         })
     }
 
-    isButtonClicked = (id: string, idx: number) => {
-        let head = this.state.heads[parseInt(id)];
+    isButtonClicked = (row: number, column: number) => {
+        let head = this.state.heads[row];
         this.setState({
             modalData: {
                 title: `Cabeza: ${head.head.siniga}`,
@@ -123,7 +123,7 @@ export class SellAlotList extends React.Component<SellAlotListProps,
                     if(opt == ModalExitOptions.ACCEPT){
                         let modalFields = this.state.modalFields;
                         head = {...head, ...modalFields}
-                        heads[parseInt(id)] = head;
+                        heads[row] = head;
                     }
                     this.setState({modalData: null, modalFields: {
                         finalSellPrice: null,
@@ -142,9 +142,9 @@ export class SellAlotList extends React.Component<SellAlotListProps,
         this.setState({heads})
     }
 
-    onItemSelected = (id:string, isSelected: boolean) => {
+    onItemSelected = (idx:number, isSelected: boolean) => {
         let heads = this.state.heads;
-        heads[parseInt(id)].isSelected = isSelected;
+        heads[idx].isSelected = isSelected;
         this.setState({heads})
     }
 
@@ -191,8 +191,8 @@ export class SellAlotList extends React.Component<SellAlotListProps,
             <h2>Venta de lote</h2>
             <p>Seleccione las cabezas y sus respectivos datos de venta</p>
             <div className="row">
-            <List headers={[ "SINIGA", "Id. local", "Proveedor", "Info. venta"]}
-                    selectable={true}
+            <List headers={[ "SINIGA", "Id. local", "Sexo", "Info. venta"]}
+                    selectable
                     onButtonClicked={this.isButtonClicked}
                     onItemSelected={this.onItemSelected}
                     onAllSelected={this.onAllSelected}

@@ -4,9 +4,9 @@ import { IOption } from "~/Classes/IOption";
 interface SelectProps{
     elements: Array<IOption> | Array<Array<IOption>>,
     className?: string,
-    value?: string,
+    value?: number,
     placeholder?: string
-    onChange: (value: string) => boolean;
+    onChange: (value: number) => boolean;
 }
 
 export class Select extends React.Component<SelectProps>{
@@ -20,9 +20,9 @@ export class Select extends React.Component<SelectProps>{
     optCount = 0;
 
     onChange(e: React.ChangeEvent<HTMLSelectElement>){
-        let value = e.target.value;
+        let value = parseInt(e.target.value);
         if(this.props.onChange(value)){
-            this.setState({});
+            this.forceUpdate()
         };
     }
 

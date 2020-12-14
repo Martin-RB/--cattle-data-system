@@ -1,10 +1,12 @@
 import React from "react";
 import { Input } from "./Input";
-import { Checkbox } from "./Checkbox";
-import { Button, MaterialButton } from "./Button";
+import { MaterialButton } from "./Button";
+import { Button, Checkbox, Icon } from "../../node_modules/react-materialize/lib/index";
+import { v4 as uuid } from 'uuid';
+
+/* import * as Checkbots from "./Checkbox"; */
 
 export interface ListRow{
-    id: string
     isSelected?: boolean,
     columns: Array<string | ListColInput>
     styleClass?:string
@@ -20,12 +22,12 @@ interface ListProps{
     viewable?: boolean;
     deletable?: boolean;
     onAllSelected?: (isSelected: boolean) => void;
-    onChange?: (id: string, columnIndex: number, value: string) => void;
-    onItemSelected?: (id:string, isSelected: boolean) => void;
-    onDeleteClicked?: (id: string) => void;
-    onEditClicked?: (id: string) => void;
-    onViewClicked?: (id: string) => void;
-    onButtonClicked?: (id: string, columnIndex: number) => void;
+    onChange?: (idx: number, columnIndex: number, value: string) => void;
+    onItemSelected?: (idx:number, isSelected: boolean) => void;
+    onDeleteClicked?: (idx: number) => void;
+    onEditClicked?: (idx: number) => void;
+    onViewClicked?: (idx: number) => void;
+    onButtonClicked?: (idx: number, columnIndex: number) => void;
 }
 
 interface ListState{}
@@ -44,27 +46,27 @@ export class List extends React.Component<ListProps, ListState>{
         return this.props.rows.find((v) => !v.isSelected) == undefined
     }
 
-    private onDelete = (id: string) => {
-        this.props.onDeleteClicked?this.props.onDeleteClicked(id):"";
+    private onDelete = (idx: number) => {
+        this.props.onDeleteClicked?this.props.onDeleteClicked(idx):null;
     }
 
-    private onEdit = (id: string) => {
-        this.props.onEditClicked?this.props.onEditClicked(id):"";
+    private onEdit = (idx: number) => {
+        this.props.onEditClicked?this.props.onEditClicked(idx):null;
     }
 
-    private onItemSelected = (id: string) => {
-        let element = this.props.rows.find((e) => e.id == id)!;
-        this.props.onItemSelected?this.props.onItemSelected(id, !element.isSelected):"";
+    private onItemSelected = (idx: number) => {
+        let element = this.props.rows[idx];
+        this.props.onItemSelected?this.props.onItemSelected(idx, !element.isSelected):"";
     }
 
-    private onItemChanged = (id: string, arrIdx: number, value: string) => {
-        this.props.onChange?this.props.onChange(id, arrIdx, value):"";
+    private onItemChanged = (idx: number, arrIdx: number, value: string) => {
+        this.props.onChange?this.props.onChange(idx, arrIdx, value):null;
     }
-    private onView = (id: string) => {
-        this.props.onViewClicked?this.props.onViewClicked(id):"";
+    private onView = (idx: number) => {
+        this.props.onViewClicked?this.props.onViewClicked(idx):null;
     }
-    private onButtonClicked = (id: string, columnIndex: number) => {
-        this.props.onButtonClicked?this.props.onButtonClicked(id, columnIndex):"";
+    private onButtonClicked = (idx: number, columnIndex: number) => {
+        this.props.onButtonClicked?this.props.onButtonClicked(idx, columnIndex):null;
     }
 
     render(){
@@ -73,12 +75,24 @@ export class List extends React.Component<ListProps, ListState>{
                 <div className="myList--head">
                     <div className="myList--row myList--row--rightMargin">
                         {this.props.selectable? <span className="myList--small-item">
-                            <Checkbox indeterminated={true} checked={this.areAllSelected()} name="no" onChange={this.onAllSelected} value={"checkAll"}/>
+                            <Checkbox label="" 
+                                    filledIn 
+                                    id={uuid()}
+                                    indeterminate
+                                    checked={this.areAllSelected()} 
+                                    onChange={this.onAllSelected} 
+                                    value={"checkAll"}/>
                         </span>: null}
                         {this.props.headers.map((v) => <span className="myList--item" key={v}>{v}</span>)}
-                        {this.props.deletable || this.props.editable?<span className="myList--small-item myList--small-item--verticalItems">
-                            <i className="tiny material-icons icon">remove</i>
-                        </span>:null}
+                        {this.props.viewable? <div className="myList--small-item">
+                            <Icon className="icon">visibility</Icon>
+                        </div>:null}
+                        {this.props.editable?<div className="myList--small-item">
+                            <Icon className="icon">edit</Icon>
+                        </div>:null}
+                        {this.props.deletable? <div className="myList--small-item">
+                            <Icon className="icon">remove</Icon>
+                        </div>:null}
                     </div>
                 </div>
                 <div className="myList--content">
@@ -87,30 +101,44 @@ export class List extends React.Component<ListProps, ListState>{
                             <div className={`myList--row ${v.styleClass}`} key={i.toString()}>
                                 {this.props.selectable? <span className="myList--small-item">
                                     <Checkbox 
+                                        filledIn
+                                        id={uuid()}
                                         checked={v.isSelected != undefined && v.isSelected} 
-                                        name={i.toString()} 
-                                        onChange={() => this.onItemSelected(v.id)} 
-                                        value={i.toString()}/>
+                                        onChange={(e) => {
+                                            console.log(e)
+                                            this.onItemSelected(i)}
+                                        }
+                                        value={i.toString()}
+                                        label=""/>
                                 </span>: null}
 
-                                {v.columns.map((vv, ii) => {
-                                    if(typeof vv == "string"){
-                                        return <span className="myList--item" key={`${this.props.headers[ii]}_${i}`}>{vv}</span>;
+                                {v.columns.map((cv, ci) => {
+                                    if(typeof cv == "string"){
+                                        return <span className="myList--item" key={`${this.props.headers[ci]}_${i}`}>{cv}</span>;
                                     }
-                                    else if(vv.type == "button"){
-                                        return <div className="myList--item" key={`${this.props.headers[ii]}_${i}`}>
-                                            <MaterialButton className="button--small" text={vv.inputValue} onClick={()=>this.onButtonClicked(v.id, ii)}/>
+                                    else if(cv.type == "button"){
+                                        return <div className="myList--item" key={`${this.props.headers[ci]}_${i}`}>
+                                            <MaterialButton className="button--small" text={cv.inputValue} onClick={()=>this.onButtonClicked(i, ci)}/>
                                         </div>
                                     }
                                     else{
-                                        return <Input type={vv.type} className="myList--item" key={`${this.props.headers[ii]}_${i}`} value={vv.inputValue} onChange={(_,val) => {this.onItemChanged(v.id, ii, val)}}/>;
+                                        return <Input type={cv.type} className="myList--item" key={`${this.props.headers[ci]}_${i}`} value={cv.inputValue} onChange={(_,val) => {this.onItemChanged(i, ci, val)}}/>;
                                     }
                                 })}
-                                {this.props.deletable || this.props.editable || this.props.viewable? <span className="myList--small-item myList--small-item--verticalItems">
-                                    {this.props.deletable? <i className="tiny material-icons icon" onClick={()=>this.onDelete(v.id)}>remove</i>:null}
-                                    {this.props.editable? <i className="tiny material-icons icon" onClick={()=>this.onEdit(v.id)}>edit</i>: null}
-                                    {this.props.viewable? <i className="tiny material-icons icon" onClick={()=>this.onView(v.id)}>visibility</i>: null}
-                                </span>: null}
+                                {
+                                    this.props.viewable? 
+                                    <div className="myList--small-item" onClick={()=>this.onView(i)}>
+                                        <Icon className="icon">visibility</Icon>
+                                    </div>
+                                    :null
+                                }
+                                {
+                                    this.props.editable?
+                                    <div className="myList--small-item" onClick={()=>this.onEdit(i)}> <Icon className="icon">edit</Icon></div>: 
+                                    null
+                                }
+                                {this.props.deletable? <div className="myList--small-item" onClick={()=>this.onDelete(i)}><Icon className="icon">remove</Icon></div>:null}
+                                
                             </div>)}
                     
                 </div>

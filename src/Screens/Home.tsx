@@ -107,13 +107,13 @@ export class Home extends React.Component<HomeProps, HomeState>{
 			this.onSubmitSearch()
 		}}>
 			<div className="input-field">
-				<input id="search" type="search"
-					required value={this.state.search} onChange={(v)=>
-					this.setState({search: v.target.value})
-				} onKeyUp={(v)=>{
-					console.log(v.keyCode);
-					
-				}}/>
+				<input id="search" 
+					type="search"
+					required 
+					value={this.state.search} 
+					onChange={(v)=>
+						this.setState({search: v.target.value})
+					}/>
 				<label className="label-icon" htmlFor="search"><i className="material-icons">search</i></label>
 				<i className="material-icons" onClick={this.onCancelSearch}>close</i>
 			</div>

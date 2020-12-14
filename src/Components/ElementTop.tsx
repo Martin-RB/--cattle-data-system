@@ -6,8 +6,8 @@ import { Button, MaterialButton } from "./Button";
 interface ElementTopProps{
     elementPlaceholder?: string;
     elements: Array<IOption>;
-    selectedElement: string;
-    onElementSelected: (idx: string) => boolean;
+    idxSelectedElement: number;
+    onElementSelected: (idx: number) => boolean;
     onClickAdd: () => void;
     onClickDelete: () => void;
 }
@@ -21,24 +21,19 @@ export class ElementSelectorTop extends React.Component<ElementTopProps, Element
     constructor(props: ElementTopProps){
         super(props);
         this.state = {};
-
-        this.onElementSelected = this.onElementSelected.bind(this);
     }
 
-    onElementSelected(value: string): boolean{
-        let isAccepted = this.props.onElementSelected(value);
+    onElementSelected = (idx: number)=>{
+        let isAccepted = this.props.onElementSelected(idx);
         return isAccepted;
     }
-    /* elcfg--top
-    
-    elcfg--top-select
-
-
-    */
     render(): JSX.Element{
         return <div className="row elcfg--top">
             <div className="elcfg--top--vertical-pos col s6">
-                <Select elements={this.props.elements} value={this.props.selectedElement} onChange={this.onElementSelected} placeholder={this.props.elementPlaceholder}/>
+                <Select elements={this.props.elements} 
+                        value={this.props.idxSelectedElement} 
+                        onChange={this.onElementSelected} 
+                        placeholder={this.props.elementPlaceholder}/>
             </div>
             <div className="elcfg--top--vertical-pos col s6">
                 <div className="elcfg--top-buttons">

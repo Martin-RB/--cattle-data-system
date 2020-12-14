@@ -7,7 +7,7 @@ interface IElementSampleProps{
     title: string;
     showContent: boolean;
     items: Array<IOption>;
-    selectedItem: string;
+    idxSelectedItem: number;
     selectionPlaceholder: string;
     state: IState;
 }
@@ -15,7 +15,7 @@ interface IElementSampleProps{
 export interface IState{
     onItemAdd: () => void;
     onItemRemove: () => void;
-    onItemSelected: (idx: string) => boolean;
+    onItemSelected: (idx: number) => boolean;
     onAccept: () => void;
     onCancel: () => void;
     showContent: () => boolean;
@@ -59,7 +59,7 @@ export class ElementSample extends React.Component<IElementSampleProps>{
                         onElementSelected={this.props.state.onItemSelected}
                         elements={this.props.items}
                         elementPlaceholder={this.props.selectionPlaceholder}
-                        selectedElement={this.props.selectedItem}/>
+                        idxSelectedElement={this.props.idxSelectedItem}/>
             {this.props.showContent? 
                 <>
                     <div className="divider row"></div>

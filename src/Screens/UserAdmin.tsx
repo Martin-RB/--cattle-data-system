@@ -1,13 +1,16 @@
 import React, { createContext } from "react";
 import { List, ListRow } from "../Components/List";
 import { MaterialInput } from "../Components/Input";
-import { MaterialButton } from "../Components/Button";
 import { IN_User } from "../Classes/DataStructures/User";
 import { OUT_User } from "../Classes/DataStructures/User";
 import { toast } from "../App";
 import url from "./ConfigI";
 import { Redirect, RouteComponentProps } from "react-router-dom";
 import { admonLogOut, isAdmonLoggedIn } from "./AdmonLogin";
+import { MaterialButton } from "../Components/Button";
+import Icon from "../../node_modules/react-materialize/lib/Icon";
+import Button from "../../node_modules/react-materialize/lib/Button";
+import { TextInput } from "../../node_modules/react-materialize/lib/index";
 
 interface IFieldedUser {
     users?: Array<string>
@@ -69,7 +72,7 @@ export class UserAdmin extends React.Component<IUserProp, UserAdminState>{
         this.getUser()
     }
 
-    onItemChange = (id: string, arrIdx: number, value: string) => {
+    onItemChange = (idx: number, arrIdx: number, value: string) => {
         
     }
 
@@ -77,8 +80,8 @@ export class UserAdmin extends React.Component<IUserProp, UserAdminState>{
          
     }
 
-    onItemSelected = (idx: string, isSelected: boolean) => {     
-        let id = this.state.users[parseInt(idx)].id_user
+    onItemSelected = (idx: number, isSelected: boolean) => {     
+        let id = this.state.users[idx].id_user
         this.setEnability(id, isSelected);
 
     }
@@ -131,7 +134,7 @@ export class UserAdmin extends React.Component<IUserProp, UserAdminState>{
         return (
             <>
             <div className="container"> 
-            <h4 className="indigo-text">Administración</h4>
+            <h4>Administración</h4>
             <div className="z-depth-1 grey lighten-4 row " >
                 
                 <div className="row">
@@ -140,10 +143,10 @@ export class UserAdmin extends React.Component<IUserProp, UserAdminState>{
                     <div>
                     <h6>Registrar nuevo usuario</h6>
                 <br></br>
-                <MaterialInput placeholder="Nombre" name={Fields.NAME} onChange={(_,name) => this.setState({name})}  value={this.state.name}/>
-                <MaterialInput placeholder="Correo" name={Fields.EMAIL} onChange={(_,email) => this.setState({email})} value={this.state.email}/>
-                <MaterialInput placeholder="Contraseña" name={Fields.PASSWORD} onChange={(_,password) => this.setState({password})} value={this.state.password}/>
-                <MaterialButton className="left " text="Registrar" onClick={()=>this.accept()}/>
+                <TextInput noLayout label="Nombre" name={Fields.NAME} onChange={({target:{value}}) => this.setState({name:value})}  value={this.state.name}/>
+                <TextInput noLayout label="Correo" name={Fields.EMAIL} onChange={({target:{value}}) => this.setState({email:value})} value={this.state.email}/>
+                <TextInput noLayout label="Contraseña" name={Fields.PASSWORD} onChange={({target:{value}}) => this.setState({password:value})} value={this.state.password}/>
+                <Button className="left" onClick={()=>this.accept()} waves="teal">Registrar</Button>
             </div>
                     </div>
                     <div className="col s12 l6">
@@ -160,7 +163,7 @@ export class UserAdmin extends React.Component<IUserProp, UserAdminState>{
                                 />
                     </div>
                 </div>  
-                <MaterialButton className="right" text="Cerrar Sesión" onClick={()=>this.logout()}/>
+                <Button className="right" onClick={()=>this.logout()}>Cerrar Sesión <Icon right>logout</Icon> </Button>
                 </div>
             </div>
             </>

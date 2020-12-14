@@ -1,7 +1,6 @@
 import React, { Provider } from "react";
 import { HISTORY, toast } from "../App";
 import { MaterialInput } from "../Components/Input";
-import { Select } from "../Components/Select";
 import { SexClassifier } from "../Components/SexCassifier";
 import { TimeInput, ITime } from "../Components/TimeInput";
 import { DateInput } from "../Components/DateInput";
@@ -12,8 +11,12 @@ import url from "./ConfigI";
 import { IN_Provider } from "../Classes/DataStructures/Provider";
 import { IN_Lorry, OUT_Lorry } from "../Classes/DataStructures/Lorry";
 import { IN_Corral } from "../Classes/DataStructures/Corral";
+import { Button, TextInput } from "../../node_modules/react-materialize/lib/index";
+import { DateOptions } from "../Configs";
+import { Select } from "../Components/Select";
+import { RouteComponentProps } from "react-router-dom";
 
-interface LorryRegisterProps{
+interface LorryRegisterProps extends RouteComponentProps{
 
 }
 
@@ -27,8 +30,8 @@ interface LorryRegisterState{
     number: string,
     heads: string,
     kgOrigin: string,
-    idxProvider: string,
-    idxCorral: string,
+    idxProvider: number,
+    idxCorral: number,
     classMale: Array<OUT_SexClass>,
     classFemale: Array<OUT_SexClass>,
     providers: Array<IOption>
@@ -39,6 +42,7 @@ export class LorryRegister extends React.Component<LorryRegisterProps, LorryRegi
 
     srvProviders: Array<IN_Provider>
     srvCorrals: Array<IN_Corral>
+    actualDate = new Date()
 
     constructor(props: LorryRegisterProps){
         super(props);
@@ -53,12 +57,12 @@ export class LorryRegister extends React.Component<LorryRegisterProps, LorryRegi
             number: "",
             heads: "",
             kgOrigin: "",
-            idxProvider: "-1",
+            idxProvider: -1,
             classMale: [],
             classFemale: [],
             providers:[],
             corrals:[],
-            idxCorral: "-1"
+            idxCorral: -1
         };
     }
 
@@ -100,10 +104,14 @@ export class LorryRegister extends React.Component<LorryRegisterProps, LorryRegi
         }
         
         this.uploadLorry(fieldCheck).then((res) => {
-            if(res && res.status == 200)
-                toast("Jaula registrada con exito")
-            else
+            if(res && res.status == 200){
+                this.props.history.push("/menu")
+                toast("Jaula registrada con exito.")
+            }
+            else{
+                this.props.history.push("/menu")
                 toast("Hubo un error al registrar jaula. Verifique sus datos.")
+            }
         })
 
     }
@@ -112,106 +120,118 @@ export class LorryRegister extends React.Component<LorryRegisterProps, LorryRegi
         
         return (
             <>
-            <h2>Registrar jaula</h2>
             <div className="row">
-                <div className="col s12 m10 l10 offset-m1">
-                    {/* <div className="row">
-                        <div className="col s12 m6">
-                            <DateInput placeholder="fecha" 
-                                        id="fecha" 
+                <div className="col s12 m12 l12">
+                    <form onSubmit={e=>e.preventDefault()}>
+                        <h2>Registrar jaula</h2>
+                        <div className="row">
+                            <div className="col s12 m6">
+                                <DateInput placeholder="fecha" 
+                                            id="fecha" 
+                                            options={DateOptions}
+                                            onChange={(date) => this.setState({
+                                                date
+                                            })} 
+                                            value={this.state.date}
+                                            />
+                            </div>
+                            <div className="col s12 m6">
+                                <TimeInput placeholder="hora" 
+                                            id="hora" 
+                                            onChange={(time) => this.setState({
+                                                time
+                                            })} 
+                                            value={this.state.time}/>
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col s12">
+                                <TextInput
+                                            label="# jaula"
+                                            value={this.state.number}
+                                            noLayout
+                                            onChange={({target:{value:number}})=>{this.setState({
+                                                number
+                                            })}}/>
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col s12">
+                                <TextInput
+                                            label="Cabezas"
+                                            value={this.state.heads}
+                                            noLayout
+                                            onChange={({target:{value:heads}}) => {this.setState({
+                                                heads
+                                            })}}/>
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col s12">
+                                <TextInput
+                                            label="Kg. de origen"
+                                            value={this.state.kgOrigin}
+                                            noLayout
+                                            onChange={({target:{value:kgOrigin}}) => {this.setState({
+                                                kgOrigin
+                                            })}}/>
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col s12">
+                                <Select placeholder="Seleccione proveedor" 
+                                        value={this.state.idxProvider}
+                                        elements={this.state.providers}
+                                        onChange={(idxProvider)=>{
+                                            this.setState({
+                                                idxProvider
+                                            })
+                                            return true;
+                                        }}/>
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col s12">
+                                <Select placeholder="Seleccione corral de estancia" 
+                                        value={this.state.idxCorral}
+                                        elements={this.state.corrals}
+                                        onChange={(a)=>{
+                                            this.setState({
+                                                idxCorral: a
+                                            })
+                                            return true;
+                                        }}/>
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col s12 l6">
+                                <SexClassifier 
+                                        sex="machos"
                                         onChange={(a) => this.setState({
-                                            date: a
-                                        })} 
-                                        value={this.state.date}
-                                        />
-                        </div>
-                        <div className="col s12 m6">
-                            <TimeInput placeholder="hora" 
-                                        id="hora" 
+                                            classMale: a
+                                        })}
+                                        values={this.state.classMale}/>
+                            </div>
+                            <div className="col s12 l6">
+                                <SexClassifier 
+                                        sex="hembras"
                                         onChange={(a) => this.setState({
-                                            time: a
-                                        })} 
-                                        value={this.state.time}/>
+                                            classFemale: a
+                                        })}
+                                        values={this.state.classFemale}/>
+                            </div>
                         </div>
-                    </div> */}
-                    <div className="row">
-                        <div className="col s12">
-                            <MaterialInput placeholder="# jaula"
-                                        value={this.state.number}
-                                        onChange={(_,a)=>{this.setState({
-                                            number: a
-                                        })}}/>
+                        <div className="row">
+                            <div className="col s12">
+                                <Button 
+                                    waves="grey"
+                                    className="button--color right"
+                                    onClick={this.onAccept}>
+                                        Aceptar
+                                </Button>
+                            </div>
                         </div>
-                    </div>
-                    <div className="row">
-                        <div className="col s12">
-                            <MaterialInput placeholder="Cabezas"
-                                        value={this.state.heads}
-                                        onChange={(_,a) => {this.setState({
-                                            heads: a
-                                        })}}/>
-                        </div>
-                    </div>
-                    <div className="row">
-                        <div className="col s12">
-                            <MaterialInput placeholder="Kg. de origen"
-                                        value={this.state.kgOrigin}
-                                        onChange={(_,a) => {this.setState({
-                                            kgOrigin: a
-                                        })}}/>
-                        </div>
-                    </div>
-                    <div className="row">
-                        <div className="col s12">
-                            <Select placeholder="Seleccione proveedor" 
-                                    value={this.state.idxProvider}
-                                    elements={this.state.providers}
-                                    onChange={(a)=>{
-                                        this.setState({
-                                            idxProvider: a
-                                        })
-                                        return true;
-                                    }}/>
-                        </div>
-                    </div>
-                    <div className="row">
-                        <div className="col s12">
-                            <Select placeholder="Seleccione corral de estancia" 
-                                    value={this.state.idxCorral}
-                                    elements={this.state.corrals}
-                                    onChange={(a)=>{
-                                        this.setState({
-                                            idxCorral: a
-                                        })
-                                        return true;
-                                    }}/>
-                        </div>
-                    </div>
-                    <div className="row">
-                        <div className="col s12 l6">
-                            <SexClassifier 
-                                    sex="machos"
-                                    onChange={(a) => this.setState({
-                                        classMale: a
-                                    })}
-                                    values={this.state.classMale}/>
-                        </div>
-                        <div className="col s12 l6">
-                            <SexClassifier 
-                                    sex="hembras"
-                                    onChange={(a) => this.setState({
-                                        classFemale: a
-                                    })}
-                                    values={this.state.classFemale}/>
-                        </div>
-                    </div>
-                    <div className="row">
-                        <div className="col s12">
-                            <MaterialButton text="Aceptar" 
-                                            className="right"
-                                            onClick={this.onAccept}/>
-                        </div>
-                    </div>
+                    </form>
                 </div>
             </div>
             </>
@@ -220,10 +240,10 @@ export class LorryRegister extends React.Component<LorryRegisterProps, LorryRegi
 
     checkFields = () => {
         if(this.state.number != "" && this.state.heads != "" &&
-            this.state.kgOrigin != "" && this.state.idxProvider != "-1"){
+            this.state.kgOrigin != "" && this.state.idxProvider != -1){
 
-            let idxProvider = parseInt(this.state.idxProvider)
-            let idxCorral = parseInt(this.state.idxCorral)
+            let idxProvider = this.state.idxProvider
+            let idxCorral = this.state.idxCorral
             return {
                 femaleClassfies: this.state.classFemale,
                 maleClassfies: this.state.classMale,

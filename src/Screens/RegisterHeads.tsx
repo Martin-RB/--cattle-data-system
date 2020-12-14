@@ -17,20 +17,26 @@ import { IN_SexClass } from "../Classes/DataStructures/SexClass";
 import { MedicineDisplay, DisplayableMedicine } from "../Components/MedicineDisplay";
 import { IImplant } from "~/Classes/DataStructures/Implant";
 import url from "./ConfigI";
+import { DateInput } from "../Components/DateInput";
+import { TimeInput } from "../Components/TimeInput";
+import { DateOptions } from "../Configs";
+import { TextInput } from "../../node_modules/react-materialize/lib/index";
+import {v4 as uuid} from "uuid";
 
 interface RegisterHeadsState{
     lorries: Array<IN_Lorry>
     alots: Array<IN_Alot>
-    selectedLorry: string
-    selectedAlot: number
+    idxSelectedLorry: number
+    idxSelectedAlot: number
     siniga: string
-    weight: number
+    weight: string
     idLocal: string
     sex: "male" | "female" | ""
-    sexClass: number
+    idxSexClass: number
     heads: Array<OUT_Head>,
     classes: Array<IN_SexClass>,
-    selectedClass: number
+    idxSelectedClass: number
+    date: Date
 }
 interface RegisterHeadsProps{
 
@@ -44,16 +50,17 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps, RegisterH
         this.state = {
             lorries: [],
             alots: [],
-            selectedLorry: "-1",
-            selectedAlot: -1,
+            idxSelectedLorry: -1,
+            idxSelectedAlot: -1,
             siniga: "",
-            weight: 0,
-            sexClass: 0,
-            sex: "male",
+            weight: "",
+            idxSexClass: -1,
+            sex: "",
             heads: [],
             idLocal: "",
             classes: [],
-            selectedClass: -1
+            idxSelectedClass: -1,
+            date: new Date()
         }
     }
 
@@ -102,29 +109,35 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps, RegisterH
         setTimeout(() => {
             this.setState({
                 alots,
-                selectedAlot: -1
+                idxSelectedAlot: -1
             })
         },500);
     }
 
     onAddHead = () => {
-        if(this.state.selectedLorry == "" || this.state.selectedAlot == -1 ||
-                    this.state.siniga == "" || this.state.weight == 0 || 
+        if(this.state.idxSelectedLorry == -1 || this.state.idxSelectedAlot == -1 || 
+                    this.state.idxSexClass == -1 ||
+                    this.state.siniga == "" || this.state.weight == "" || 
                     this.state.idLocal == "" || this.state.sex == ""){
             toast("Llene todos los datos");
             return;
         }
+        let weight = parseFloat(this.state.weight)
+        if(weight == NaN){
+            toast("El peso debe de ser un numero")
+            return;
+        }
         
         let alots = [...this.state.alots];
-        let alot =  alots[this.state.selectedAlot];
+        let alot =  alots[this.state.idxSelectedAlot];
         alot.headNum++;
         let head = {
             idAlot: parseInt(alot.id),
             idLocal: this.state.idLocal,
             sex: this.state.sex,
             siniga: this.state.siniga,
-            weight: this.state.weight,
-            sexClass: parseInt(this.state.classes[this.state.sexClass].id)
+            weight: weight,
+            sexClass: parseInt(this.state.classes[this.state.idxSexClass].id)
 
         } as OUT_Head;
 
@@ -133,19 +146,19 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps, RegisterH
         this.setState({
             alots,
             heads,
-            weight: 0,
+            weight: "",
             sex: "",
             siniga: "",
             idLocal: "",
-            selectedAlot: -1,
-            selectedClass: -1
+            idxSelectedAlot: -1,
+            idxSelectedClass: -1
         })
 
 
     }
 
-    onDeleteHead = (id: string) => {
-        let i = parseInt(id);
+    onDeleteHead = (idx: number) => {
+        let i = idx
         let heads = Object.assign(this.state, {}).heads;
         let alots = [...this.state.alots];
         let alot = alots.find((v) => heads[i].idAlot == parseInt(v.id))
@@ -157,12 +170,10 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps, RegisterH
         })
     }
 
-    onChangeLorry = (id: string) => {
-        console.log("id: " + id)
+    onChangeLorry = (idx: number) => {
         this.setState({
-            //selectedLorry: this.state.lorries[parseInt(id)].id,
-            selectedLorry: id,
-            selectedClass: -1,
+            idxSelectedLorry: idx,
+            idxSelectedClass: -1,
             heads: []
         });
 
@@ -172,7 +183,10 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps, RegisterH
         if(this.state.heads.length > 0){
             let res;
             try {   
-                res = await fetch(url + "/lorries/" + this.state.lorries[parseInt(this.state.selectedLorry)].id + "/heads" , { 
+                res = await fetch(url + "/lorries/" + 
+                        this.state.lorries[
+                            this.state.idxSelectedLorry
+                        ].id + "/heads" , { 
                     method: 'POST', 
                     body: JSON.stringify(this.state.heads),
                     credentials: "include",
@@ -207,13 +221,10 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps, RegisterH
             key: i.toString(),
             name: e.name
         } as IOption))
+        let lorry = this.state.lorries[this.state.idxSelectedLorry]
         return (
             <>
-            <div className="row">
-                <div className="col s12">
-                    <h2>Trabajar cabezas</h2>
-                </div>
-            </div>
+            <h2>Trabajar cabezas</h2>
             <div className="row">
                 <div className="col s12">
                     <label>Jaula</label>
@@ -221,30 +232,47 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps, RegisterH
                             elements={lorries} 
                             className="inline"
                             onChange={(v) => {this.onChangeLorry(v); return true}}
-                            value={this.state.selectedLorry.toString()}/>
+                            value={this.state.idxSelectedLorry}/>
                 </div>
+            </div>
+            <div className="row">
+                <div className="col s12">
+                    <DateInput placeholder="Fecha de ingreso" 
+                                id="fecha" 
+                                options={DateOptions}
+                                onChange={(date) => this.setState({
+                                    date
+                                })} 
+                                value={this.state.date}
+                                />
+                </div>
+                
             </div>
             <div className="divider"></div>
             <div className="row">
                 <div className="col s12 l6">
-                    <MaterialInput placeholder="SINIGA"
-                                    value={this.state.siniga}
-                                    onChange={(_,v) => this.setState({
-                                        siniga: v
-                                    })}
-                    />
-                    <MaterialInput placeholder="Identificación local"
-                                    value={this.state.idLocal}
-                                    onChange={(_,v) => this.setState({
-                                        idLocal: v
-                                    })}/>
+                    <TextInput label="SINIGA"
+                        id={uuid()}
+                        noLayout
+                        value={this.state.siniga}
+                        onChange={({target:{value:siniga}}) => this.setState({
+                            siniga
+                        })}/>
+                    <TextInput label="Identificación local"
+                        noLayout
+                        id={uuid()}
+                        value={this.state.idLocal}
+                        onChange={({target:{value:idLocal}}) => this.setState({
+                            idLocal
+                        })}/>
                     <div className="field--margin">
                         <Radio name="sex" 
                                 checked={this.state.sex == "male"} 
-                                onChange={() => this.setState({
+                                onChange={() => {
+                                    this.setState({
                                     sex: "male",
-                                    classes: this.state.lorries[parseInt(this.state.selectedLorry)].maleClassfies
-                                })}
+                                    classes: lorry?lorry.maleClassfies:[]
+                                })}}
                                 text="Macho"
                                 value="male"/>
                     </div>
@@ -253,7 +281,7 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps, RegisterH
                                 checked={this.state.sex == "female"} 
                                 onChange={() => this.setState({
                                     sex: "female",
-                                    classes: this.state.lorries[parseInt(this.state.selectedLorry)].femaleClassfies
+                                    classes: lorry?lorry.femaleClassfies:[]
                                 })}
                                 text="Hembra"
                                 value="female"/>
@@ -262,34 +290,35 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps, RegisterH
                         <label htmlFor="">Clasificación</label>
                         <Select placeholder="Seleccione clasificación" 
                                     elements={classes} 
-                                    value={this.state.selectedClass.toString()}
+                                    value={this.state.idxSelectedClass}
                                     className="inline"
-                                    onChange={(v) => { 
+                                    onChange={(idxSelectedClass) => { 
                                         this.setState({
-                                            selectedClass: parseInt(v)
+                                            idxSelectedClass
                                         });
                                         return true;}}/>
                     </div>
                     <div className="field--margin">
-                        <MaterialInput placeholder="Peso"
+                        <TextInput label="Peso"
+                                        id={uuid()}
+                                        noLayout
                                         type="number"
                                         value={(this.state.weight.toString())}
-                                        onChange={(_,v) => {
-                                            if(isNaN(parseFloat(v))) return;
+                                        onChange={({target:{value:weight}}) => {
                                             this.setState({
-                                                weight: parseInt(v)
+                                                weight
                                             })
                                         }}/>
                     </div>
                     <div className="divider"></div>
                     <div className="section">
-                        <AlotController alotSelected={this.state.selectedAlot}
+                        <AlotController idxAlotSelected={this.state.idxSelectedAlot}
                                         alots={this.state.alots}
                                         weight={this.state.weight}
                                         sex={this.state.sex}
                                         onAlotSelected={(v) => {
                                             this.setState({
-                                                selectedAlot: v
+                                                idxSelectedAlot: v
                                             })
                                             return true;
                                         }}
@@ -331,9 +360,9 @@ export class RegisterHeads extends React.Component<RegisterHeadsProps, RegisterH
 
 interface AlotControllerProps{
     sex: "male" | "female" | ""
-    weight: number
+    weight: string
     alots: Array<IN_Alot>
-    alotSelected: number
+    idxAlotSelected: number
     onAlotSelected: (id: number) => boolean
     onNewAlotAdded: (alot: IN_Alot) => void
 }
@@ -352,19 +381,19 @@ class AlotController extends React.Component
         this.state = {showModal: false}
     }
     
-    onAlotChanged = (id: string) => {
-        let iid = parseInt(id);
+    onAlotChanged = (idx: number) => {
+        let iid = idx;
         return this.props.onAlotSelected(iid);
     }
 
     getSortedAlots = () => {
         let alots = Object.assign(this.props.alots, {});
         alots = alots.filter(v=>v.headNum<v.maxHeadNum);
-        alots = alots.sort((a:IN_Alot,b:IN_Alot) => {
+        /* alots = alots.sort((a:IN_Alot,b:IN_Alot) => {
             return (a.sex == this.props.sex
                         && a.minWeight <= this.props.weight
                         && a.maxWeight >= this.props.weight)?1:-1;
-        })
+        }) */
         return alots;
     }
 
@@ -384,7 +413,9 @@ class AlotController extends React.Component
         
         let lotes = this.props.alots.map((v,i) => ({key: i.toString(), 
                                                     name: v.name} as IOption));
-        let alot:IN_Alot|undefined = this.props.alots[this.props.alotSelected];
+        let alot:IN_Alot|undefined = this.props.alots[
+            this.props.idxAlotSelected
+        ];
         let maxHeads = alot?.maxHeadNum?.toString() || "-";
         let heads = alot?.headNum ?? "-";
         let maxWeight = alot?.maxWeight.toString() || "-";
@@ -399,7 +430,7 @@ class AlotController extends React.Component
                 <Select elements={lotes} 
                         onChange={(v) => this.onAlotChanged(v)} 
                         placeholder="Lotes"
-                        value={this.props.alotSelected.toString()}
+                        value={this.props.idxAlotSelected}
                         className="inline"/>
                {/* <MaterialButton text="Nuevo Lote" className="inline"
                                 onClick={()=>this.setState({

@@ -9,6 +9,7 @@ import { Sumer } from "../../Components/Sumer";
 import url from "../ConfigI";
 import { IN_Protocol, OUT_Protocol } from "../../Classes/DataStructures/Protocol";
 import { IN_Medicine } from "../../Classes/DataStructures/Medicine";
+import { parse } from "uuid";
 
 interface IFieldedProtocol{
     id?: string, 
@@ -25,7 +26,7 @@ interface IProtocolsState{
     item: IFieldedProtocol;
     wrongFields: Array<Fields>;
     lockedFields: Array<Fields>;
-    selectedItem: string;
+    idxSelectedItem: number;
     modalData: ModalData | null;
 }
 
@@ -54,7 +55,7 @@ export class Protocols extends React.Component<IProtocolsProps, IProtocolsState>
             lockedFields: [],
             items: [],
             item: {},
-            selectedItem: "-1",
+            idxSelectedItem: -1,
             modalData: null
         }
 
@@ -104,7 +105,7 @@ export class Protocols extends React.Component<IProtocolsProps, IProtocolsState>
                         state={this.state.fStt}
                         showContent={this.state.fStt.showContent()}
                         items={this.fromItemToOption(this.state.items)}
-                        selectedItem={this.state.selectedItem}
+                        idxSelectedItem={this.state.idxSelectedItem}
                         selectionPlaceholder="Protocolos">
                 <ProtocolsContent 
                             value={(()=>{return this.state.item;})()} 
@@ -134,7 +135,7 @@ class GatherState implements IState{
     onItemRemove = () => {
         toast("Obteniendo datos");
     }
-    onItemSelected = (idx: string) => {
+    onItemSelected = (idx: number) => {
         toast("Obteniendo datos");
         return false;
     }
@@ -158,8 +159,8 @@ class WaitingState implements IState{
     onItemRemove = () => {
         toast("Seleccione un medicamento a eliminar");
     }
-    onItemSelected = (idx: string) => {
-        let item = this.context.getStt().items.find((v) => idx == v.id!.toString());
+    onItemSelected = (idx: number) => {
+        let item = this.context.getStt().items.find((v) => idx == parseInt(v.id)!);
         this.context.setStt({
             fStt: new ViewState(this.context),
             selectedItem: idx,
@@ -188,7 +189,7 @@ class AddState implements IState{
     onItemRemove = () => {
         toast("Guarde el medicamento antes de continuar");
     }
-    onItemSelected = (idx: string) => {
+    onItemSelected = (idx: number) => {
         toast("Guarde el medicamento antes de continuar");
         return false;
     }
@@ -249,8 +250,8 @@ class ViewState implements IState{
             } as ModalData
         })
     }
-    onItemSelected = (idx: string) => {
-        let item = this.context.getStt().items.find((v) => idx == v.id!.toString());
+    onItemSelected = (idx: number) => {
+        let item = this.context.getStt().items.find((v) => idx == parseInt(v.id));
         this.context.setStt({
             fStt: new ViewState(this.context),
             selectedItem: idx,
@@ -424,7 +425,7 @@ export class ProtocolsContent extends React.Component<ProtocolsContentProps, Pro
         this.props.onChange(v);
     }
 
-    onItemChange = (id: string, arrIdx: number, value: string) => {
+    onItemChange = (idx: number, arrIdx: number, value: string) => {
         /* let medicines = ;
         let newState = Object.assign({}, this.state, {
             rows: this.selMeds.map((v) => {
@@ -446,17 +447,20 @@ export class ProtocolsContent extends React.Component<ProtocolsContentProps, Pro
         this.forceUpdate()
     }
 
-    onItemSelected = (id: string, isSelected: boolean) => {        
+    onItemSelected = (idx: number, isSelected: boolean) => {        
         let newValue = Object.assign({}, this.props.value);
         if(newValue.medicines == undefined) newValue.medicines = []
         let meds = newValue.medicines!=undefined?newValue.medicines:[];
         
         if(isSelected){
-            newValue.medicines?.push(id)
+            newValue.medicines?.push(idx.toString())
         }
         else{
-            newValue.medicines?.splice(meds.findIndex(v=>v==id), 1);
+            newValue.medicines?.splice(idx, 1);
         }
+
+        console.log(newValue);
+        
         
 
         this.props.onChange(newValue);
@@ -527,14 +531,14 @@ export class ProtocolsContent extends React.Component<ProtocolsContentProps, Pro
                         <div className="elcfg--field--margin">
                             <label>Medicamentos</label>
                             <List 
-                                deletable={false} 
-                                editable={false} 
+                                selectable
                                 headers={this.headers} 
                                 rows={this.selMeds} 
-                                selectable={true} 
                                 onChange={this.onItemChange}
                                 onAllSelected={this.onAllSelected}
-                                onItemSelected={this.onItemSelected}/>
+                                onItemSelected={(idx, isSelected) => {
+                                    this.onItemSelected(idx, isSelected)
+                                }}/>
                         </div>
                     </div>
                     <div className="col s6 hide">

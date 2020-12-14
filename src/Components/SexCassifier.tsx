@@ -1,7 +1,9 @@
 import React from "react";
 import { OUT_SexClass } from "~/Classes/DataStructures/SexClass";
-import { Input } from "./Input";
-import { MaterialButton } from "./Button";
+import { Button, TextInput } from "../../node_modules/react-materialize/lib/index";
+import { toast } from "../App";
+
+
 import { List, ListRow } from "./List";
 
 export interface SexClassifierProp{
@@ -13,7 +15,7 @@ export interface SexClassifierProp{
 interface SexClassifierState{
     values: Array<OUT_SexClass>;
     name: string;
-    cost: number;
+    cost: string;
 }
 
 export class SexClassifier extends React.Component<SexClassifierProp, 
@@ -22,7 +24,7 @@ export class SexClassifier extends React.Component<SexClassifierProp,
     constructor(props: SexClassifierProp){
         super(props);
 
-        this.state = {cost: 0, name: "", values: props.values};
+        this.state = {cost: "", name: "", values: props.values};
     }
 
     onNameChange = (value: string) => {
@@ -32,25 +34,32 @@ export class SexClassifier extends React.Component<SexClassifierProp,
     }
 
     onCostChange = (value: string) => {
-        let val = parseFloat(value);
         this.setState({
-            cost: val
+            cost: value
         })
     }
 
     onAdd = () => {
         let vals = this.state.values;
-        vals.push({name: this.state.name, cost: this.state.cost.toString()})
+        if(this.state.name == "" || this.state.cost == ""){
+            toast("Debes llenar el costo");
+            return;
+        }
+        if(parseFloat(this.state.cost) == NaN){
+            toast("El valor del costo debe de ser un numero");
+            return;
+        }
+        vals.push({name: this.state.name, cost: parseFloat(this.state.cost).toString()})
         this.setState({
             values:vals,
-            cost: 0,
+            cost: "",
             name: ""
         })
     }
 
-    onDelete = (id: string) => {
+    onDelete = (idx: number) => {
         let vals = this.state.values;
-        vals.splice(parseInt(id),1);
+        vals.splice(idx,1);
         this.setState({
             values: vals
         })
@@ -62,19 +71,29 @@ export class SexClassifier extends React.Component<SexClassifierProp,
             <div>
                 <p>Clasificaciones de {this.props.sex}</p>
                 <div className="field--margin">
-                    <Input placeholder="Nombre clasificación" value={this.state.name} onChange={(name, val) => this.onNameChange(val)}/>
+                    <TextInput  inputClassName="browser-default"
+                                noLayout
+                                placeholder="Nombre clasificación" 
+                                value={this.state.name} 
+                                onChange={({target:{value}}) => this.onNameChange(value)}/>
                 </div>
                 <div className="field--margin">
-                    <Input placeholder="Costo" type="number" value={this.state.cost.toString()} onChange={(name, val) => this.onCostChange(val)}/>
+                    <TextInput inputClassName="browser-default"
+                                noLayout
+                                placeholder="Costo" 
+                                type="number" 
+                                value={this.state.cost.toString()} 
+                                onChange={({target:{value}}) => this.onCostChange(value)}/>
                 </div>
                 <div className="field--margin">
-                    <MaterialButton text="Agregar" onClick={this.onAdd}/>
+                    <Button 
+                            waves="grey"
+                            className="button--color"
+                            onClick={this.onAdd}>Agregar</Button>
                 </div>
                 <List headers={["Nombre", "Costo"]} 
-                        deletable={true} 
+                        deletable 
                         rows={this.parseToRows()}
-                        editable={false}
-                        selectable={false}
                         onDeleteClicked={this.onDelete}
                         />
             </div>
@@ -85,8 +104,7 @@ export class SexClassifier extends React.Component<SexClassifierProp,
         let array = new Array<ListRow>();
         this.state.values.forEach((el, i) => {
             array.push({
-                columns: [el.name, el.cost.toString()],
-                id: i.toString()
+                columns: [el.name, el.cost.toString()]
             })
         });
 

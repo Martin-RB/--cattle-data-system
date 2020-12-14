@@ -14,6 +14,7 @@
     "@types/materialize-css": "^1.0.8",
     "@types/react-cookies": "^0.1.0",
     "@types/react-router-dom": "^5.1.5",
+    "@types/uuid": "^8.3.0",
     "factory.ts": "^0.5.1",
     "faker": "^5.1.0",
     "materialize-css": "^1.0.0-rc.2",
@@ -21,7 +22,9 @@
     "react": "^16.13.1",
     "react-cookies": "^0.1.1",
     "react-dom": "^16.13.1",
-    "react-router-dom": "^5.2.0"
+    "react-materialize": "^3.9.3",
+    "react-router-dom": "^5.2.0",
+    "uuid": "^8.3.1"
   },
   "devDependencies": {
     "@types/react": "^16.9.41",

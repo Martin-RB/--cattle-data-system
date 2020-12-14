@@ -6,12 +6,13 @@ import { IN_CorralFeeding, OUT_CorralFeeding } from "../Classes/DataStructures/C
 import { toast } from "../App";
 import url from "./ConfigI";
 import { OUT_Feeds } from "../Classes/DataStructures/Feeds";
+import { TextInput } from "../../node_modules/react-materialize/lib/index";
 
 interface FeedCorralsState{
     screenState: ScreenState
     kg: string
     corrals: Array<IN_CorralFeeding>
-    selectedCorral: number,
+    idxSelectedCorral: number,
     canEdit: boolean
 }
 
@@ -22,7 +23,7 @@ export class FeedCorrals extends React.Component<{}, FeedCorralsState>{
             corrals: [],
             kg:"",
             screenState: new WaitingState(this),
-            selectedCorral: -1,
+            idxSelectedCorral: -1,
             canEdit: false
         }
     }
@@ -98,7 +99,7 @@ export class FeedCorrals extends React.Component<{}, FeedCorralsState>{
                             selectable={false}
                             headers={["Corral", "Surtido"]}
                             rows={corrals}
-                            onViewClicked={(id) => {this.state.screenState.viewCorral(id)}}
+                            onViewClicked={(idx) => {this.state.screenState.viewCorral(idx)}}
                             />
                 </div>
                 <div className="col s12 l6">
@@ -115,8 +116,8 @@ export class FeedCorrals extends React.Component<{}, FeedCorralsState>{
 
 interface ScreenState{
 
-    viewCorral:(id:string) => void
-    accept:(id:string, kg: string) => void
+    viewCorral:(idx:number) => void
+    accept:(idx:number, kg: string) => void
     cancel:() => void
     getCorralView: () => JSX.Element
 }
@@ -124,17 +125,17 @@ interface ScreenState{
 class WaitingState implements ScreenState{
     constructor(private ctx:FeedCorrals){}
     
-    viewCorral: (id: string) => void = (id) => {
-        let i = parseInt(id) ;
+    viewCorral: (idx: number) => void = (idx) => {
+        let i = idx ;
         let corral = this.ctx.state.corrals[i]
         this.ctx.setState({
-            selectedCorral: parseInt(id),
-            kg: corral.kg==null? "0":corral.kg.toString(),
+            idxSelectedCorral: idx,
+            kg: corral.kg==null? "":corral.kg.toString(),
             screenState: new EditingState(this.ctx),
             canEdit: corral.id_feeds != null
         })
     }
-    accept: (id: string, kg: string) => void = (id, kg) => {
+    accept: (idx: number, kg: string) => void = (id, kg) => {
         toast("Seleccione un corral")
     }
     
@@ -149,13 +150,22 @@ class WaitingState implements ScreenState{
 class EditingState implements ScreenState{
     constructor(private ctx:FeedCorrals){}
     
-    viewCorral: (id: string) => void = (id) => {
+    viewCorral: (idx: number) => void = (idx) => {
         toast("Termine de editar el corral actual antes de continuar");
     }
-    accept: (id: string, kg: string) => void = (id, kg) =>{
+    accept: (idx: number, kg: string) => void = (idx, kg) =>{
+        if(kg == ""){
+            toast("Debe de escribir un peso");
+            return;
+        }
+        let fKg = parseFloat(kg);
+        if(fKg == NaN){
+            toast("Escriba un peso valido");
+            return;
+        }
         let corrals = Object.assign(this.ctx.state.corrals, {});
-        let newcorral : OUT_CorralFeeding= {idCorral: id, kg : parseInt(kg)}
-        corrals[parseInt(id)].kg = parseFloat(kg);
+        let newcorral : OUT_CorralFeeding= {idCorral: idx.toString(), kg : parseInt(kg)}
+        corrals[idx].kg = parseFloat(kg);
         console.log(newcorral)
         
 
@@ -175,15 +185,20 @@ class EditingState implements ScreenState{
 
     getCorralView: () => JSX.Element = () => {
         let corrals = this.ctx.state.corrals;
-        let id = this.ctx.state.selectedCorral;
-        let corral = corrals[id];
+        let idx = this.ctx.state.idxSelectedCorral;
+        let corral = corrals[idx];
         let kg = this.ctx.state.kg;
         
         return (
             <div>
                 <p>Corral: {corral.name}</p>
-                <MaterialInput locked={this.ctx.state.canEdit} placeholder="Kg a surtir" onChange={(_,kg) => {this.ctx.setState({kg})}} value={this.ctx.state.kg}/>
-                <MaterialButton className="right" text="Aceptar" onClick={()=>this.ctx.state.screenState.accept(id.toString(), kg)}/>
+                <TextInput disabled={this.ctx.state.canEdit} 
+                            noLayout
+                            type="number"
+                            placeholder="Kg a surtir" 
+                            onChange={({target:{value:kg}}) => {this.ctx.setState({kg})}} 
+                            value={this.ctx.state.kg}/>
+                <MaterialButton className="right" text="Aceptar" onClick={()=>this.ctx.state.screenState.accept(idx, kg)}/>
                 <MaterialButton className="right" text="Cancelar" onClick={()=>this.ctx.state.screenState.cancel()}/>
             </div>);
     };
