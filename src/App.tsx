@@ -1,6 +1,6 @@
 // Cambios Daniel
 import { render } from "react-dom";
-import React from "react";
+import React, { createRef } from "react";
 import {
     BrowserRouter as Router,
     Switch,
@@ -19,6 +19,8 @@ import M from "materialize-css";
 
 import cookie from 'react-cookies';
 import { AdmonLogin, isAdmonLoggedIn } from "./Screens/AdmonLogin";
+import { LoadingScreen } from "./Components/LoadingScreen";
+import { ServerComms } from "./Classes/ServerComms";
 
 export var HISTORY: History;
 export var MATCH: match;
@@ -34,11 +36,11 @@ export function toast(message: string) {
     M.toast({ html: message });
 }
 
+let LoadingScreenRef = createRef<LoadingScreen>();
 
 let view = (
     <BrowserRouter>
         <Switch>
-
             <Route
                 exact
                 path="/"
@@ -77,7 +79,11 @@ let view = (
                 }}
             />
         </Switch>
+        <LoadingScreen ref={LoadingScreenRef}/>
     </BrowserRouter>
 );
-
 render(view, document.getElementById("app"));
+console.log(LoadingScreenRef.current);
+
+ServerComms.init(LoadingScreenRef);
+ServerComms.isProduction = false;

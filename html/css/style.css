@@ -3,6 +3,42 @@
   position: relative!important;
   top: 30px;
 }
+.hidden{
+  display: none;
+}
+.load-title{
+  text-align: center;
+  color: whitesmoke;
+  font-size: large;
+}
+.load-subtitle{
+  text-align: center;
+  color: whitesmoke;
+}
+.load--background{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0,0,0,0.6);
+  width: 100vw;
+  z-index: 999;
+}
+.load{
+  position: relative;
+  top: calc(50% - 15vw);
+  left: calc(50% - 15vw);
+  width: 30vw;
+}
+.load--container{
+  display: flex;
+}
+.load--entity{
+  margin: auto;
+  width: 10vw;
+  height: 10vw;
+}
 html{
   margin: 0 !important;
   padding: 0 !important;

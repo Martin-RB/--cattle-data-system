@@ -9,6 +9,7 @@ import { IN_Alot } from "../Classes/DataStructures/Alot";
 import { IN_Head } from "../Classes/DataStructures/Head";
 import { IN_Corral } from "../Classes/DataStructures/Corral";
 import url from "./ConfigI";
+import { ServerComms, ServerError, ServerResponse } from "../Classes/ServerComms";
 
 export interface HomeProps extends RouteComponentProps{
 
@@ -31,41 +32,30 @@ export class Home extends React.Component<HomeProps, HomeState>{
 	}
 
 	onSubmitSearch = async () => {
-		try {
-			const response = await fetch(url + "/search?search=" + this.state.search, {
-				method: 'GET', 
-				mode: 'cors', 
-				credentials: "include",
-				cache: 'no-cache', 
-			}); 
 
-			if(response.ok){
-				let data = await response.json() as {
-					alots: IN_Alot[], heads: IN_Head[], corrals: IN_Corral[]
-				}
+		type Return = {
+			alots: IN_Alot[], heads: IN_Head[], corrals: IN_Corral[]
+		}
 
-				let alots = data.alots;
-				let heads = data.heads
+		let response = await ServerComms
+						.getInstance()
+						.get<Return>("/search", {search: this.state.search});
+		if(response.success){
+			let data = response.content as Return
 
-				let sHeads: SearchItem[] = heads.map(v => ({type: "head", data: v} as SearchItem));
-				let sAlot: SearchItem[] = alots.map(v => ({type: "alot", data: v} as SearchItem));
-				let searchItems = [...sAlot, ... sHeads]
-				console.log(sAlot);
-				
-				this.setState({
-					searchItems
-				})
-			}
-			else{
-				toast(await response.text())
-			}
+			let alots = data.alots;
+			let heads = data.heads
 
-
-
+			let sHeads: SearchItem[] = heads.map(v => ({type: "head", data: v} as SearchItem));
+			let sAlot: SearchItem[] = alots.map(v => ({type: "alot", data: v} as SearchItem));
+			let searchItems = [...sAlot, ... sHeads]
 			
-		} catch (error) {
-			console.log(error);
-			toast(error)
+			this.setState({
+				searchItems
+			})
+		}
+		else{
+			toast((response.content as ServerError).message)
 		}
 	}
 
