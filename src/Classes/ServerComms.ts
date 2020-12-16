@@ -19,16 +19,11 @@ export class ServerComms {
     
     static getInstance(){
         if(this.inst == null){
-            throw "ServerComms not initialized!";
+            this.inst = new ServerComms();
         }
         return this.inst
     }
 
-    static init(loadRefInstance: RefObject<LoadingScreen>){
-        if(this.inst == null)
-            this.inst = new ServerComms(loadRefInstance);
-    }
-    
     static set isProduction(isProd: boolean){
         this.isProd = isProd
     }
@@ -38,49 +33,37 @@ export class ServerComms {
     }
 
     // Instance
-    private loadingScreen: RefObject<LoadingScreen>;
-    private constructor(loadRefInstance: RefObject<LoadingScreen>) {
-        this.loadingScreen = loadRefInstance
-    }
+    private constructor() {}
 
-    async get<TResponse>(endpoint: string, data: any){
-        this.setLoadScreen(true);
+    async get<TResponse>(endpoint: string, data: any = {}){
         let url = new URL(ServerComms.url + endpoint);
         url.search = new URLSearchParams(data).toString();
         let dir = url.href;
 
         let resp = await this.endpointCommon<TResponse>(dir, undefined, "get");
-        this.setLoadScreen(false);
         return resp;
     }
 
-    async post<TResponse>(endpoint: string, data: any){
-        this.setLoadScreen(true);
+    async post<TResponse>(endpoint: string, data: any = {}){
         let dir = ServerComms.url + endpoint;
         let resp = await this.endpointCommon<TResponse>(dir, data, "post");
-        this.setLoadScreen(false);
         return resp;
     }
 
-    async put<TResponse>(endpoint: string, data: any){
-        this.setLoadScreen(true);
+    async put<TResponse>(endpoint: string, data: any = {}){
         let dir = ServerComms.url + endpoint;
         let resp = await this.endpointCommon<TResponse>(dir, data, "put");
-        this.setLoadScreen(false);
         return resp;
     }
 
-    async delete<TResponse>(endpoint: string, data: any){
-        this.setLoadScreen(true);
+    async delete<TResponse>(endpoint: string, data: any = {}){
         let dir = ServerComms.url + endpoint;
         let resp = await this.endpointCommon<TResponse>(dir, data, "delete");
-        this.setLoadScreen(false);
         return resp;
     }
 
     private async endpointCommon<TResponse>(url:string, data:any, method: string, ){
         let returnData: ServerResponse<TResponse> | undefined;
-        console.log(data);
         
         let awFetch = fetch(url, 
             this.fetchOptions(method, data)); 
@@ -113,7 +96,6 @@ export class ServerComms {
             } as ServerResponse<TResponse>;            
         }
         finally{
-            this.setLoadScreen(false);
             return returnData ?? {
                 success: false,
                 content: {
@@ -128,16 +110,12 @@ export class ServerComms {
         return ({
             method, 
             body,
+            mode: 'cors', 
+            cache: 'no-cache', 
             credentials: "include",
             headers:{
                 'Content-Type': 'application/json'
             }
         } as RequestInit);
-    }
-
-    private setLoadScreen(visible: boolean){
-        this.loadingScreen.current?.setState({
-            visible
-        })
     }
 }

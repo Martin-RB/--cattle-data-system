@@ -1,6 +1,6 @@
 // Cambios Daniel
 import { render } from "react-dom";
-import React, { createRef } from "react";
+import React, { createContext, createRef, useContext, useEffect, useRef, useState } from "react";
 import {
     BrowserRouter as Router,
     Switch,
@@ -36,54 +36,59 @@ export function toast(message: string) {
     M.toast({ html: message });
 }
 
-let LoadingScreenRef = createRef<LoadingScreen>();
-
-let view = (
-    <BrowserRouter>
-        <Switch>
-            <Route
-                exact
-                path="/"
-                render={(a) => historyRefresher(a, <Redirect to="/login" />)}
-            />
-            <Route
-                exact
-                path="/login"
-                render={(a) => (<Login {...a}/>)}
-            />
-            <Route
-                exact
-                path="/admon"
-                render={(a) => <Redirect to="/admon/login"/>}
-            />
-            <Route
-                exact
-                path="/admon/login"
-                render={(a) => <AdmonLogin {...a}/>}
-            />
-            <Route
-                exact
-                path="/admon/platform"
-                render={(a) => 
-                    isAdmonLoggedIn()?
-                    <UserAdmin {...a}/>: <Redirect to="/admon/login"/>}
-                    />
-            <Route
-                path="/menu"
-                render={(a) => {
-                    return (
-                    isLoggedIn() ?
-                    <Menu {...a}/>: <Redirect to="/login" /> 
-                    )
-                    
-                }}
-            />
-        </Switch>
-        <LoadingScreen ref={LoadingScreenRef}/>
-    </BrowserRouter>
-);
-render(view, document.getElementById("app"));
-console.log(LoadingScreenRef.current);
-
-ServerComms.init(LoadingScreenRef);
 ServerComms.isProduction = false;
+
+type TLoadCallback = (toggle: boolean) => void
+export let LoadingScreenWr = createContext<TLoadCallback>(()=>{});
+LoadingScreenWr.displayName = "XD"
+
+function App(){
+    let [isLoading, changeLoading] = useState(false);
+    return (
+        <LoadingScreenWr.Provider value={changeLoading}>
+        <BrowserRouter>
+            <Switch>
+                <Route
+                    exact
+                    path="/"
+                    render={(a) => historyRefresher(a, <Redirect to="/login" />)}
+                />
+                <Route
+                    exact
+                    path="/login"
+                    render={(a) => (<Login {...a}/>)}
+                />
+                <Route
+                    exact
+                    path="/admon"
+                    render={(a) => <Redirect to="/admon/login"/>}
+                />
+                <Route
+                    exact
+                    path="/admon/login"
+                    render={(a) => <AdmonLogin {...a}/>}
+                />
+                <Route
+                    exact
+                    path="/admon/platform"
+                    render={(a) => 
+                        isAdmonLoggedIn()?
+                        <UserAdmin {...a}/>: <Redirect to="/admon/login"/>}
+                        />
+                <Route
+                    path="/menu"
+                    render={(a) => {
+                        return (
+                        isLoggedIn() ?
+                        <Menu {...a}/>: <Redirect to="/login" /> 
+                        )
+                        
+                    }}
+                />
+            </Switch>
+            <LoadingScreen visible={isLoading}/>
+        </BrowserRouter>
+        </LoadingScreenWr.Provider>
+    );
+}
+render(<App/>, document.getElementById("app"));

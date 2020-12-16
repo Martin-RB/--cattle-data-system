@@ -1,5 +1,5 @@
 import React, { Provider } from "react";
-import { HISTORY, toast } from "../App";
+import { HISTORY, LoadingScreenWr, toast } from "../App";
 import { MaterialInput } from "../Components/Input";
 import { SexClassifier } from "../Components/SexCassifier";
 import { TimeInput, ITime } from "../Components/TimeInput";
@@ -15,6 +15,8 @@ import { Button, TextInput } from "../../node_modules/react-materialize/lib/inde
 import { DateOptions } from "../Configs";
 import { Select } from "../Components/Select";
 import { RouteComponentProps } from "react-router-dom";
+import { ServerComms, ServerError } from "../Classes/ServerComms";
+import { LoadingScreen } from "../Components/LoadingScreen";
 
 interface LorryRegisterProps extends RouteComponentProps{
 
@@ -43,6 +45,8 @@ export class LorryRegister extends React.Component<LorryRegisterProps, LorryRegi
     srvProviders: Array<IN_Provider>
     srvCorrals: Array<IN_Corral>
     actualDate = new Date()
+    srv: ServerComms
+    loadRef: ((toggle: boolean) => void) | undefined = undefined;
 
     constructor(props: LorryRegisterProps){
         super(props);
@@ -64,61 +68,57 @@ export class LorryRegister extends React.Component<LorryRegisterProps, LorryRegi
             corrals:[],
             idxCorral: -1
         };
+        this.srv = ServerComms.getInstance()
     }
 
-    componentDidMount(){
+    componentDidMount(){        
         let asd = async() => {
-            return new Promise(async (res, rej) => {
-                let [provRes, corrRes] = await Promise.all(
-                        [this.gatherProviders(), this.gatherCorrals()]);
+            this.loadRef!(true);
+            let [provRes, corrRes] = await Promise.all(
+                [this.gatherProviders(), this.gatherCorrals()]);
 
-                this.srvProviders = provRes || []
-                this.srvCorrals = corrRes || []
+            this.srvProviders = provRes
+            this.srvCorrals = corrRes
 
-                let providers : Array<IOption> = this.srvProviders.map((v, i) => ({
-                    key: i.toString(),
-                    name: v.name
-                }as IOption))
+            let providers : Array<IOption> = this.srvProviders.map((v, i) => ({
+                key: i.toString(),
+                name: v.name
+            }as IOption))
 
-                let corrals : Array<IOption> = this.srvCorrals.map((v, i) => ({
-                    key: i.toString(),
-                    name: v.name
-                }as IOption))
-                
-                this.setState({
-                    providers,
-                    corrals
-                })
-                res();
+            let corrals : Array<IOption> = this.srvCorrals.map((v, i) => ({
+                key: i.toString(),
+                name: v.name
+            }as IOption))
+            
+            this.setState({
+                providers,
+                corrals
             })
+            this.loadRef!(false);
         }
         asd();
     }
 
-    onAccept = () => {
+    onAccept = async () => {
 
         let fieldCheck = this.checkFields()
         if(fieldCheck == false){
             toast("Llene todos los campos")
             return;
         }
-        
-        this.uploadLorry(fieldCheck).then((res) => {
-            if(res && res.status == 200){
-                this.props.history.push("/menu")
-                toast("Jaula registrada con exito.")
-            }
-            else{
-                this.props.history.push("/menu")
-                toast("Hubo un error al registrar jaula. Verifique sus datos.")
-            }
-        })
 
+        let response = await this.srv.post<any>("/lorries", fieldCheck);
+        if(response.success){
+            this.props.history.push("/menu")
+            toast("Jaula registrada con exito.")
+        }
+        else{
+            toast((response.content as ServerError).message)
+        }
     }
 
     render(): JSX.Element{
-        
-        return (
+        let view = (
             <>
             <div className="row">
                 <div className="col s12 m12 l12">
@@ -224,7 +224,7 @@ export class LorryRegister extends React.Component<LorryRegisterProps, LorryRegi
                         <div className="row">
                             <div className="col s12">
                                 <Button 
-                                    waves="grey"
+                                    waves="light"
                                     className="button--color right"
                                     onClick={this.onAccept}>
                                         Aceptar
@@ -236,6 +236,15 @@ export class LorryRegister extends React.Component<LorryRegisterProps, LorryRegi
             </div>
             </>
         )
+
+        let wrap = <LoadingScreenWr.Consumer>
+            {loadRef=>{
+                this.loadRef = loadRef
+                return view
+            }}
+        </LoadingScreenWr.Consumer>
+
+        return wrap;
     }
 
     checkFields = () => {
@@ -259,7 +268,17 @@ export class LorryRegister extends React.Component<LorryRegisterProps, LorryRegi
     }
 
     gatherProviders = async () => {
-        let asd: IN_Provider
+
+        let resp = await ServerComms.getInstance().get<IN_Provider[]>("/providers");
+        if(resp.success){
+            return resp.content as IN_Provider[]
+        }
+        else{
+            toast((resp.content as ServerError).message)
+            return []
+        }
+
+        /* let asd: IN_Provider
         try {
             const response = await fetch(url + "/providers", {
             method: 'GET', 
@@ -273,11 +292,19 @@ export class LorryRegister extends React.Component<LorryRegisterProps, LorryRegi
         } catch (error) {
             console.log(error);
             
-        }
+        } */
     }
 
     gatherCorrals = async () => {
-        let asd: IN_Lorry
+        let resp = await ServerComms.getInstance().get<IN_Corral[]>("/corrals");
+        if(resp.success){
+            return resp.content as IN_Corral[]
+        }
+        else{
+            toast((resp.content as ServerError).message)
+            return []
+        }
+        /* let asd: IN_Lorry
         try {
             const response = await fetch(url + "/corrals", {
             method: 'GET', 
@@ -291,26 +318,6 @@ export class LorryRegister extends React.Component<LorryRegisterProps, LorryRegi
         } catch (error) {
             console.log(error);
             
-        }
-    }
-
-    uploadLorry = async (data: OUT_Lorry) => {
-        try {
-            let headers = [[
-                "content-type", "application/json"
-            ]]
-            const response = await fetch(url + "/lorries", {
-                method: 'POST', 
-                mode: 'cors', 
-                headers,
-                credentials: "include",
-                cache: 'no-cache', 
-                body: JSON.stringify(data)
-            }); 
-            return response;
-        } catch (error) {
-            console.log(error);
-            
-        }
+        } */
     }
 }

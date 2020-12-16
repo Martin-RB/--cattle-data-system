@@ -87,7 +87,7 @@ export class SexClassifier extends React.Component<SexClassifierProp,
                 </div>
                 <div className="field--margin">
                     <Button 
-                            waves="grey"
+                            waves="light"
                             className="button--color"
                             onClick={this.onAdd}>Agregar</Button>
                 </div>

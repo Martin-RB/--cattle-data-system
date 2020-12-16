@@ -86,7 +86,7 @@ export class Menu extends React.Component<MenuProps, MenuState>{
 
             <div className="sidenaved">
                 <Switch>
-                    <Route path={`${path}/reg-lorry`} component={LorryRegister}/>
+                    <Route path={`${path}/reg-lorry`} render={a=><LorryRegister {...a}/>}/>
                     <Route path={`${path}/work-heads`} render={(a) => historyRefresher(a, <RegisterHeads/>)}/>
                     <Route path={`${path}/feed-corrals`} render={(a) => historyRefresher(a, <FeedCorrals/>)}/>
                     <Route path={`${path}/sell-alot`} render={(props) => <SellAlotRoute {...props}/>}/>

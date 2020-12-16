@@ -2,12 +2,11 @@ import React from "react";
 import { Preloader } from "../../node_modules/react-materialize/lib/index";
 
 export interface LoadingScreenProps{
-
+    visible: boolean
 }
 
 interface LoadingScreenState{
     dots: string
-    visible: boolean
 }
 
 export class LoadingScreen extends React.Component<LoadingScreenProps, 
@@ -18,8 +17,7 @@ export class LoadingScreen extends React.Component<LoadingScreenProps,
         super(props);
         this.interval = null;
         this.state = {
-            dots: "",
-            visible: false
+            dots: ""
         }
     }
 
@@ -44,7 +42,7 @@ export class LoadingScreen extends React.Component<LoadingScreenProps,
 
     render(){
         return (
-            <div className={`load--background ${this.state.visible?"":"hidden"}`}>
+            <div className={`load--background ${this.props.visible?"":"hidden"}`}>
                 <div className="load">
                     <div className="load--container">   
                         <Preloader 

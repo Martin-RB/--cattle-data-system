@@ -11,7 +11,6 @@ export class SellAlotRoute extends React.Component{
     render():JSX.Element{        
         let path = this.getRouteProps().match.url
         console.log(path);
-        
 
         return (
             <>
