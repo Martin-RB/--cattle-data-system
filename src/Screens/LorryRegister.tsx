@@ -1,5 +1,5 @@
 import React, { Provider } from "react";
-import { HISTORY, LoadingScreenWr, toast } from "../App";
+import { HISTORY, toggleLoadingScreen, toast } from "../App";
 import { MaterialInput } from "../Components/Input";
 import { SexClassifier } from "../Components/SexCassifier";
 import { TimeInput, ITime } from "../Components/TimeInput";
@@ -46,7 +46,6 @@ export class LorryRegister extends React.Component<LorryRegisterProps, LorryRegi
     srvCorrals: Array<IN_Corral>
     actualDate = new Date()
     srv: ServerComms
-    loadRef: ((toggle: boolean) => void) | undefined = undefined;
 
     constructor(props: LorryRegisterProps){
         super(props);
@@ -73,7 +72,7 @@ export class LorryRegister extends React.Component<LorryRegisterProps, LorryRegi
 
     componentDidMount(){        
         let asd = async() => {
-            this.loadRef!(true);
+            toggleLoadingScreen(true);
             let [provRes, corrRes] = await Promise.all(
                 [this.gatherProviders(), this.gatherCorrals()]);
 
@@ -94,7 +93,7 @@ export class LorryRegister extends React.Component<LorryRegisterProps, LorryRegi
                 providers,
                 corrals
             })
-            this.loadRef!(false);
+            toggleLoadingScreen(false);
         }
         asd();
     }
@@ -118,7 +117,7 @@ export class LorryRegister extends React.Component<LorryRegisterProps, LorryRegi
     }
 
     render(): JSX.Element{
-        let view = (
+        return (
             <>
             <div className="row">
                 <div className="col s12 m12 l12">
@@ -236,15 +235,6 @@ export class LorryRegister extends React.Component<LorryRegisterProps, LorryRegi
             </div>
             </>
         )
-
-        let wrap = <LoadingScreenWr.Consumer>
-            {loadRef=>{
-                this.loadRef = loadRef
-                return view
-            }}
-        </LoadingScreenWr.Consumer>
-
-        return wrap;
     }
 
     checkFields = () => {

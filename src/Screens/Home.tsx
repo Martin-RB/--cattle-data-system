@@ -2,7 +2,7 @@ import React from "react";
 import { DropDown } from "../Components/DropDown";
 import head from "./../../img/head.jpg";
 import alot from "./../../img/alot.png";
-import { HISTORY, toast } from "../App";
+import { HISTORY, LoadingScreenWr, toast, toggleLoadingScreen } from "../App";
 import { IOption } from "../Classes/IOption";
 import { RouteComponentProps } from "react-router-dom";
 import { IN_Alot } from "../Classes/DataStructures/Alot";
@@ -32,7 +32,7 @@ export class Home extends React.Component<HomeProps, HomeState>{
 	}
 
 	onSubmitSearch = async () => {
-
+		toggleLoadingScreen(true);
 		type Return = {
 			alots: IN_Alot[], heads: IN_Head[], corrals: IN_Corral[]
 		}
@@ -57,6 +57,7 @@ export class Home extends React.Component<HomeProps, HomeState>{
 		else{
 			toast((response.content as ServerError).message)
 		}
+		toggleLoadingScreen(false);
 	}
 
 	onCancelSearch = () => {

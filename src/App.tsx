@@ -38,14 +38,12 @@ export function toast(message: string) {
 
 ServerComms.isProduction = false;
 
-type TLoadCallback = (toggle: boolean) => void
-export let LoadingScreenWr = createContext<TLoadCallback>(()=>{});
-LoadingScreenWr.displayName = "XD"
+export var toggleLoadingScreen = (toggle: boolean) => {  }
 
 function App(){
     let [isLoading, changeLoading] = useState(false);
+    toggleLoadingScreen = changeLoading
     return (
-        <LoadingScreenWr.Provider value={changeLoading}>
         <BrowserRouter>
             <Switch>
                 <Route
@@ -88,7 +86,6 @@ function App(){
             </Switch>
             <LoadingScreen visible={isLoading}/>
         </BrowserRouter>
-        </LoadingScreenWr.Provider>
     );
 }
 render(<App/>, document.getElementById("app"));
