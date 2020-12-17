@@ -350,7 +350,11 @@ export class WorkHeads extends React.Component<RegisterHeadsProps, RegisterHeads
                     <div className="section">
                         <AlotController idxAlotSelected={this.state.idxSelectedAlot}
                             alots={this.state.alots}
-                            disabled={this.state.idxSelectedLorry == -1}
+                            disabled={
+                                this.state.idxSelectedLorry == -1 ||
+                                this.state.weight == "" ||
+                                this.state.sex == ""
+                            }
                             weight={this.state.weight}
                             sex={this.state.sex}
                             onAlotSelected={(v) => {
@@ -373,8 +377,7 @@ export class WorkHeads extends React.Component<RegisterHeadsProps, RegisterHeads
                 </div>
                 <div className="col s12 l6">
                     <p>Cabezas registradas</p>
-                    <List deletable={true}
-                        editable={true}
+                    <List deletable
                         headers={["Siniga", "Id local", "Sexo", "Peso"]}
                         rows={heads}
                         selectable={false}
