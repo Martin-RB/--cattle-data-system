@@ -7,6 +7,7 @@ interface SelectProps{
     value?: number,
     placeholder?: string
     onChange: (value: number) => boolean;
+    disabled?: boolean
 }
 
 export class Select extends React.Component<SelectProps>{
@@ -21,14 +22,13 @@ export class Select extends React.Component<SelectProps>{
 
     onChange(e: React.ChangeEvent<HTMLSelectElement>){
         let value = parseInt(e.target.value);
-        if(this.props.onChange(value)){
-            this.forceUpdate()
-        };
+        this.props.onChange(value)
     }
 
     render(): JSX.Element{
         return <>
-            <select className={`browser-default ${this.props.className?this.props.className:""}`} value={this.props.value} onChange={this.onChange}>
+            <select className={`browser-default ${this.props.className?this.props.className:""}`} value={this.props.value} onChange={this.onChange}
+                    disabled={this.props.disabled}>
                 {(this.props.placeholder)?<option disabled={true} value="-1">{this.props.placeholder}</option>: null}
                 {
                     (this.props.elements.length > 0 

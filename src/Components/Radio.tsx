@@ -7,6 +7,7 @@ interface IRadioProps{
     value: string,
     checked: boolean,
     onChange: (name: string, value: string) => void
+    disabled?: boolean
 }
 
 export class Radio extends React.Component<IRadioProps>{
@@ -15,7 +16,7 @@ export class Radio extends React.Component<IRadioProps>{
     }
     render(): JSX.Element{
         return  <label>
-                    <input className={`with-gap ${this.props.class? this.props.class:""}`} name={this.props.name} value={this.props.value} checked={this.props.checked} type="radio" onChange={this.onChange}/>
+                    <input disabled={this.props.disabled} className={`with-gap ${this.props.class? this.props.class:""}`} name={this.props.name} value={this.props.value} checked={this.props.checked} type="radio" onChange={this.onChange}/>
                     <span>{this.props.text}</span>
                 </label>
     }

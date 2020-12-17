@@ -452,6 +452,21 @@ body{
     flex-wrap: wrap;
   }
 }
+.dateInput--disabled .datepicker{
+  color: rgba(0,0,0,0.42)!important;
+  border-bottom: 1px dotted rgba(0,0,0,0.42)!important;
+}
+.dateInputWrapper div.col.input-field, .datepicker{
+  float: unset;
+  -webkit-box-sizing: unset;
+  box-sizing: unset;
+  padding: unset;
+  min-height: unset;
+  position: unset;
+  margin-top: unset;
+  margin-bottom: unset;
+  
+};
 
 ul{
   list-style: none;

@@ -3,6 +3,7 @@ import React, { createRef } from "react";
 export interface ModalData{
     title: string,
     content: string | JSX.Element,
+    hasOptions?: boolean
     acceptText?: string,
     cancelText?: string,
     onFinish: (opt: ModalExitOptions) => void;
@@ -79,8 +80,16 @@ export class Modal extends React.Component<IModalProps>{
                             <p>{this.props.data.content}</p>:this.props.data.content}
                     </div>
                     <div className="modal-footer">
-                        <a href="#!" className="modal-close waves-effect waves-green btn-flat" onClick={this.onCancel}>Cancelar</a>
-                        <a href="#!" className="modal-close waves-effect waves-green btn-flat" onClick={this.onAccept}>Aceptar</a>
+                        {
+                            this.props.data.hasOptions?
+                            (
+                                <>
+                                <a href="#!" className="modal-close waves-effect waves-green btn-flat" onClick={this.onCancel}>Cancelar</a>
+                                <a href="#!" className="modal-close waves-effect waves-green btn-flat" onClick={this.onAccept}>Aceptar</a>
+                                </>
+                            ):
+                            <a href="#!" className="modal-close waves-effect waves-green btn-flat" onClick={this.onAccept}>Cerrar</a>
+                        }
                     </div>
                 </div>
     }

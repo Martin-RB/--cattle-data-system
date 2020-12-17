@@ -13,6 +13,7 @@ export interface MedicineDisplayProps{
     medicines: Array<DisplayableMedicine>
     buttonText?: string
     protocolName: string
+    disabled?: boolean
 }
 
 export interface MedicineDisplayState{
@@ -53,6 +54,7 @@ export class MedicineDisplay extends React.Component<MedicineDisplayProps, Medic
         return (
             <>
             <MaterialButton text={this.props.buttonText?this.props.buttonText:"Medicinas"}
+                            disabled={this.props.disabled}
                             onClick={() => {
                                 this.setState({
                                     isModalOpen: true
