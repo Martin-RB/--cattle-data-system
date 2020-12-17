@@ -43,7 +43,7 @@ interface RegisterHeadsProps{
 }   
 
 
-export class RegisterHeads extends React.Component<RegisterHeadsProps, RegisterHeadsState>{
+export class WorkHeads extends React.Component<RegisterHeadsProps, RegisterHeadsState>{
 
     constructor(props: RegisterHeadsProps){
         super(props);

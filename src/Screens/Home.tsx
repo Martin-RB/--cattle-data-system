@@ -2,7 +2,7 @@ import React from "react";
 import { DropDown } from "../Components/DropDown";
 import head from "./../../img/head.jpg";
 import alot from "./../../img/alot.png";
-import { HISTORY, LoadingScreenWr, toast, toggleLoadingScreen } from "../App";
+import { HISTORY,  toast, toggleLoadingScreen } from "../App";
 import { IOption } from "../Classes/IOption";
 import { RouteComponentProps } from "react-router-dom";
 import { IN_Alot } from "../Classes/DataStructures/Alot";

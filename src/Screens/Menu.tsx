@@ -17,7 +17,7 @@ import { SellAlotRoute } from "./SellAlot/SellAlotRoute";
 import { Corrals } from "./config/Corrals";
 import { Lots } from "./config/Lots";
 import { LorryRegister } from "./LorryRegister";
-import { RegisterHeads } from "./RegisterHeads";
+import { WorkHeads } from "./WorkHeads";
 import { FeedCorrals } from "./FeedCorrals";
 import cookie from 'react-cookies';
 
@@ -87,7 +87,7 @@ export class Menu extends React.Component<MenuProps, MenuState>{
             <div className="sidenaved">
                 <Switch>
                     <Route path={`${path}/reg-lorry`} render={a=><LorryRegister {...a}/>}/>
-                    <Route path={`${path}/work-heads`} render={(a) => historyRefresher(a, <RegisterHeads/>)}/>
+                    <Route path={`${path}/work-heads`} render={(a) => historyRefresher(a, <WorkHeads/>)}/>
                     <Route path={`${path}/feed-corrals`} render={(a) => historyRefresher(a, <FeedCorrals/>)}/>
                     <Route path={`${path}/sell-alot`} render={(props) => <SellAlotRoute {...props}/>}/>
                     <Route path={`${path}/drugs`} render={(a) => historyRefresher(a, <Drugs/>)}/>
