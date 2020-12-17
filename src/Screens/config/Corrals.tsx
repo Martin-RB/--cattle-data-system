@@ -71,6 +71,21 @@ export class Corrals extends React.Component<ICorralsProps, ICorralsState> imple
     async gather(){
         let srv = CorralsSrv.getInstance();
         this.onGather(await srv.get());
+
+        /* toggleLoadingScreen(true);
+        let resp = await ServerComms.getInstance().get<IN_Corral[]>("/corrals")
+        if(resp.success){
+            this.onGather((resp.content as IN_Corral[]));
+        }
+        else{
+            toast((resp.content as ServerError).message)
+        }
+
+        await new Promise(r=>setTimeout(()=>{
+            console.log("XD");
+            r(1 as unknown)
+        }, 1000))
+        toggleLoadingScreen(false); */
     }
 
     onGather = (data: Array<IN_Corral>) =>{

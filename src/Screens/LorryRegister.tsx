@@ -125,7 +125,7 @@ export class LorryRegister extends React.Component<LorryRegisterProps, LorryRegi
                         <h2>Registrar jaula</h2>
                         <div className="row">
                             <div className="col s12 m6">
-                                <DateInput placeholder="fecha" 
+                                <DateInput label="Fecha" 
                                             id="fecha" 
                                             options={DateOptions}
                                             onChange={(date) => this.setState({

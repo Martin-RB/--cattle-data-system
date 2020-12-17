@@ -66,7 +66,7 @@ export class ServerComms {
         let returnData: ServerResponse<TResponse> | undefined;
         
         let awFetch = fetch(url, 
-            this.fetchOptions(method, data)); 
+            this.fetchOptions(method, JSON.stringify(data))); 
         try{
             let response = await awFetch;
             if(response.ok){

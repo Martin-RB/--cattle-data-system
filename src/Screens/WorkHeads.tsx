@@ -237,7 +237,7 @@ export class WorkHeads extends React.Component<RegisterHeadsProps, RegisterHeads
             </div>
             <div className="row">
                 <div className="col s12">
-                    <DateInput placeholder="Fecha de ingreso" 
+                    <DateInput label="Fecha de ingreso" 
                                 id="fecha" 
                                 options={DateOptions}
                                 onChange={(date) => this.setState({

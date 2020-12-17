@@ -3,10 +3,13 @@ import { List, ListRow } from "../Components/List";
 import { MaterialInput } from "../Components/Input";
 import { MaterialButton } from "../Components/Button";
 import { IN_CorralFeeding, OUT_CorralFeeding } from "../Classes/DataStructures/CorralFeeding";
-import { toast } from "../App";
+import { toast, toggleLoadingScreen } from "../App";
 import url from "./ConfigI";
 import { OUT_Feeds } from "../Classes/DataStructures/Feeds";
 import { TextInput } from "../../node_modules/react-materialize/lib/index";
+import { ServerComms, ServerError } from "../Classes/ServerComms";
+import { v4 as uuid } from "uuid";
+import { DateInput } from "../Components/DateInput";
 
 interface FeedCorralsState{
     screenState: ScreenState
@@ -14,6 +17,7 @@ interface FeedCorralsState{
     corrals: Array<IN_CorralFeeding>
     idxSelectedCorral: number,
     canEdit: boolean
+    date: Date
 }
 
 export class FeedCorrals extends React.Component<{}, FeedCorralsState>{
@@ -24,26 +28,23 @@ export class FeedCorrals extends React.Component<{}, FeedCorralsState>{
             kg:"",
             screenState: new WaitingState(this),
             idxSelectedCorral: -1,
-            canEdit: false
+            canEdit: false,
+            date: new Date()
         }
     }
 
     getFeedCorrals: () => void = async() => {
-        try {
-            let date = new Date()
-            const response = await fetch(url + "/corrals/alimentacion/" + date.getTime(), {
-                credentials: "include",
-            method: 'GET', 
-            mode: 'cors', 
-            cache: 'no-cache', 
-            }); 
-            
-        let corrals = await response.json() as Array<IN_CorralFeeding>
-        console.log(corrals)
-        this.setState({corrals:corrals})
-        } catch (error) {
-           return error
+        toggleLoadingScreen(true);
+        let resp = await ServerComms.getInstance().get<IN_CorralFeeding[]>(`/corrals/alimentacion/${new Date().getTime()}`)
+        if(resp.success){
+            let corrals = resp.content as IN_CorralFeeding[];
+            this.setState({corrals})
         }
+        else{
+            toast((resp.content as ServerError).message)
+        }
+        toggleLoadingScreen(false);
+        
     }
 
     componentDidMount(){
@@ -65,21 +66,16 @@ export class FeedCorrals extends React.Component<{}, FeedCorralsState>{
     } 
 
     upload = async (corrals: OUT_Feeds[]) => {
-        try {
-            let resp = await fetch(url + "/corrals/alimentacion/", { 
-                method: 'POST', 
-                body: JSON.stringify(corrals),
-                credentials: "include",
-                headers:{
-                    'Content-Type': 'application/json'
-                  }
-                }); 
-
-            if(resp.ok) toast("Alimentación terminada con exito")
-        } catch (error) {
-            console.log(error)
+        toggleLoadingScreen(true);
+        let resp = await ServerComms.getInstance().post(`/corrals/alimentacion/`)
+        if(resp.success){
+            toast("Alimentacion terminada con exito");
+            this.getFeedCorrals()
         }
-        this.getFeedCorrals()
+        else{
+            toast((resp.content as ServerError).message)
+        }
+        toggleLoadingScreen(false);
     }
     
 
@@ -92,7 +88,18 @@ export class FeedCorrals extends React.Component<{}, FeedCorralsState>{
             <>
             <h2>Alimentar corrales</h2>
             <div className="row">
-                <div className="col s12 l6">
+                <div className="col s12">
+                    
+                    <DateInput 
+                        value={this.state.date} 
+                        label="Fecha"
+                        maxDate={new Date()}
+                        onChange={date=>{
+                            this.setState({date});
+                        }}
+                        id={uuid().replace(/\-/g, "")}/>
+                </div>
+                <div className="col s12 l6"> 
                     <List viewable={true}
                             deletable={false}
                             editable={false}

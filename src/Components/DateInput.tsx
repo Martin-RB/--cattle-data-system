@@ -1,14 +1,16 @@
 import { InternationalizationOptions } from "materialize-css";
-import React from "react";
-import { TextInput } from "../../node_modules/react-materialize/lib/index";
+import React, { createRef } from "react";
+import { DatePicker, TextInput } from "../../node_modules/react-materialize/lib/index";
 import { Input, MaterialInput } from "./Input";
 
 export interface DateInputProps{
     onChange:(date: Date) => void;
-    value: Date;
+    value?: Date;
     id: string;
-    placeholder:string;
+    label:string;
     options?: InternationalizationOptions
+    minDate?: Date
+    maxDate?: Date
 }
 
 export interface DateInputState{
@@ -17,17 +19,15 @@ export interface DateInputState{
 
 export class DateInput extends React.Component<DateInputProps, DateInputState>{
 
-    selector: Element | null = null;
+    date: Date | undefined
     constructor(props: DateInputProps){
         super(props);
 
-        this.state = {
-            dateSet: false
-        };
+        this.date = props.value;
     }
 
     componentDidMount(){
-        this.selector = document.querySelector("#"+this.props.id)
+        /* this.selector = document.querySelector("#"+this.props.id)
         var dis = this;
         M.Datepicker.init(this.selector, {
             i18n:{
@@ -35,46 +35,57 @@ export class DateInput extends React.Component<DateInputProps, DateInputState>{
             },
             onClose: function() {
                 dis.onChange();
-            }
+            },
+            events: [(new Date(new Date().getTime() - 1000*60*60*24*5)).toDateString()]
         })[0];
-        this.forceUpdate()
+        this.forceUpdate() */
     }
 
-    onChange = () => {
-        let instance;
-        if(!this.selector) return;
-        
-        instance = M.Datepicker.getInstance(this.selector);
-        this.props.onChange(instance.date);
-        this.setState({
-            dateSet: true
-        })
+    onChange = (date: Date) => {
+        /* this.props.onChange(date); */
+        this.date = date;
     }
 
     render():JSX.Element{
-        let dateString = this.setDate(this.props.value);
-
-        return (
-            <TextInput inputClassName={`datepicker ${this.state.dateSet? "valid": ""}`}
-                        noLayout
-                        label="Fecha"
-                        value={dateString} 
-                        id={this.props.id} 
-                        placeholder={this.props.placeholder}/>
+        return (<>
+            <label>{this.props.label}</label>
+            <style>
+                {`.dateInputWrapper div.col.input-field{
+                    float: unset;
+                    -webkit-box-sizing: unset;
+                    box-sizing: unset;
+                    padding: unset;
+                    min-height: unset;
+                    position: unset;
+                    margin-top: unset;
+                    margin-bottom: unset;
+                }`}
+            </style>
+            <div className="dateInputWrapper">
+            <DatePicker 
+                        onChange={date=>{
+                            this.onChange(date);
+                            return date;
+                        }}
+                        options={{
+                            i18n:{
+                                ...this.props.options
+                            },
+                            minDate: this.props.minDate,
+                            maxDate: this.props.maxDate,
+                            defaultDate: this.props.value,
+                            onClose: _=>{
+                                this.props.onChange(this.date ?? new Date())
+                            },
+                            setDefaultDate: true,
+                            events: [(new Date(new Date().getTime() - 1000*60*60*24*5)).toDateString()]}
+                        }
+                        />
+            </div>
+            </>
         );
     }
     componentDidUpdate(prevProps: DateInputProps, prevState: DateInputState){
         
     }
-
-    setDate = (date: Date) => {
-        let instance;
-        if(!this.selector) return;
-        
-        instance = M.Datepicker.getInstance(this.selector);
-        instance.setDate(date);
-        return instance.toString();
-    }
-    
-
 }
