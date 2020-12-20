@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { IUserInfo } from "~/Classes/UserInfo";
 
 interface ISidenavProps{
@@ -28,15 +29,17 @@ export class Sidenav extends React.Component<ISidenavProps>{
                         <div className="background">
                             <div className="user-background"></div>
                         </div>
-                        <a href="#user"><div className="circle user-image"></div></a>
-                        <a href="#name"><span className="white-text name">{this.props.user.name}</span></a>
-                        <a href="#email"><span className="white-text email">{this.props.user.email}</span></a>
+                        <Link to="#user"><div className="circle user-image"></div></Link>
+                        <Link to="#name"><span className="white-text name">{this.props.user.name}</span></Link>
+                        <Link to="#email"><span className="white-text email">{this.props.user.email}</span></Link>
                     </div>
                 </li>
                 <li><a href="/menu" className="f_selectSection" id="home"><i className="material-icons">home</i>Inicio</a></li>
-                <li><a href="/menu/reg-lorry" className="f_selectSection" id="registerLorry">Registrar jaula</a></li>
-                <li><a href="/menu/work-heads" className="f_selectSection" id="workHeads">Trabajar cabezas</a></li>
-                <li><a href="/menu/feed-corrals" className="f_selectSection" id="feedCorrals">Alimentar corrales</a></li>
+                <li><Link to="/menu/reg-lorry">AAAAAAAAAA</Link></li>
+                <li><Link to="/menu/work-heads">BBBBBBBBBBB</Link></li>
+                <li><Link to="/menu/reg-lorry" className="f_selectSection" id="registerLorry">Registrar jaula</Link></li>
+                <li><Link to="/menu/work-heads" className="f_selectSection" id="workHeads">Trabajar cabezas</Link></li>
+                <li><Link to="/menu/feed-corrals" className="f_selectSection" id="feedCorrals">Alimentar corrales</Link></li>
                 <li>
                     <div className="divider"></div>
                 </li>
@@ -44,14 +47,14 @@ export class Sidenav extends React.Component<ISidenavProps>{
                 <li className="no-padding">
                     <ul className="collapsible collapsible-accordion" id="side_collapse">
                         <li>
-                        <a className="collapsible-header sidenav--collapsible"><i className="material-icons">add</i> Administración</a>
+                        <a className="collapsible-header sidenav--collapsible"><i className="material-icons">add</i> Configuraciones</a>
                         <div className="collapsible-body">
                             <ul>
-                            <li><a href="/menu/drugs">Medicamentos</a></li>
-                            <li><a href="/menu/protocols">Protocolos</a></li>
-                            <li><a href="/menu/providers">Proveedores</a></li>
-                            <li><a href="/menu/corrals">Corrales</a></li>
-                            <li><a href="/menu/lots">Lotes</a></li>
+                            <li><Link to="/menu/drugs">Medicamentos</Link></li>
+                            <li><Link to="/menu/protocols">Protocolos</Link></li>
+                            <li><Link to="/menu/providers">Proveedores</Link></li>
+                            <li><Link to="/menu/corrals">Corrales</Link></li>
+                            <li><Link to="/menu/lots">Lotes</Link></li>
                             </ul>
                         </div>
                         </li>

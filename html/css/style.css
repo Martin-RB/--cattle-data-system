@@ -465,8 +465,25 @@ body{
   position: unset;
   margin-top: unset;
   margin-bottom: unset;
-  
 };
+.timeInput--disabled .timepicker{
+  color: rgba(0,0,0,0.42)!important;
+  border-bottom: 1px dotted rgba(0,0,0,0.42)!important;
+}
+.timeInputWrapper div.col.input-field, .timepicker{
+  float: unset;
+  -webkit-box-sizing: unset;
+  box-sizing: unset;
+  padding: unset;
+  min-height: unset;
+  position: unset;
+  margin-top: unset;
+  margin-bottom: unset;
+};
+
+.banner{
+  
+}
 
 ul{
   list-style: none;

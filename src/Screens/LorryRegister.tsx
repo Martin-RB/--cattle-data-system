@@ -11,14 +11,16 @@ import url from "./ConfigI";
 import { IN_Provider } from "../Classes/DataStructures/Provider";
 import { IN_Lorry, OUT_Lorry } from "../Classes/DataStructures/Lorry";
 import { IN_Corral } from "../Classes/DataStructures/Corral";
-import { Button, TextInput } from "../../node_modules/react-materialize/lib/index";
+import { Button, Navbar, TextInput } from "../../node_modules/react-materialize/lib/index";
 import { DateOptions } from "../Configs";
 import { Select } from "../Components/Select";
-import { RouteComponentProps } from "react-router-dom";
+import { Prompt, RouteChildrenProps, RouteComponentProps } from "react-router-dom";
 import { ServerComms, ServerError } from "../Classes/ServerComms";
 import { LoadingScreen } from "../Components/LoadingScreen";
+import { GlobalState } from "./Menu";
+import { Modal, ModalData, ModalExitOptions } from "../Components/Modal";
 
-interface LorryRegisterProps extends RouteComponentProps{
+interface LorryRegisterProps extends GlobalState{
 
 }
 
@@ -38,6 +40,7 @@ interface LorryRegisterState{
     classFemale: Array<OUT_SexClass>,
     providers: Array<IOption>
     corrals: Array<IOption>
+    isSaveStateModalOpened: boolean
 }
 
 export class LorryRegister extends React.Component<LorryRegisterProps, LorryRegisterState>{
@@ -46,6 +49,7 @@ export class LorryRegister extends React.Component<LorryRegisterProps, LorryRegi
     srvCorrals: Array<IN_Corral>
     actualDate = new Date()
     srv: ServerComms
+    saveStateModal: ModalData
 
     constructor(props: LorryRegisterProps){
         super(props);
@@ -65,9 +69,24 @@ export class LorryRegister extends React.Component<LorryRegisterProps, LorryRegi
             classFemale: [],
             providers:[],
             corrals:[],
-            idxCorral: -1
+            idxCorral: -1,
+            isSaveStateModalOpened: false,
+            ...props.screenState?.state
         };
         this.srv = ServerComms.getInstance()
+        
+        this.saveStateModal = {
+            title: "Precacion",
+            content: "Hay datos no guardados en la pantalla, desea guardarlos para trabajar despues?",
+            onFinish: (opt) => {
+                if(opt == ModalExitOptions.ACCEPT && props.screenState){
+                    props.screenState.state = {
+                        ...this.state, isSaveStateModalOpened: false
+                    }
+                }
+            },
+            hasOptions: true
+        }
     }
 
     componentDidMount(){        
@@ -98,8 +117,29 @@ export class LorryRegister extends React.Component<LorryRegisterProps, LorryRegi
         asd();
     }
 
-    onAccept = async () => {
+    componentWillUnmount(){
+        if(this.props.screenState)
+        if(confirm("Hay datos no guardados en la pantalla, desea guardarlos para trabajar despues?")){
+                this.props.screenState.state = {
+                    ...this.state, isSaveStateModalOpened: false
+                }
+        }
+        else{
+            this.props.screenState.eraseState()
+        }
+        
+        
+        /* if(this.props.screenState){
+            this.props.screenState.state = {
+                ...this.state
+            }
+        } */
+    }
 
+    onAccept = async () => {
+        this.setState({
+            isSaveStateModalOpened: true
+        })
         let fieldCheck = this.checkFields()
         if(fieldCheck == false){
             toast("Llene todos los campos")
@@ -108,7 +148,7 @@ export class LorryRegister extends React.Component<LorryRegisterProps, LorryRegi
 
         let response = await this.srv.post<any>("/lorries", fieldCheck);
         if(response.success){
-            this.props.history.push("/menu")
+            //this.props.history.push("/menu")
             toast("Jaula registrada con exito.")
         }
         else{
@@ -119,6 +159,9 @@ export class LorryRegister extends React.Component<LorryRegisterProps, LorryRegi
     render(): JSX.Element{
         return (
             <>
+            <div>
+                
+            </div>
             <div className="row">
                 <div className="col s12 m12 l12">
                     <form onSubmit={e=>e.preventDefault()}>
@@ -135,8 +178,7 @@ export class LorryRegister extends React.Component<LorryRegisterProps, LorryRegi
                                             />
                             </div>
                             <div className="col s12 m6">
-                                <TimeInput placeholder="hora" 
-                                            id="hora" 
+                                <TimeInput label="Hora" 
                                             onChange={(time) => this.setState({
                                                 time
                                             })} 

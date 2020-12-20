@@ -1,5 +1,6 @@
 import React from "react";
-import { TextInput } from "../../node_modules/react-materialize/lib/index";
+import { TextInput, TimePicker } from "../../node_modules/react-materialize/lib/index";
+import { I18nOptions } from "../../node_modules/react-materialize/lib/utils";
 import { Input, MaterialInput } from "./Input";
 
 export interface ITime{
@@ -8,10 +9,11 @@ export interface ITime{
 }
 
 export interface TimeInputProps{
-    onChange:(time: ITime) => void;
-    value: ITime;
-    id: string;
-    placeholder:string;
+    onChange:(time: ITime) => void
+    value: ITime
+    label: string
+    options?: I18nOptions 
+    disable?:boolean
 }
 
 export interface TimeInputState{
@@ -20,55 +22,45 @@ export interface TimeInputState{
 
 export class TimeInput extends React.Component<TimeInputProps, TimeInputState>{
 
-    selector: Element | null = null;
+    actualTime: ITime;
     constructor(props: TimeInputProps){
         super(props);
 
         this.state = {
             dateSet: false
         };
+        
+        this.actualTime = props.value
     }
 
-    componentDidMount(){
-        this.selector = document.querySelector("#"+this.props.id)
-        M.Timepicker.init(this.selector, {
-            onCloseEnd: () => {
-                this.onChange();
-            }
-        })[0];
-        
-        this.forceUpdate()
-    }
-
-    onChange = () => {
-        let instance:any;
-        if(!this.selector) return;
-        
-        instance = M.Timepicker.getInstance(this.selector) as any;
-        let hour = parseInt(instance.hours)
-        this.props.onChange({
-            hour: (instance.amOrPm == "PM")? hour+12: hour,
-            minute: parseInt(instance.minutes),
-        });
-        this.setState({
-            dateSet: true
-        })
-        
+    onChange = (hour:number, minute: number) => {
+        this.actualTime = {
+            hour, minute
+        }
     }
 
     render():JSX.Element{
-        let time = this.setDate(this.props.value);
+        
         return (
-            <TextInput inputClassName={`timepicker ${this.state.dateSet?"valid":""}`} 
-                        noLayout
-                        label="Hora"
-                        value={time} 
-                        id={this.props.id} 
-                        placeholder={this.props.placeholder}/>
+            <div className={`${this.props.disable?"timeInput--disabled ":""}timeInputWrapper`}>
+                <label>{this.props.label}</label>
+                <TimePicker 
+                    onChange={(h:any, m:any)=>{
+                        this.onChange(h,m);
+                    }}
+                    options={{
+                        i18n:{
+                            ...this.props.options,
+                        },
+                        defaultTime: this.fromITimeToString(this.actualTime),
+                        twelveHour: true,
+                    }
+                    }/>
+            </div>
         );
     }
 
-    setDate = (time: ITime) => {
+    /* setDate = (time: ITime) => {
         let instance:any;
         if(!this.selector) return;
         
@@ -78,7 +70,10 @@ export class TimeInput extends React.Component<TimeInputProps, TimeInputState>{
         instance.hours = time.hour >= 12? time.hour - 12:time.hour;
         instance.minutes = time.minute;
         return `${instance.hours}:${parseInt(instance.minutes)<9?"0":""}${instance.minutes} ${instance.amOrPm}`
-    }
+    } */
     
+    fromITimeToString = (t: ITime) => {
+        return `${t.hour}:${t.minute}`
+    }
 
 }
